@@ -11,6 +11,8 @@ global.jQuery = jQuery;
 let Bootstrap = require('bootstrap');
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+let cloneDeep = require('clone-deep');
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
@@ -20,4 +22,4 @@ new Vue({
   store,
   template: '<App/>',
   components: { App }
-})
+});
