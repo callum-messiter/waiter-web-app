@@ -13,15 +13,15 @@
               <tr class="item-row" v-for="item in items">
                   <td class="item-name text-left col-md-3">
                     <input type="text" class="form-control" v-model="item.name" 
-                    v-bind:readonly="!item.isUpdatable" v-on:click="makeItemUpdatable(item.itemId)">
+                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item.itemId)"> 
                   </td>
                   <td class="item-price text-left col-md-1">
                     <input type="text" class="form-control" v-model="item.price" 
-                    v-bind:readonly="!item.isUpdatable" v-on:click="makeItemUpdatable(item.itemId)">
+                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item.itemId)">
                   </td>
                   <td class="item-description text-left col-md-5">
                     <input type="text" class="form-control" v-model="item.description" 
-                    v-bind:readonly="!item.isUpdatable" v-on:click="makeItemUpdatable(item.itemId)">
+                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item.itemId)">
                   </td>
                   <td class="buttons col-md-4">
                     <button v-if="!item.isUpdatable" class="btn btn-danger pull-left align-middle" 
@@ -34,19 +34,41 @@
               </tr>
           </tbody>
       </table>
+      <modal 
+        v-on:discardChanges="resetItem($event)" 
+        :showCancelUpdateModal="modals.cancelUpdate">
+      </modal>
     </div>
   </div>
 </template>
 
 <script>
+// Dependencies
 import cloneDeep from 'clone-deep';
 import lodash from 'lodash';
 
+// Components
+import Modal from './Modal';
 export default {
   name: 'Menu',
-  data: function() {
+  components: {
+    'modal': Modal
+  },
+  data() {
     return {
-      items: []
+      itemId: null,
+      items: [],
+      modals: {
+        cancelUpdate: {
+          isVisible: false,
+          triggerItemId: null,
+          title: 'Are you sure you want to discard your changes?',
+          buttons: {
+            continueEditing: 'Continue Editing',
+            discardChanges: 'Discard'
+          }
+        }
+      }
     }
   },
   created() {
@@ -82,18 +104,26 @@ export default {
       const itemId = item.itemId;
       const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
       const itemState = this.itemsState[objIndex];
-      // Check if the view item has departed from the item's state
-      // The isUpdatable property should not be in the state object: we should add it to the items of the cloned array
+      // Compare the view item with the item state
       const viewItemHasDepartedFromState = _.isEqual(
           _.omit(item, ['isUpdatable']), 
           _.omit(itemState, ['isUpdatable'])
       );
+      // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
       if(viewItemHasDepartedFromState) {
         this.items[objIndex].isUpdatable = false;
       } else {
-        alert('Are you sure you want to discard your changes?'); 
-        // Show a modal, with a button the user can click to discard the changes (reset the item to the state, and revert to readonly)
+        // If the item has actually been edited by the user, then we want to display the cancel-warning modal
+        this.modals.cancelUpdate.isVisible = true; // Here we mofidy the values that are bound to our _showCancelUpdateModal_ prop. 
+        this.modals.cancelUpdate.triggerItemId = itemId;
       }
+    },
+    resetItem(itemId) {
+      // Get the item from the state by referencing the itemId
+      const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
+      const itemState = this.itemsState[objIndex];
+      // Set the state item to the local item
+      Object.assign(this.items[objIndex], itemState);
     },
     updateItem(item) {
       const itemId = item.itemId;
