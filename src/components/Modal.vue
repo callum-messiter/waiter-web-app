@@ -41,11 +41,13 @@ export default {
   },
   computed: {
     modal () {
-      // Define a computed property that is computed from the prop’s value
       return this.showCancelUpdateModal;
     }
   },
   methods: {
+    hideModal() {
+      this.modal.isVisible = false;
+    },
     discardChanges(itemId) {
       // Emit and event to the parent component, triggering the item to be reset
       this.$emit('discardChanges', itemId);

@@ -73,9 +73,6 @@ export default {
   },
   created() {
       // Clone the item's state so we can compare the view with the state
-      /**
-         Here we should add the isUpdatable = false property to every item in the cloned array. It shouldn't be included in the state
-      **/
       this.items = cloneDeep(this.itemsState);
   },
   methods: {
@@ -105,12 +102,12 @@ export default {
       const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
       const itemState = this.itemsState[objIndex];
       // Compare the view item with the item state
-      const viewItemHasDepartedFromState = _.isEqual(
+      const viewItemIsEqualToItemState = _.isEqual(
           _.omit(item, ['isUpdatable']), 
           _.omit(itemState, ['isUpdatable'])
       );
       // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
-      if(viewItemHasDepartedFromState) {
+      if(viewItemIsEqualToItemState) {
         this.items[objIndex].isUpdatable = false;
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
