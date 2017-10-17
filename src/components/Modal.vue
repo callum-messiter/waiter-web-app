@@ -9,15 +9,15 @@
         </div>
         <div class="modal-body">{{modal.title}}</div>
         <div class="modal-footer">
+          <!-- Cancel Update Modal-->
+          <button v-if="modal.name == 'cancel_update'" class="btn btn-danger" 
+          v-on:click="emitDiscardConfirmation(modal.triggerItem.itemId)">{{modal.buttons.warning}}</button>
+          <!-- Confirm Delete Modal -->
+          <button v-if="modal.name == 'confirm_delete'" class="btn btn-danger" 
+          v-on:click="emitDeleteConfirmation(modal.triggerItem.itemId)">{{modal.buttons.warning}}</button>
           <!-- This button simply hides the modal when the primary button is clicked; appears on all modals -->
           <button class="btn btn-primary" 
           v-on:click="hideModal">{{modal.buttons.primary}}</button>
-          <!-- Cancel Update Modal-->
-          <button v-if="modal.name == 'cancel_update'" class="btn btn-danger" 
-          v-on:click="discardChanges(modal.triggerItem.itemId)">{{modal.buttons.warning}}</button>
-          <!-- Confirm Delete Modal -->
-          <button v-if="modal.name == 'confirm_delete'" class="btn btn-danger" 
-          v-on:click="deleteItem(modal.triggerItem.itemId)">{{modal.buttons.warning}}</button>
         </div>
       </div>
     </div>
@@ -41,24 +41,26 @@ export default {
       }
     }
   },
+  // Create a computed property, which is a clone of the menu prop (see defaultModal for a template), that is bound to the template
   computed: {
     modal () {
       return this.showModal;
     }
   },
   methods: {
+    // The modal should be hidden once the user initiates a confirmation/conclusive action 
     hideModal() {
       this.modal.isVisible = false;
     },
-    discardChanges(itemId) {
-      // Emit and event to the parent component, triggering the item to be reset
-      this.$emit('discardChanges', itemId);
-      this.modal.isVisible = false;
+    emitDiscardConfirmation(itemId) {
+      // When the user confirms they want to discard their item updates, we inform the menu, triggering a reset of the view item
+      this.$emit('emitDiscardConfirmation', itemId);
+      this.hideModal();
     },
-    deleteItem(itemId) {
-      // Delete the item from the state and update the clone
-      // this.$store.commit('deleteItem', itemId);
-      //this.items = cloneDeep(this.itemsState);
+    // When the user confirms they want to delete the item, we inform the menu, triggering item deletion
+    emitDeleteConfirmation(itemId) {
+      this.$emit('userConfirmedDeleteIntention', itemId);
+      this.hideModal();
     }
   }
 }

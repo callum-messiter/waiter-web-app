@@ -25,7 +25,7 @@
                   </td>
                   <td class="buttons col-md-4">
                     <button v-if="!item.isEditable" class="btn btn-danger pull-left align-middle" 
-                    v-on:click="deleteItem(item)">Delete</button>
+                    v-on:click="showConfirmDeleteModal(item)">Delete</button>
                     <button v-if="item.isEditable" class="btn btn-primary pull-left align-middle" 
                     v-on:click="updateItem(item)">Save</button>
                     <button v-if="item.isEditable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
@@ -34,8 +34,9 @@
               </tr>
           </tbody>
       </table>
-      <modal 
-        v-on:discardChanges="resetItem($event)" 
+      <modal
+        v-on:emitDiscardConfirmation="resetItem($event)"
+        v-on:userConfirmedDeleteIntention="deleteItem($event)"
         :showModal="modal">
       </modal>
     </div>
@@ -166,7 +167,7 @@ export default {
       // If any item data actually changed, display a flash message
     },
 
-    deleteItem(item) {
+    showConfirmDeleteModal(item) {
       const itemId = item.itemId;
       const itemState = this.getSingleItemState(itemId).item;
 
@@ -175,7 +176,7 @@ export default {
       const modalObj = {
         name: 'confirm_delete',
         isVisible: true,
-        title: 'Are you sure you want to delete "' + itemState.name + '"?',
+        title: 'Are you sure you want to delete "' + itemState.name + '"? It will become invisible to your customers.',
         triggerItem: item,
         buttons: {
           primary: 'Cancel',
@@ -183,6 +184,13 @@ export default {
         }
       }
       this.renderModal(modalObj);
+    },
+
+    deleteItem(itemId) {
+      // Delete the item from the state and update the clone
+      this.$store.commit('deleteItem', itemId);
+      this.items = cloneDeep(this.itemsState);
+      // Show flash message if successful (later this will be done from the store, inside the API call)
     },
 
     compareViewWithState(viewItem, itemState) {
