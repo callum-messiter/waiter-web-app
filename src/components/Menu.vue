@@ -13,15 +13,15 @@
               <tr class="item-row" v-for="item in items">
                   <td class="item-name text-left col-md-3">
                     <input type="text" class="form-control" v-model="item.name" 
-                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item.itemId)"> 
+                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item)"> 
                   </td>
                   <td class="item-price text-left col-md-1">
                     <input type="text" class="form-control" v-model="item.price" 
-                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item.itemId)">
+                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item)">
                   </td>
                   <td class="item-description text-left col-md-5">
                     <input type="text" class="form-control" v-model="item.description" 
-                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item.itemId)">
+                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item)">
                   </td>
                   <td class="buttons col-md-4">
                     <button v-if="!item.isUpdatable" class="btn btn-danger pull-left align-middle" 
@@ -93,7 +93,8 @@ export default {
   },
   methods: {
     // When a user clicks on a row (item), we want to make each input in this row writable
-    makeItemUpdatable(itemId) {
+    makeItemUpdatable(item) {
+      const itemId = item.itemId;
       // Only one item at a time can be updatable, so first we must check if any are already updatable
       var areAnyOtherItemsUpdatable = false;
       for(let item of this.items) {
@@ -126,12 +127,6 @@ export default {
           const itemIndex = this.items.findIndex((item => item.itemId == itemId));
           // Change the isUpdatable property of this item
           this.items[itemIndex].isUpdatable = true;
-        } else {
-          // SHOW THE "CANCEL-UPDATE" MODAL
-          alert('You need to finish editing the other item first');
-          // The challenge is, when the discardChanges method is fired in the Modal component, it's hard to then set
-          // the 'new' item to editable. We would have to send a property that says "this discard-changes was not triggered by a button, but by the user double clicking another item whilst editing an item."
-          // This property would be sent with the event, and then in the Menu.resetItem method, we will check, and set the properties of visibiility for the old item and the new item
         }
       } else {
         // Find the item by referencing the ID
