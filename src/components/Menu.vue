@@ -43,6 +43,23 @@
 </template>
 
 <script>
+/**
+  A NOTE ABOUT A NASTY HACK:
+
+  In order to be able to compare the item in the current view, with the item state, we create a clone o 
+  the state.
+
+  Thus, if the user edits an edit, and then cancels those edits, we don't need to display a warning modal
+  about discarding changes. (For example.)
+
+  There must be a better way to do this; keeping track of two different versions of the item is horrible.
+
+  For now, whenever an item's state is changed here, we must re-clone the state such that immediately after
+  the state is updated, the view will be a perfect clone of the state.
+
+  THe view should only depart from the state when the user modifies the view. Then, termporary discrepancies
+  are exactly what we want, so that we can compare them and affect the UX accordingly. 
+**/
 // Dependencies
 import cloneDeep from 'clone-deep';
 import lodash from 'lodash';
@@ -61,8 +78,8 @@ export default {
       modals: {
         cancelUpdate: {
           isVisible: false,
-          triggerItemId: null,
-          title: 'Are you sure you want to discard your changes?',
+          triggerItem: null,
+          title: null,
           buttons: {
             continueEditing: 'Continue Editing',
             discardChanges: 'Discard'
@@ -98,6 +115,7 @@ export default {
       }
     },
     cancelUpdate(item) {
+      const modal = this.modals.cancelUpdate;
       const itemId = item.itemId;
       const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
       const itemState = this.itemsState[objIndex];
@@ -111,8 +129,10 @@ export default {
         this.items[objIndex].isUpdatable = false;
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
-        this.modals.cancelUpdate.isVisible = true; // Here we mofidy the values that are bound to our _showCancelUpdateModal_ prop. 
-        this.modals.cancelUpdate.triggerItemId = itemId;
+        modal.isVisible = true; // Here we mofidy the values that are bound to our _showCancelUpdateModal_ prop. 
+        modal.triggerItem = item;
+        // The modal title should include the item state, incase the user changes the item name
+        modal.title = 'Are you sure you want to discard your changes to "' + itemState.name + '"?';
       }
     },
     resetItem(itemId) {

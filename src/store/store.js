@@ -61,7 +61,8 @@ export default new Vuex.Store({
 				// Change the isUpdatable property of this item
 				state.items[objIndex].isUpdatable = true;
 			}
-		}
+		},
+		updateItem(item){}
 	},
 	actions: {},
 	getters: {
