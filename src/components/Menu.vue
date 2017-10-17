@@ -25,7 +25,7 @@
                   </td>
                   <td class="buttons col-md-4">
                     <button v-if="!item.isUpdatable" class="btn btn-danger pull-left align-middle" 
-                    v-on:click="deleteItem(item.itemId)">Delete</button>
+                    v-on:click="deleteItem(item)">Delete</button>
                     <button v-if="item.isUpdatable" class="btn btn-primary pull-left align-middle" 
                     v-on:click="updateItem(item)">Save</button>
                     <button v-if="item.isUpdatable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
@@ -36,7 +36,7 @@
       </table>
       <modal 
         v-on:discardChanges="resetItem($event)" 
-        :showCancelUpdateModal="modals.cancelUpdate">
+        :showModal="modal">
       </modal>
     </div>
   </div>
@@ -75,15 +75,14 @@ export default {
     return {
       itemId: null,
       items: [],
-      modals: {
-        cancelUpdate: {
-          isVisible: false,
-          triggerItem: null,
-          title: null,
-          buttons: {
-            continueEditing: 'Continue Editing',
-            discardChanges: 'Discard'
-          }
+      modal: {
+        name: null,
+        isVisible: false,
+        triggerItem: null,
+        title: null,
+        buttons: {
+          primary: null,
+          warning: null
         }
       }
     }
@@ -115,7 +114,7 @@ export default {
       }
     },
     cancelUpdate(item) {
-      const modal = this.modals.cancelUpdate;
+      const modal = this.modal;
       const itemId = item.itemId;
       const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
       const itemState = this.itemsState[objIndex];
@@ -129,10 +128,13 @@ export default {
         this.items[objIndex].isUpdatable = false;
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
-        modal.isVisible = true; // Here we mofidy the values that are bound to our _showCancelUpdateModal_ prop. 
+        modal.isVisible = true;
+        modal.name = 'cancel_update'; 
         modal.triggerItem = item;
         // The modal title should include the item state, incase the user changes the item name
         modal.title = 'Are you sure you want to discard your changes to "' + itemState.name + '"?';
+        modal.buttons.primary = 'Continue Editing';
+        modal.buttons.warning = 'Discard';
       }
     },
     resetItem(itemId) {
@@ -152,10 +154,19 @@ export default {
       this.items[objIndex].isUpdatable = false;
       // If any item data actually changed, display a flash message
     },
-    deleteItem(itemId) {
-      // Delete the item from the state and update the clone
-      this.$store.commit('deleteItem', itemId);
-      this.items = cloneDeep(this.itemsState);
+    deleteItem(item) {
+      const modal = this.modal;
+      const itemId = item.itemId;
+      const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
+      const itemState = this.itemsState[objIndex];
+      // If the item has actually been edited by the user, then we want to display the cancel-warning modal
+      modal.isVisible = true;
+      modal.name = 'confirm_delete'; 
+      modal.triggerItem = item;
+      // The modal title should include the item state, incase the user changes the item name
+      modal.title = 'Are you sure you want to delete "' + itemState.name + '"?';
+      modal.buttons.primary = 'Cancel';
+      modal.buttons.warning = 'Delete Item';
       // Display flash message
     },
   },
