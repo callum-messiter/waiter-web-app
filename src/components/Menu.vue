@@ -13,22 +13,22 @@
               <tr class="item-row" v-for="item in items">
                   <td class="item-name text-left col-md-3">
                     <input type="text" class="form-control" v-model="item.name" 
-                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item)"> 
+                    v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)"> 
                   </td>
                   <td class="item-price text-left col-md-1">
                     <input type="text" class="form-control" v-model="item.price" 
-                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item)">
+                    v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
                   </td>
                   <td class="item-description text-left col-md-5">
                     <input type="text" class="form-control" v-model="item.description" 
-                    v-bind:readonly="!item.isUpdatable" v-on:dblclick="makeItemUpdatable(item)">
+                    v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
                   </td>
                   <td class="buttons col-md-4">
-                    <button v-if="!item.isUpdatable" class="btn btn-danger pull-left align-middle" 
+                    <button v-if="!item.isEditable" class="btn btn-danger pull-left align-middle" 
                     v-on:click="deleteItem(item)">Delete</button>
-                    <button v-if="item.isUpdatable" class="btn btn-primary pull-left align-middle" 
+                    <button v-if="item.isEditable" class="btn btn-primary pull-left align-middle" 
                     v-on:click="updateItem(item)">Save</button>
-                    <button v-if="item.isUpdatable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
+                    <button v-if="item.isEditable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
                     v-on:click="cancelUpdate(item)">Cancel</button>
                   </td>
               </tr>
@@ -93,105 +93,132 @@ export default {
   },
   methods: {
     // When a user clicks on a row (item), we want to make each input in this row writable
-    makeItemUpdatable(item) {
-      const itemId = item.itemId;
-      // Only one item at a time can be updatable, so first we must check if any are already updatable
-      var areAnyOtherItemsUpdatable = false;
-      for(let item of this.items) {
-        // The editable item may be the current item
-        if(item.isUpdatable && item.itemId != itemId) {
-          areAnyOtherItemsUpdatable = true;
-          var editableItem = item;
-        }
-      }
-      // If there currently are no updatable items, then make this item updatable
-      if(areAnyOtherItemsUpdatable) {
-        /**
-         If the user is leaving one item (in edit mode) to edit another item, then:
-            
-            1) If the item in edit mode has departed from its state, show a warning modal
-            2) If the item in edit mode is the same as its state, just set this item to readonly, and set the new item to editable
-        **/
-        const editableItemId = editableItem.itemId;
-        const editableItemIndex = this.itemsState.findIndex((item => item.itemId == editableItemId));
-        const editableItemState = this.itemsState[editableItemIndex];
-        // Compare the view item with the item state
-        const editableItemIsEqualToItsState = _.isEqual(
-            _.omit(editableItem, ['isUpdatable']), 
-            _.omit(editableItemState, ['isUpdatable'])
-        );
+    makeItemEditable(clickedViewItem) {
+      const clickedViewItemId = clickedViewItem.itemId;
+      // Only one item at a time can be editable, so first we must check if any other view items are already editable
+      const areThereAnyOtherEditableViewItems = this.itemsCurrentlyEditable(clickedViewItemId).areThereAny;
+      const editableViewItem = this.itemsCurrentlyEditable(clickedViewItemId).item;
+      // If there currently are no editable items, then make the clicked view-item editable
+      if(!areThereAnyOtherEditableViewItems) {
+        // Find the clicked view-item (in our array of view items) by referencing the ID
+        const itemIndex = this.items.findIndex((item => item.itemId == clickedViewItemId));
+        // Change the isEditable property of this clicked view item
+        this.items[itemIndex].isEditable = true;
 
-        if(editableItemIsEqualToItsState) {
-          this.items[editableItemIndex].isUpdatable = false;
-          // Find the item by referencing the ID
-          const itemIndex = this.items.findIndex((item => item.itemId == itemId));
-          // Change the isUpdatable property of this item
-          this.items[itemIndex].isUpdatable = true;
-        }
+      // If there is another view item that is already editable...
       } else {
-        // Find the item by referencing the ID
-        const objIndex = this.items.findIndex((item => item.itemId == itemId));
-        // Change the isUpdatable property of this item
-        this.items[objIndex].isUpdatable = true;
+        const editableViewItemId = editableViewItem.itemId;
+        const state = this.getSingleItemState(editableViewItemId);
+        // Compare the editable view-item with its state
+        const editableViewItemIsEqualToItsState = this.compareViewWithState(editableViewItem, state.item);
+        // If the editable view-item is equal to its state...
+        if(editableViewItemIsEqualToItsState) {
+          // Set the editable view-item to readonly...
+          this.items[state.index].isEditable = false;
+          // ...And set the target view-item to editable
+          const itemIndex = this.items.findIndex((item => item.itemId == clickedViewItemId));
+          this.items[itemIndex].isEditable = true;
+        }
       }
     },
+
     cancelUpdate(item) {
       const modal = this.modal;
-      const itemId = item.itemId;
-      const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
-      const itemState = this.itemsState[objIndex];
+      const state = this.getSingleItemState(item.itemId);
       // Compare the view item with the item state
-      const viewItemIsEqualToItemState = _.isEqual(
-          _.omit(item, ['isUpdatable']), 
-          _.omit(itemState, ['isUpdatable'])
-      );
-      // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
+      const viewItemIsEqualToItemState = this.compareViewWithState(item, state.item);
+      
       if(viewItemIsEqualToItemState) {
-        this.items[objIndex].isUpdatable = false;
+        // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
+        this.items[state.index].isEditable = false;
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
-        modal.isVisible = true;
-        modal.name = 'cancel_update'; 
-        modal.triggerItem = item;
-        // The modal title should include the item state, incase the user changes the item name
-        modal.title = 'Are you sure you want to discard your changes to "' + itemState.name + '"?';
-        modal.buttons.primary = 'Continue Editing';
-        modal.buttons.warning = 'Discard';
+        const modalObj = {
+          name: 'cancel_update',
+          isVisible: true,
+          title: 'Are you sure you want to discard your changes to "' + state.item.name + '"?',
+          triggerItem: item,
+          buttons: {
+            primary: 'Continue Editing',
+            warning: 'Discard'
+          }
+        }
+        this.renderModal(modalObj);
       }
     },
+
     resetItem(itemId) {
       // Get the item from the state by referencing the itemId
-      const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
-      const itemState = this.itemsState[objIndex];
-      // Set the state item to the local item
-      Object.assign(this.items[objIndex], itemState);
+      const state = this.getSingleItemState(itemId);
+      // Set the view item to its pre-edit state
+      Object.assign(this.items[state.index], state.item);
     },
+
     updateItem(item) {
       const itemId = item.itemId;
       // Update the item in the state and update the clone
       // this.$store.commit('updateItem', item.itemId);
       // Find the item by referencing the ID
-      const objIndex = this.items.findIndex((item => item.itemId == itemId));
-      // Change the isUpdatable property of this item
-      this.items[objIndex].isUpdatable = false;
+      const itemIndex = this.items.findIndex((item => item.itemId == itemId));
+      // Change the isEditable property of this item
+      this.items[itemIndex].isEditable = false;
       // DO WE NEED TO CLONE THE STATE AGAIN HERE?
       // If any item data actually changed, display a flash message
     },
+
     deleteItem(item) {
-      const modal = this.modal;
       const itemId = item.itemId;
-      const objIndex = this.itemsState.findIndex((item => item.itemId == itemId));
-      const itemState = this.itemsState[objIndex];
-      // If the item has actually been edited by the user, then we want to display the cancel-warning modal
-      modal.isVisible = true;
-      modal.name = 'confirm_delete'; 
-      modal.triggerItem = item;
-      // The modal title should include the item state, incase the user changes the item name
-      modal.title = 'Are you sure you want to delete "' + itemState.name + '"?';
-      modal.buttons.primary = 'Cancel';
-      modal.buttons.warning = 'Delete Item';
-      // Display flash message
+      const itemState = this.getSingleItemState(itemId).item;
+
+      // Display the warning modal 
+      const modal = this.modal;
+      const modalObj = {
+        name: 'confirm_delete',
+        isVisible: true,
+        title: 'Are you sure you want to delete "' + itemState.name + '"?',
+        triggerItem: item,
+        buttons: {
+          primary: 'Cancel',
+          warning: 'Delete Item'
+        }
+      }
+      this.renderModal(modalObj);
     },
+
+    compareViewWithState(viewItem, itemState) {
+      return _.isEqual(
+          _.omit(viewItem, ['isEditable']), 
+          _.omit(itemState, ['isEditable'])
+      );
+    },
+
+    renderModal(modalObj) {
+      Object.assign(this.modal, modalObj);
+    },
+
+    getSingleItemState(itemId) {
+      const itemIndex = this.itemsState.findIndex((item => item.itemId == itemId));
+      return {
+        item: this.itemsState[itemIndex],
+        index: itemIndex
+      }
+    },
+
+    itemsCurrentlyEditable(itemId) {
+      for(let item of this.items) {
+        // The editable item may be the current item
+        if(item.isEditable && item.itemId != itemId) {
+          return {
+            areThereAny: true,
+            item: item
+          }
+        }
+      }
+      return {
+        areThereAny: false,
+        item: null
+      }
+    }
   },
   computed: {
     itemsState() {
