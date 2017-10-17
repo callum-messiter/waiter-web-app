@@ -58,7 +58,7 @@ export default {
     deleteItem(itemId) {
       // Delete the item from the state and update the clone
       // this.$store.commit('deleteItem', itemId);
-      // this.items = cloneDeep(this.itemsState);
+      //this.items = cloneDeep(this.itemsState);
     }
   }
 }

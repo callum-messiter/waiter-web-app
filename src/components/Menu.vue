@@ -96,16 +96,43 @@ export default {
     makeItemUpdatable(itemId) {
       // Only one item at a time can be updatable, so first we must check if any are already updatable
       var areAnyOtherItemsUpdatable = false;
-      this.items.forEach((item) => {
-          // The editable item may be the current item
-          if(item.isUpdatable && item.itemId != itemId) {
-            areAnyOtherItemsUpdatable = true;
-          }
-      });
+      for(let item of this.items) {
+        // The editable item may be the current item
+        if(item.isUpdatable && item.itemId != itemId) {
+          areAnyOtherItemsUpdatable = true;
+          var editableItem = item;
+        }
+      }
       // If there currently are no updatable items, then make this item updatable
       if(areAnyOtherItemsUpdatable) {
-        // 
-        alert('Please finish editing the other item!');
+        /**
+         If the user is leaving one item (in edit mode) to edit another item, then:
+            
+            1) If the item in edit mode has departed from its state, show a warning modal
+            2) If the item in edit mode is the same as its state, just set this item to readonly, and set the new item to editable
+        **/
+        const editableItemId = editableItem.itemId;
+        const editableItemIndex = this.itemsState.findIndex((item => item.itemId == editableItemId));
+        const editableItemState = this.itemsState[editableItemIndex];
+        // Compare the view item with the item state
+        const editableItemIsEqualToItsState = _.isEqual(
+            _.omit(editableItem, ['isUpdatable']), 
+            _.omit(editableItemState, ['isUpdatable'])
+        );
+
+        if(editableItemIsEqualToItsState) {
+          this.items[editableItemIndex].isUpdatable = false;
+          // Find the item by referencing the ID
+          const itemIndex = this.items.findIndex((item => item.itemId == itemId));
+          // Change the isUpdatable property of this item
+          this.items[itemIndex].isUpdatable = true;
+        } else {
+          // SHOW THE "CANCEL-UPDATE" MODAL
+          alert('You need to finish editing the other item first');
+          // The challenge is, when the discardChanges method is fired in the Modal component, it's hard to then set
+          // the 'new' item to editable. We would have to send a property that says "this discard-changes was not triggered by a button, but by the user double clicking another item whilst editing an item."
+          // This property would be sent with the event, and then in the Menu.resetItem method, we will check, and set the properties of visibiility for the old item and the new item
+        }
       } else {
         // Find the item by referencing the ID
         const objIndex = this.items.findIndex((item => item.itemId == itemId));
@@ -152,6 +179,7 @@ export default {
       const objIndex = this.items.findIndex((item => item.itemId == itemId));
       // Change the isUpdatable property of this item
       this.items[objIndex].isUpdatable = false;
+      // DO WE NEED TO CLONE THE STATE AGAIN HERE?
       // If any item data actually changed, display a flash message
     },
     deleteItem(item) {
