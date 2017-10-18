@@ -1,6 +1,9 @@
 <template>
   <div class="menu container-fluid">
     <div class="menu-wrapper col-md-10 col-md-offset-1">
+      <div v-if="messageVisible" class="alert alert-success">
+        <strong>Success!</strong> Indicates a successful or positive action.
+      </div>
       <table class="table table-bordered">
           <thead class="thead-default">
               <tr>
@@ -39,6 +42,7 @@
         v-on:userConfirmedDeleteIntention="deleteItem($event)"
         :showModal="modal">
       </modal>
+      <button v-on:click="showMessage()">Show Message</button>
     </div>
   </div>
 </template>
@@ -74,6 +78,7 @@ export default {
   },
   data() {
     return {
+      messageVisible: false,
       itemId: null,
       items: [],
       modal: {
@@ -93,6 +98,12 @@ export default {
       this.items = cloneDeep(this.itemsState);
   },
   methods: {
+    showMessage() {
+      this.messageVisible = true;
+      setTimeout(() =>{ 
+        this.messageVisible = false;
+      }, 3000);
+    },
     // When a user clicks on a row (item), we want to make each input in this row writable
     makeItemEditable(clickedViewItem) {
       const clickedViewItemId = clickedViewItem.itemId;
