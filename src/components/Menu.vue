@@ -1,9 +1,12 @@
 <template>
   <div class="menu container-fluid">
     <div class="menu-wrapper col-md-10 col-md-offset-1">
-      <div v-if="messageVisible" class="alert alert-success">
-        <strong>Success!</strong> Indicates a successful or positive action.
+      <transition name="fade">
+      <div v-if="alert.isVisible" class="alert" 
+      v-bind:class="{'alert-success': alert.itemModificationSuccess, 'alert-danger': alert.itemModificationError}">
+        <strong>{{alert.summary}}</strong> {{alert.message}}
       </div>
+      </transition>
       <table class="table table-bordered">
           <thead class="thead-default">
               <tr>
@@ -78,9 +81,15 @@ export default {
   },
   data() {
     return {
-      messageVisible: false,
       itemId: null,
       items: [],
+      alert: {
+        isVisible: false,
+        itemModificationSuccess: false,
+        itemModificationError: false,
+        summary: null,
+        message: null,
+      },
       modal: {
         name: null,
         isVisible: false,
@@ -99,9 +108,11 @@ export default {
   },
   methods: {
     showMessage() {
-      this.messageVisible = true;
+      this.alert.isVisible = true;
+      this.alert.itemModificationSuccess = true;
+      this.alert.message = 'Your item was successfully updated!';
       setTimeout(() =>{ 
-        this.messageVisible = false;
+        this.alert. isVisible = false;
       }, 3000);
     },
     // When a user clicks on a row (item), we want to make each input in this row writable
@@ -250,6 +261,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   /** Inputs should fill the entire cell **/
+
   td {
     padding: 0 !important;
   }
@@ -294,5 +306,12 @@ export default {
 
   .buttons {
     border: none !important;
+  }
+
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .5s
+  }
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0
   }
 </style>
