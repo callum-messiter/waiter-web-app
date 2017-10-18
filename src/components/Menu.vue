@@ -1,12 +1,7 @@
 <template>
   <div class="menu container-fluid">
     <div class="menu-wrapper col-md-10 col-md-offset-1">
-      <transition name="fade">
-      <div v-if="alert.isVisible" class="alert" 
-      v-bind:class="{'alert-success': alert.itemModificationSuccess, 'alert-danger': alert.itemModificationError}">
-        <strong>{{alert.summary}}</strong> {{alert.message}}
-      </div>
-      </transition>
+      <alert :showAlert="alert"></alert>
       <table class="table table-bordered">
           <thead class="thead-default">
               <tr>
@@ -45,7 +40,8 @@
         v-on:userConfirmedDeleteIntention="deleteItem($event)"
         :showModal="modal">
       </modal>
-      <button v-on:click="showMessage()">Show Message</button>
+      <button v-on:click="showSuccessMessage()">:) Alert</button>
+      <button v-on:click="showErrorMessage()">:( Alert</button>
     </div>
   </div>
 </template>
@@ -74,19 +70,21 @@ import lodash from 'lodash';
 
 // Components
 import Modal from './Modal';
+import Alert from './Alert';
+
 export default {
   name: 'Menu',
   components: {
-    'modal': Modal
+    'modal': Modal,
+    'alert': Alert
   },
   data() {
     return {
       itemId: null,
       items: [],
       alert: {
-        isVisible: false,
-        itemModificationSuccess: false,
-        itemModificationError: false,
+        isVisible: true,
+        type: null,
         summary: null,
         message: null,
       },
@@ -107,14 +105,24 @@ export default {
       this.items = cloneDeep(this.itemsState);
   },
   methods: {
-    showMessage() {
+    showSuccessMessage() {
       this.alert.isVisible = true;
-      this.alert.itemModificationSuccess = true;
+      this.alert.type = 'success';
       this.alert.message = 'Your item was successfully updated!';
       setTimeout(() =>{ 
-        this.alert. isVisible = false;
-      }, 3000);
+        this.alert.isVisible = false;
+      }, 2000);
     },
+
+    showErrorMessage() {
+      this.alert.isVisible = true;
+      this.alert.type = 'error';
+      this.alert.message = 'There was an error deleting your item. Try it again.';
+      setTimeout(() =>{ 
+        this.alert.isVisible = false;
+      }, 2000);
+    },
+
     // When a user clicks on a row (item), we want to make each input in this row writable
     makeItemEditable(clickedViewItem) {
       const clickedViewItemId = clickedViewItem.itemId;
@@ -146,7 +154,6 @@ export default {
     },
 
     cancelUpdate(item) {
-      const modal = this.modal;
       const state = this.getSingleItemState(item.itemId);
       // Compare the view item with the item state
       const viewItemIsEqualToItemState = this.compareViewWithState(item, state.item);
@@ -156,6 +163,7 @@ export default {
         this.items[state.index].isEditable = false;
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
+        const modal = this.modal;
         const modalObj = {
           name: 'cancel_update',
           isVisible: true,
@@ -228,26 +236,17 @@ export default {
 
     getSingleItemState(itemId) {
       const itemIndex = this.itemsState.findIndex((item => item.itemId == itemId));
-      return {
-        item: this.itemsState[itemIndex],
-        index: itemIndex
-      }
+      return {item: this.itemsState[itemIndex], index: itemIndex}
     },
 
     itemsCurrentlyEditable(itemId) {
       for(let item of this.items) {
         // The editable item may be the current item
         if(item.isEditable && item.itemId != itemId) {
-          return {
-            areThereAny: true,
-            item: item
-          }
+          return {areThereAny: true, item: item}
         }
       }
-      return {
-        areThereAny: false,
-        item: null
-      }
+      return {areThereAny: false, item: null}
     }
   },
   computed: {
@@ -306,12 +305,5 @@ export default {
 
   .buttons {
     border: none !important;
-  }
-
-  .fade-enter-active, .fade-leave-active {
-    transition: opacity .5s
-  }
-  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    opacity: 0
   }
 </style>
