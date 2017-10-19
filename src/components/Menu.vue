@@ -2,39 +2,73 @@
   <div class="menu container-fluid">
     <div class="menu-wrapper col-md-10 col-md-offset-1">
       <alert :showAlert="alert"></alert>
-      <table class="table table-bordered">
-          <thead class="thead-default">
-              <tr>
-                  <th>Name</th>
-                  <th>Price</th>
-                  <th>Description</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr class="item-row" v-for="item in items">
-                  <td class="item-name text-left col-md-3">
-                    <input type="text" class="form-control" v-model="item.name" 
-                    v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)"> 
-                  </td>
-                  <td class="item-price text-left col-md-1">
-                    <input type="text" class="form-control" v-model="item.price" 
-                    v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
-                  </td>
-                  <td class="item-description text-left col-md-5">
-                    <input type="text" class="form-control" v-model="item.description" 
-                    v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
-                  </td>
-                  <td class="buttons col-md-4">
-                    <button v-if="!item.isEditable" class="btn btn-danger pull-left align-middle" 
-                    v-on:click="showConfirmDeleteModal(item)">Delete</button>
-                    <button v-if="item.isEditable" class="btn btn-primary pull-left align-middle" 
-                    v-on:click="updateItem(item)">Save</button>
-                    <button v-if="item.isEditable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
-                    v-on:click="cancelUpdate(item)">Cancel</button>
-                  </td>
-              </tr>
-          </tbody>
-      </table>
+      <!-- Accordion Start -->
+      <div class="panel-group" id="accordion">
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+              Main Menu</a>
+            </h4>
+          </div>
+          <div id="collapse1" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <table class="table table-bordered">
+                <thead class="thead-default">
+                  <tr>
+                      <th class="text-center">Name</th>
+                      <th class="text-center">Price</th>
+                      <th class="text-center">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="item-row" v-for="item in items">
+                      <td class="item-name text-left col-md-2">
+                        <input type="text" class="form-control" v-model="item.name" 
+                        v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)"> 
+                      </td>
+                      <td class="item-price text-left col-md-1">
+                        <input type="text" class="form-control" v-model="item.price" 
+                        v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
+                      </td>
+                      <td class="item-description text-left col-md-5">
+                        <input type="text" class="form-control" v-model="item.description" 
+                        v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
+                      </td>
+                      <td class="buttons col-md-2" v-if="true">
+                        <button v-if="!item.isEditable" class="btn btn-danger pull-left align-middle" 
+                        v-on:click="showConfirmDeleteModal(item)">Delete</button>
+                        <button v-if="item.isEditable" class="btn btn-primary pull-left align-middle" 
+                        v-on:click="updateItem(item)">Save</button>
+                        <button v-if="item.isEditable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
+                        v-on:click="cancelUpdate(item)">Cancel</button>
+                      </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fot"
+          </div>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
+              Collapsible Group 2</a>
+            </h4>
+          </div>
+          <div id="collapse2" class="panel-collapse collapse">
+            <div class="panel-body">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+            minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+            commodo consequat.</div>
+          </div>
+        </div>
+
+      </div>
+      <!-- Accordion End -->
       <modal
         v-on:emitDiscardConfirmation="resetItem($event)"
         v-on:userConfirmedDeleteIntention="deleteItem($event)"
@@ -306,4 +340,23 @@ export default {
   .buttons {
     border: none !important;
   }
+
+  .accordion {
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .panel-body {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+  }
+
+  .panel-heading {
+    background-color: #8d8d8e !important;
+    color: white !important;
+  }
+
 </style>
