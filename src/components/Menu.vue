@@ -1,82 +1,73 @@
 <template>
-  <div class="menu container-fluid">
-    <div class="menu-wrapper col-md-10 col-md-offset-1">
-      <alert :showAlert="alert"></alert>
-      <!-- Accordion Start -->
-      <div class="panel-group" id="accordion">
+  <div class="menu-wrapper col-md-10 col-md-offset-1">
 
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
-              Main Menu</a>
-            </h4>
-          </div>
-          <div id="collapse1" class="panel-collapse collapse in">
-            <div class="panel-body">
-              <table class="table table-bordered">
-                <thead class="thead-default">
-                  <tr>
-                      <th class="text-center">Name</th>
-                      <th class="text-center">Price</th>
-                      <th class="text-center">Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="item-row" v-for="item in items">
-                      <td class="item-name text-left col-md-2">
-                        <input type="text" class="form-control" v-model="item.name" 
-                        v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)"> 
-                      </td>
-                      <td class="item-price text-left col-md-1">
-                        <input type="text" class="form-control" v-model="item.price" 
-                        v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
-                      </td>
-                      <td class="item-description text-left col-md-5">
-                        <input type="text" class="form-control" v-model="item.description" 
-                        v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
-                      </td>
-                      <td class="buttons col-md-2" v-if="true">
-                        <button v-if="!item.isEditable" class="btn btn-danger pull-left align-middle" 
-                        v-on:click="showConfirmDeleteModal(item)">Delete</button>
-                        <button v-if="item.isEditable" class="btn btn-primary pull-left align-middle" 
-                        v-on:click="updateItem(item)">Save</button>
-                        <button v-if="item.isEditable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
-                        v-on:click="cancelUpdate(item)">Cancel</button>
-                      </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="fot"
+    <!-- Notification alerts for item/category updates/deletions --> 
+    <alert :showAlert="alert"></alert>
+    
+    <!-- CategoriesAccordion Component -->
+    <div class="panel-group" id="accordion">
+      <div v-for="category in categories" class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" v-bind:href="'#' + category.categoryId">
+            {{category.name}}</a>
+          </h4>
+        </div>
+        <div v-bind:id="category.categoryId" class="panel-collapse collapse in">
+          <div class="panel-body">
+
+            <!-- Item Component -->
+            <table class="table table-bordered">
+              <thead class="thead-default">
+                <tr>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Price</th>
+                    <th class="text-center">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="item-row" v-for="item in category.items">
+                    <td class="item-name text-left col-md-2">
+                      <input type="text" class="form-control" v-model="item.name" 
+                      v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)"> 
+                    </td>
+                    <td class="item-price text-left col-md-1">
+                      <input type="text" class="form-control" v-model="item.price" 
+                      v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
+                    </td>
+                    <td class="item-description text-left col-md-5">
+                      <input type="text" class="form-control" v-model="item.description" 
+                      v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
+                    </td>
+                    <td class="buttons col-md-2" v-if="true">
+                      <button v-if="!item.isEditable" class="btn btn-danger pull-left align-middle" 
+                      v-on:click="showConfirmDeleteModal(item)">Delete</button>
+                      <button v-if="item.isEditable" class="btn btn-primary pull-left align-middle" 
+                      v-on:click="updateItem(item)">Save</button>
+                      <button v-if="item.isEditable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
+                      v-on:click="cancelUpdate(item)">Cancel</button>
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- Item Component -->
+
           </div>
         </div>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
-              Collapsible Group 2</a>
-            </h4>
-          </div>
-          <div id="collapse2" class="panel-collapse collapse">
-            <div class="panel-body">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-            minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-            commodo consequat.</div>
-          </div>
-        </div>
-
       </div>
-      <!-- Accordion End -->
-      <modal
-        v-on:emitDiscardConfirmation="resetItem($event)"
-        v-on:userConfirmedDeleteIntention="deleteItem($event)"
-        :showModal="modal">
-      </modal>
-      <button v-on:click="showSuccessMessage()">:) Alert</button>
-      <button v-on:click="showErrorMessage()">:( Alert</button>
     </div>
+    <!-- CategoriesAccordion Component -->
+
+    <!-- Confirmation modals triggered when the user initialises an "update" or "deletion" -->
+    <modal
+      v-on:emitDiscardConfirmation="resetItem($event)"
+      v-on:userConfirmedDeleteIntention="deleteItem($event)"
+      :showModal="modal">
+    </modal>
+
+    <!-- Test buttons -->
+    <button v-on:click="showSuccessMessage()">:) Alert</button>
+    <button v-on:click="showErrorMessage()">:( Alert</button>
   </div>
 </template>
 
@@ -114,6 +105,7 @@ export default {
   },
   data() {
     return {
+      categories: [],
       itemId: null,
       items: [],
       alert: {
@@ -136,7 +128,7 @@ export default {
   },
   created() {
       // Clone the item's state so we can compare the view with the state
-      this.items = cloneDeep(this.itemsState);
+      this.categories = cloneDeep(this.categoriesState);
   },
   methods: {
     showSuccessMessage() {
@@ -284,7 +276,7 @@ export default {
     }
   },
   computed: {
-    itemsState() {
+    categoriesState() {
       return this.$store.getters.getItems;
     }
   }
