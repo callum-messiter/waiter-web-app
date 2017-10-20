@@ -41,21 +41,75 @@ export default new Vuex.Store({
 						itemId: 4,
 						name: 'Ribs',
 						price: '10.00',
-						description: 'Delicious bbq spare ribs glazed in sticky sauce',
+						description: 'At vero eos et accusamus et iusto odio dignissimos ',
 						isEditable: false
 					},
 					{
 						itemId: 5,
 						name: 'Nachos',
 						price: '7.00',
-						description: 'Nacho chips, salsa, jalapeños, guac.',
+						description: 'Nam libero tempore, cum soluta nobis est eligendi optio',
 						isEditable: false
 					},
 					{
 						itemId: 6,
 						name: 'Soup',
 						price: '4.00',
-						description: 'Our delicious house soup, served hot',
+						description: 'Itaque earum rerum hic tenetur a sapiente',
+						isEditable: false
+					}
+				]
+			},
+			{
+				categoryId: 3,
+				name: 'Desserts',
+				items: [
+					{
+						itemId: 1,
+						name: 'Apple Crumble',
+						price: '6.00',
+						description: 'Excepteur sint occaecat cupidatat non proident',
+						isEditable: false
+					},
+					{
+						itemId: 2,
+						name: 'Cheesecake',
+						price: '5.00',
+						description: 'Quis autem vel eum iure reprehenderit qui in',
+						isEditable: false
+					},
+					{
+						itemId: 3,
+						name: 'Sundae',
+						price: '5.00',
+						description: 'Ut enim ad minima veniam, quis nostrum',
+						isEditable: false
+					}
+				]
+			},
+			{
+				categoryId: 4,
+				name: 'Drinks',
+				items: [
+					{
+						itemId: 1,
+						name: 'Heineken',
+						price: '3.80',
+						description: 'Sed ut perspiciatis unde omnis iste natus error sit ',
+						isEditable: false
+					},
+					{
+						itemId: 2,
+						name: 'Milkshake',
+						price: '5.00',
+						description: 'Nemo enim ipsam voluptatem quia voluptas sit ',
+						isEditable: false
+					},
+					{
+						itemId: 3,
+						name: 'Coca Cola',
+						price: '3.00',
+						description: 'Neque porro quisquam est, qui dolorem',
 						isEditable: false
 					}
 				]
@@ -66,22 +120,23 @@ export default new Vuex.Store({
 	mutations: {
 		deleteItem(state, itemId) {
 			// Find the item by the ID
-			const item = state.items.find(item => {
-				return item.itemId == itemId;
-			});
-			// Delete this item
-			state.items.splice(state.items.indexOf(item), 1);
+			const categories = state.categories;
+			for(var i = 0; i < categories.length; i++) {
+				var itemIndex = null; 
+				const items = categories[i].items;
+				const itemIndex = items.findIndex((item => item.itemId == itemId));
+			  if(itemIndex > -1) {
+			  	items.splice(itemIndex, 1);
+			  	return true;
+			  }
+			}
+			return false;
 		}
 	},
 	actions: {},
 	getters: {
-		getItems(state) {
+		getCategoriesAndItems(state) {
 			return state.categories;
-		},
-
-		getItem(state, itemId) {
-			const objIndex = state.items.findIndex((item => item.itemId == itemId));
-			return state.items[obJIndex];
 		}
 	}
 });

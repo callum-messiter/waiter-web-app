@@ -13,7 +13,8 @@
             {{category.name}}</a>
           </h4>
         </div>
-        <div v-bind:id="category.categoryId" class="panel-collapse collapse in">
+        <div v-bind:id="category.categoryId" class="panel-collapse collapse" 
+        v-bind:class="{'in': categories.indexOf(category) == 0}">
           <div class="panel-body">
 
             <!-- Item Component -->
@@ -39,11 +40,11 @@
                       <input type="text" class="form-control" v-model="item.description" 
                       v-bind:readonly="!item.isEditable" v-on:dblclick="makeItemEditable(item)">
                     </td>
-                    <td class="buttons col-md-2" v-if="true">
+                    <td class="buttons col-md-2" v-if="buttonsVisible">
                       <button v-if="!item.isEditable" class="btn btn-danger pull-left align-middle" 
                       v-on:click="showConfirmDeleteModal(item)">Delete</button>
                       <button v-if="item.isEditable" class="btn btn-primary pull-left align-middle" 
-                      v-on:click="updateItem(item)">Save</button>
+                      v-on:click="showConfirmUpdateModal(item)">Save</button>
                       <button v-if="item.isEditable" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
                       v-on:click="cancelUpdate(item)">Cancel</button>
                     </td>
@@ -62,33 +63,15 @@
     <modal
       v-on:emitDiscardConfirmation="resetItem($event)"
       v-on:userConfirmedDeleteIntention="deleteItem($event)"
+      v-on:userConfirmedUpdateIntention="updateItem($event)"
       :showModal="modal">
     </modal>
 
-    <!-- Test buttons -->
-    <button v-on:click="showSuccessMessage()">:) Alert</button>
-    <button v-on:click="showErrorMessage()">:( Alert</button>
   </div>
 </template>
 
 <script>
-/**
-  A NOTE ABOUT A NASTY HACK:
 
-  In order to be able to compare the item in the current view, with the item state, we create a clone o 
-  the state.
-
-  Thus, if the user edits an edit, and then cancels those edits, we don't need to display a warning modal
-  about discarding changes. (For example.)
-
-  There must be a better way to do this; keeping track of two different versions of the item is horrible.
-
-  For now, whenever an item's state is changed here, we must re-clone the state such that immediately after
-  the state is updated, the view will be a perfect clone of the state.
-
-  THe view should only depart from the state when the user modifies the view. Then, termporary discrepancies
-  are exactly what we want, so that we can compare them and affect the UX accordingly. 
-**/
 // Dependencies
 import cloneDeep from 'clone-deep';
 import lodash from 'lodash';
@@ -106,8 +89,6 @@ export default {
   data() {
     return {
       categories: [],
-      itemId: null,
-      items: [],
       alert: {
         isVisible: true,
         type: null,
@@ -128,22 +109,22 @@ export default {
   },
   created() {
       // Clone the item's state so we can compare the view with the state
-      this.categories = cloneDeep(this.categoriesState);
+      this.categories = cloneDeep(this.categoryItemsState);
   },
   methods: {
-    showSuccessMessage() {
+    showSuccessMessage(message) {
       this.alert.isVisible = true;
       this.alert.type = 'success';
-      this.alert.message = 'Your item was successfully updated!';
+      this.alert.message = message;
       setTimeout(() =>{ 
         this.alert.isVisible = false;
       }, 2000);
     },
 
-    showErrorMessage() {
+    showErrorMessage(message) {
       this.alert.isVisible = true;
       this.alert.type = 'error';
-      this.alert.message = 'There was an error deleting your item. Try it again.';
+      this.alert.message = message;
       setTimeout(() =>{ 
         this.alert.isVisible = false;
       }, 2000);
@@ -152,48 +133,54 @@ export default {
     // When a user clicks on a row (item), we want to make each input in this row writable
     makeItemEditable(clickedViewItem) {
       const clickedViewItemId = clickedViewItem.itemId;
+      // Find the clicked view-item (in our array of view items) by referencing the ID
+      const viewItem = this.getSingleItem(clickedViewItemId, this.categories);
+      const itemIndex = viewItem.itemIndex;
+      const catIndex = viewItem.catIndex;
       // Only one item at a time can be editable, so first we must check if any other view items are already editable
-      const areThereAnyOtherEditableViewItems = this.itemsCurrentlyEditable(clickedViewItemId).areThereAny;
-      const editableViewItem = this.itemsCurrentlyEditable(clickedViewItemId).item;
+      const editableItems = this.itemsCurrentlyEditable(clickedViewItemId);
+      const areThereAnyOtherEditableViewItems = editableItems.areThereAny;
+      const editableViewItem = editableItems.item;
       // If there currently are no editable items, then make the clicked view-item editable
       if(!areThereAnyOtherEditableViewItems) {
-        // Find the clicked view-item (in our array of view items) by referencing the ID
-        const itemIndex = this.items.findIndex((item => item.itemId == clickedViewItemId));
         // Change the isEditable property of this clicked view item
-        this.items[itemIndex].isEditable = true;
+        this.categories[catIndex].items[itemIndex].isEditable = true;
 
       // If there is another view item that is already editable...
       } else {
         const editableViewItemId = editableViewItem.itemId;
-        const state = this.getSingleItemState(editableViewItemId);
+        const state = this.getSingleItem(editableViewItemId, this.categoryItemsState);
+        const editableItemIndex = state.itemIndex;
         // Compare the editable view-item with its state
         const editableViewItemIsEqualToItsState = this.compareViewWithState(editableViewItem, state.item);
         // If the editable view-item is equal to its state...
         if(editableViewItemIsEqualToItsState) {
           // Set the editable view-item to readonly...
-          this.items[state.index].isEditable = false;
+          this.categories[catIndex].items[editableItemIndex].isEditable = false;
           // ...And set the target view-item to editable
-          const itemIndex = this.items.findIndex((item => item.itemId == clickedViewItemId));
-          this.items[itemIndex].isEditable = true;
+          this.categories[catIndex].items[itemIndex].isEditable = true;
         }
       }
     },
 
     cancelUpdate(item) {
-      const state = this.getSingleItemState(item.itemId);
+      const itemState = this.getSingleItem(item.itemId, this.categoryItemsState);
+      const state = itemState.item;
+      const catIndex = itemState.catIndex;
+      const itemIndex = itemState.itemIndex;
       // Compare the view item with the item state
-      const viewItemIsEqualToItemState = this.compareViewWithState(item, state.item);
+      const viewItemIsEqualToItemState = this.compareViewWithState(item, state);
       
       if(viewItemIsEqualToItemState) {
         // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
-        this.items[state.index].isEditable = false;
+        this.categories[catIndex].items[itemIndex].isEditable = false;
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
         const modal = this.modal;
         const modalObj = {
           name: 'cancel_update',
           isVisible: true,
-          title: 'Are you sure you want to discard your changes to "' + state.item.name + '"?',
+          title: 'Are you sure you want to discard your changes to "' + state.name + '"?',
           triggerItem: item,
           buttons: {
             primary: 'Continue Editing',
@@ -206,27 +193,57 @@ export default {
 
     resetItem(itemId) {
       // Get the item from the state by referencing the itemId
-      const state = this.getSingleItemState(itemId);
+      const state = this.getSingleItem(itemId, this.categoryItemsState);
       // Set the view item to its pre-edit state
-      Object.assign(this.items[state.index], state.item);
+      Object.assign(this.categories[state.catIndex].items[state.itemIndex], state.item);
     },
 
-    updateItem(item) {
-      const itemId = item.itemId;
-      // Update the item in the state and update the clone
-      // this.$store.commit('updateItem', item.itemId);
-      // Find the item by referencing the ID
-      const itemIndex = this.items.findIndex((item => item.itemId == itemId));
-      // Change the isEditable property of this item
-      this.items[itemIndex].isEditable = false;
-      // DO WE NEED TO CLONE THE STATE AGAIN HERE?
-      // If any item data actually changed, display a flash message
+    showConfirmUpdateModal(item) {
+      // Check if the item has actually changed
+      const itemState = this.getSingleItem(item.itemId, this.categoryItemsState);
+      const state = itemState.item;
+      const itemIndex = itemState.itemIndex;
+      const catIndex = itemState.catIndex;
+      // Compare the view item with the item state
+      const viewItemIsEqualToItemState = this.compareViewWithState(item, state);
+      
+      if(viewItemIsEqualToItemState) {
+        // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
+        this.categories[catIndex].items[itemIndex].isEditable = false;
+      } else {
+        // Display the warning modal 
+        const modal = this.modal;
+        const modalObj = {
+          name: 'confirm_update',
+          isVisible: true,
+          title: 'Are you sure you want to update "' + state.name + '"? This will take effect immediately in your live menu.',
+          triggerItem: {
+            item: item,
+            itemIndex: itemIndex,
+            catIndex: catIndex,
+            itemStateName: state.name 
+          },
+          buttons: {
+            primary: 'Continue Editing',
+            warning: 'Save Changes'
+          }
+        }
+        this.renderModal(modalObj);
+      }
+    },
+
+    updateItem(triggerItem) {
+      // If it has, then make the API call
+      // If successful, update the state
+      const itemStateIndex = this.categories[triggerItem.catIndex].items[triggerItem.itemIndex];
+      itemStateIndex.isEditable = false;
+      Object.assign(itemStateIndex, triggerItem.item);
+      this.showSuccessMessage('Your item "' + triggerItem.itemStateName + '" was successfully updated!');
     },
 
     showConfirmDeleteModal(item) {
-      const itemId = item.itemId;
-      const itemState = this.getSingleItemState(itemId).item;
-
+      console.log(item.itemId);
+      const itemState = this.getSingleItem(item.itemId, this.categoryItemsState).item;
       // Display the warning modal 
       const modal = this.modal;
       const modalObj = {
@@ -243,10 +260,12 @@ export default {
     },
 
     deleteItem(itemId) {
-      // Delete the item from the state and update the clone
+      // Make API call, and if successful..
+      // ...delete the item from the state and update the clone
       this.$store.commit('deleteItem', itemId);
-      this.items = cloneDeep(this.itemsState);
-      // Show flash message if successful (later this will be done from the store, inside the API call)
+      this.categories = cloneDeep(this.categoryItemsState);
+      // ... and in any case, show flash message if successful (later this will be done from the store, inside the API call)
+      this.showSuccessMessage('Your item was successfully deleted!');
     },
 
     compareViewWithState(viewItem, itemState) {
@@ -260,24 +279,37 @@ export default {
       Object.assign(this.modal, modalObj);
     },
 
-    getSingleItemState(itemId) {
-      const itemIndex = this.itemsState.findIndex((item => item.itemId == itemId));
-      return {item: this.itemsState[itemIndex], index: itemIndex}
+    getSingleItem(itemId, categories) {
+      // Implement check for empty categories array, and empty items arrays
+      for(var i = 0; i < categories.length; i++) {
+        var item = null; 
+        const items = categories[i].items;
+        const itemIndex = items.findIndex((item => item.itemId == itemId));
+        if(itemIndex > -1) {
+          return {item: items[itemIndex], itemIndex: itemIndex, catIndex: i};
+        }
+      }
+      return {item: items[itemIndex], index: itemIndex};
     },
 
     itemsCurrentlyEditable(itemId) {
-      for(let item of this.items) {
-        // The editable item may be the current item
-        if(item.isEditable && item.itemId != itemId) {
-          return {areThereAny: true, item: item}
+      // Implement check for empty categories array, and empty items arrays
+      const categories = this.categories;
+      for(var i = 0; i < categories.length; i++) {
+        const items = categories[i].items;
+        for(var j = 0; j < items.length; j++) {
+          // The editable item may be the current item
+          if(items[j].isEditable && items[j].itemId != itemId) {
+            return {areThereAny: true, item: items[j]}
+          }
         }
       }
       return {areThereAny: false, item: null}
     }
   },
   computed: {
-    categoriesState() {
-      return this.$store.getters.getItems;
+    categoryItemsState() {
+      return this.$store.getters.getCategoriesAndItems;
     }
   }
 }
@@ -327,6 +359,7 @@ export default {
   table {
     border-right: 0;
     border-bottom: 0;
+    margin-bottom: 0 !important;
   }
 
   .buttons {

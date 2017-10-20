@@ -9,6 +9,9 @@
         </div>
         <div class="modal-body">{{modal.title}}</div>
         <div class="modal-footer">
+          <!-- Confirm Update Modal -->
+          <button v-if="modal.name == 'confirm_update'" class="btn btn-danger" 
+          v-on:click="emitUpdateConfirmation(modal.triggerItem)">{{modal.buttons.warning}}</button>
           <!-- Cancel Update Modal-->
           <button v-if="modal.name == 'cancel_update'" class="btn btn-danger" 
           v-on:click="emitDiscardConfirmation(modal.triggerItem.itemId)">{{modal.buttons.warning}}</button>
@@ -52,16 +55,24 @@ export default {
     hideModal() {
       this.modal.isVisible = false;
     },
+
     emitDiscardConfirmation(itemId) {
       // When the user confirms they want to discard their item updates, we inform the menu, triggering a reset of the view item
       this.$emit('emitDiscardConfirmation', itemId);
       this.hideModal();
     },
+
     // When the user confirms they want to delete the item, we inform the menu, triggering item deletion
     emitDeleteConfirmation(itemId) {
       this.$emit('userConfirmedDeleteIntention', itemId);
       this.hideModal();
+    },
+
+    emitUpdateConfirmation(item) {
+      this.$emit('userConfirmedUpdateIntention', item);
+      this.hideModal();
     }
+
   }
 }
 </script>
