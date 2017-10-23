@@ -76,23 +76,18 @@ export default {
     // When the user confirms they want to discard their item updates, we inform the menu component, triggering a reset of the view item
     emitDiscardConfirmation(trigger) {
       this.$emit('emitDiscardConfirmation', trigger);
-      this.hideModal();
+      this.modal.isVisible = false;
     },
 
     // When the user confirms they want to delete the item, we inform the menu component, triggering item deletion
     emitDeleteConfirmation(trigger) {
       this.$emit('userConfirmedDeleteIntention', trigger);
-      this.hideModal();
+      this.modal.isVisible = false;
     },
 
     // When the user confirms they want to save the updates made to their item, we inform the menu component, triggering item update
     emitUpdateConfirmation(trigger) {
       this.$emit('userConfirmedUpdateIntention', trigger);
-      this.hideModal();
-    },
-
-    // The modal should be hidden once the user initiates a confirmation/conclusive action 
-    hideModal() {
       this.modal.isVisible = false;
     },
 
