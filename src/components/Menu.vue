@@ -4,7 +4,7 @@
     <!-- Notification alerts for item/category updates/deletions --> 
     <alert :showAlert="alert"></alert>
     
-    <!-- CategoriesAccordion Component -->
+    <!-- START: CategoriesAccordion Component -->
     <div class="panel-group" id="accordion">
       <div v-for="category in categories" class="panel panel-default">
         <div class="panel-heading">
@@ -13,11 +13,14 @@
             {{category.name}}</a>
           </h4>
         </div>
-        <div v-bind:id="category.categoryId" class="panel-collapse collapse" 
-        v-bind:class="{'in': categories.indexOf(category) == 0}">
+        <div 
+          class="panel-collapse collapse"
+          v-bind:id="category.categoryId"  
+          v-bind:class="{'in': categories.indexOf(category) == 0}"
+        >
           <div class="panel-body">
 
-            <!-- Item Component -->
+            <!-- START: Item Component -->
             <table class="table table-bordered">
               <thead class="thead-default">
                 <tr>
@@ -29,38 +32,93 @@
               <tbody>
                 <tr class="item-row" v-for="item in category.items">
                     <td class="item-name text-left col-md-2">
-                      <input type="text" class="form-control" v-model="item.name" 
-                      v-bind:readonly="editableItem.id != item.itemId" 
-                      v-on:dblclick="makeItemEditable(item.itemId, category.items.indexOf(item), category.categoryId, categories.indexOf(category))"> 
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        v-model="item.name" 
+                        v-bind:readonly="editableItem.id != item.itemId" 
+                        v-on:dblclick="
+                          makeItemEditable(
+                            item.itemId, 
+                            category.items.indexOf(item), 
+                            category.categoryId, 
+                            categories.indexOf(category)
+                          )"
+                      > 
                     </td>
                     <td class="item-price text-left col-md-1">
-                      <input type="text" class="form-control" v-model="item.price" 
-                      v-bind:readonly="editableItem.id != item.itemId" 
-                      v-on:dblclick="makeItemEditable(item.itemId, category.items.indexOf(item), category.categoryId, categories.indexOf(category))">
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        v-model="item.price" 
+                        v-bind:readonly="editableItem.id != item.itemId" 
+                        v-on:dblclick="
+                          makeItemEditable(
+                            item.itemId, 
+                            category.items.indexOf(item), 
+                            category.categoryId, 
+                            categories.indexOf(category)
+                          )"
+                      >
                     </td>
                     <td class="item-description text-left col-md-5">
-                      <input type="text" class="form-control" v-model="item.description" 
-                      v-bind:readonly="editableItem.id != item.itemId" 
-                      v-on:dblclick="makeItemEditable(item.itemId, category.items.indexOf(item), category.categoryId, categories.indexOf(category))">
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        v-model="item.description" 
+                        v-bind:readonly="editableItem.id != item.itemId" 
+                        v-on:dblclick="
+                          makeItemEditable(
+                            item.itemId, 
+                            category.items.indexOf(item), 
+                            category.categoryId, 
+                            categories.indexOf(category)
+                          )"
+                      >
                     </td>
                     <td class="buttons col-md-2">
-                      <button v-if="editableItem.id != item.itemId" class="btn btn-danger pull-left align-middle" 
-                      v-on:click="showConfirmDeleteModal(item/itemId, category.items.indexOf(item), categories.indexOf(category))">Delete</button>
-                      <button v-if="editableItem.id == item.itemId" class="btn btn-primary pull-left align-middle" 
-                      v-on:click="showConfirmUpdateModal(item, category.items.indexOf(item), categories.indexOf(category))">Save</button>
-                      <button v-if="editableItem.id == item.itemId" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
-                      v-on:click="cancelUpdate(item, category.items.indexOf(item), categories.indexOf(category))">Cancel</button>
+                      <button 
+                        class="btn btn-danger pull-left align-middle"
+                        v-if="editableItem.id != item.itemId"
+                        v-on:click="
+                          showConfirmDeleteModal(
+                            item.itemId, 
+                            category.items.indexOf(item), 
+                            categories.indexOf(category)
+                          )"
+                        >Delete
+                      </button>
+                      <button 
+                        class="btn btn-primary pull-left align-middle"
+                        v-if="editableItem.id == item.itemId" 
+                        v-on:click="
+                          showConfirmUpdateModal(
+                            item, 
+                            category.items.indexOf(item), 
+                            categories.indexOf(category)
+                          )"
+                        >Save</button>
+                      <button 
+                        class="btn btn-danger pull-left align-middle cancelBtn"
+                        v-if="editableItem.id == item.itemId" 
+                        v-on:click="
+                          showConfirmDiscardModal(
+                            item, 
+                            category.items.indexOf(item), 
+                            categories.indexOf(category)
+                          )"
+                        >Cancel</button>
                     </td>
                 </tr>
               </tbody>
             </table>
-            <!-- Item Component -->
+            <!-- END: Item Component -->
 
           </div>
         </div>
       </div>
     </div>
-    <!-- CategoriesAccordion Component -->
+    <!-- END: CategoriesAccordion Component -->
 
     <!-- Confirmation modals triggered when the user initialises an "update" or "deletion" -->
     <modal
@@ -121,25 +179,10 @@ export default {
       this.categories = cloneDeep(this.categoryItemsState);
   },
   methods: {
-    showSuccessMessage(message) {
-      this.alert.isVisible = true;
-      this.alert.type = 'success';
-      this.alert.message = message;
-      setTimeout(() =>{ 
-        this.alert.isVisible = false;
-      }, 2000);
-    },
-
-    showErrorMessage(message) {
-      this.alert.isVisible = true;
-      this.alert.type = 'error';
-      this.alert.message = message;
-      setTimeout(() =>{ 
-        this.alert.isVisible = false;
-      }, 2000);
-    },
-
-    // When a user clicks on a row (item), we want to make each input in this row writable
+    /** 
+      When a user clicks on a row (item), we want to make each input in this row writable. 
+      There must only ever be *one* item in edit mode
+    **/
     makeItemEditable(itemId, itemIndex, catId, catIndex) {
       // Only one item at a time can be editable: If there currently are no editable items, then make the clicked view-item editable
       if(this.editableItem.index == null || this.editableItem.catIndex == null) {
@@ -156,43 +199,9 @@ export default {
       }
     },
 
-    cancelUpdate(item, itemIndex, catIndex) {
-      // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then nclick cancel without making any changes)
-      const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
-      if(viewItemIsEqualToItemState) {
-        // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
-        this.exitEditMode();
-      } else {
-        // If the item has actually been edited by the user, then we want to display the cancel-warning modal
-        const modal = this.modal;
-        const itemState = this.categoryItemsState[catIndex].items[itemIndex];
-        const modalObj = {
-          name: 'cancel_update',
-          isVisible: true,
-          title: 'Are you sure you want to discard your changes to "' + itemState.name + '"?',
-          trigger: {
-            item: item,
-            itemIndex: itemIndex,
-            catIndex: catIndex,
-          },
-          buttons: {
-            primary: 'Continue Editing',
-            warning: 'Discard'
-          }
-        }
-        this.renderModal(modalObj);
-      }
-    },
-
-    resetItem(trigger) {
-      const viewItem = this.categories[trigger.catIndex].items[trigger.itemIndex];
-      const itemState = this.categoryItemsState[trigger.catIndex].items[trigger.itemIndex];
-      // Set the view item to its pre-edit state
-      Object.assign(viewItem, itemState);
-      // Set editableItem to null (and the item will exit edit mode)
-      this.exitEditMode();
-    },
-
+    /**
+      Updating an item
+    **/
     showConfirmUpdateModal(item, itemIndex, catIndex) {
       // Compare the view item with the item state
       const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
@@ -219,23 +228,66 @@ export default {
             warning: 'Save Changes'
           }
         }
-        this.renderModal(modalObj);
+        // Set the modal object, which will trigger the displaying of the modal
+        Object.assign(this.modal, modalObj);
       }
     },
 
     updateItem(trigger) {
-      /**
-        Make the updateItem API call
-        If successful, udpdat the state, create a new view clone, and exit edit mode
-      **/
+      // Make the updateItem API call
+      // If successful, udpdat the state, create a new view clone, and exit edit mode
       this.$store.commit('updateItem', trigger);
       this.showSuccessMessage('Your item "' + trigger.itemStateName + '" was successfully updated!');
       this.exitEditMode();
     },
 
+    /**
+      Discarding changes made to an item in edit mode
+    **/
+    showConfirmDiscardModal(item, itemIndex, catIndex) {
+      // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then nclick cancel without making any changes)
+      const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
+      if(viewItemIsEqualToItemState) {
+        // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
+        this.exitEditMode();
+      } else {
+        // If the item has actually been edited by the user, then we want to display the cancel-warning modal
+        const modal = this.modal;
+        const itemState = this.categoryItemsState[catIndex].items[itemIndex];
+        const modalObj = {
+          name: 'cancel_update',
+          isVisible: true,
+          title: 'Are you sure you want to discard your changes to "' + itemState.name + '"?',
+          trigger: {
+            item: item,
+            itemIndex: itemIndex,
+            catIndex: catIndex,
+          },
+          buttons: {
+            primary: 'Continue Editing',
+            warning: 'Discard'
+          }
+        }
+        // Set the modal object, which will trigger the displaying of the modal
+        Object.assign(this.modal, modalObj);
+      }
+    },
+
+    resetItem(trigger) {
+      const viewItem = this.categories[trigger.catIndex].items[trigger.itemIndex];
+      const itemState = this.categoryItemsState[trigger.catIndex].items[trigger.itemIndex];
+      // Set the view item to its pre-edit state
+      Object.assign(viewItem, itemState);
+      // Set editableItem to null (and the item will exit edit mode)
+      this.exitEditMode();
+    },
+
+    /**
+      Deleting an item
+    **/
     showConfirmDeleteModal(itemId, itemIndex, catIndex) {
       const itemState = this.categoryItemsState[catIndex].items[itemIndex];
-      // Display the warning modal 
+      // Build the confirm_delete modal
       const modal = this.modal;
       const modalObj = {
         name: 'confirm_delete',
@@ -251,7 +303,8 @@ export default {
           warning: 'Delete Item'
         }
       }
-      this.renderModal(modalObj);
+      // Set the modal object, which will trigger the displaying of the modal
+      Object.assign(this.modal, modalObj);
     },
 
     deleteItem(trigger) {
@@ -264,15 +317,32 @@ export default {
       this.showSuccessMessage('Your item was successfully deleted!');
     },
 
+    /**
+      Flash messages which appear following a significant user action, e.g. deleting an item
+    **/
+    showSuccessMessage(message) {
+      this.alert.isVisible = true;
+      this.alert.type = 'success';
+      this.alert.message = message;
+      setTimeout(() =>{ 
+        this.alert.isVisible = false;
+      }, 2000);
+    },
+
+    showErrorMessage(message) {
+      this.alert.isVisible = true;
+      this.alert.type = 'error';
+      this.alert.message = message;
+      setTimeout(() =>{ 
+        this.alert.isVisible = false;
+      }, 2000);
+    },
+
     compareViewWithState(viewItems, itemsState) {
       return _.isEqual(
           _.omit(viewItems), 
           _.omit(itemsState)
       );
-    },
-
-    renderModal(modalObj) {
-      Object.assign(this.modal, modalObj);
     },
 
     exitEditMode() {
@@ -291,35 +361,8 @@ export default {
         catIndex: catIndex, 
         catId: catId
       }
-    },
-
-    getSingleItem(itemId, categories) {
-      // Implement check for empty categories array, and empty items arrays
-      for(var i = 0; i < categories.length; i++) {
-        var item = null; 
-        const items = categories[i].items;
-        const itemIndex = items.findIndex((item => item.itemId == itemId));
-        if(itemIndex > -1) {
-          return {item: items[itemIndex], itemIndex: itemIndex, catIndex: i};
-        }
-      }
-      return {item: items[itemIndex], index: itemIndex};
-    },
-
-    itemsCurrentlyEditable(itemId) {
-      // Implement check for empty categories array, and empty items arrays
-      const categories = this.categories;
-      for(var i = 0; i < categories.length; i++) {
-        const items = categories[i].items;
-        for(var j = 0; j < items.length; j++) {
-          // The editable item may be the current item
-          if(items[j].isEditable && items[j].itemId != itemId) {
-            return {areThereAny: true, item: items[j]}
-          }
-        }
-      }
-      return {areThereAny: false, item: null}
     }
+
   },
   computed: {
     categoryItemsState() {
@@ -358,15 +401,15 @@ export default {
     margin-top: 1px;
   }
 
-  #cancelUpdateBtn {
+  .cancelBtn {
     background-color: #404040
   }
 
-  #cancelUpdateBtn:hover {
+  .cancelBtn:hover {
     background-color: #1a1a1a;
   }
 
-  #cancelUpdateBtn:active {
+  .cancelBtn:active {
     background-color: #000000
   }
 
