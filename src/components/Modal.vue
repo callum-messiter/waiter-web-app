@@ -14,10 +14,10 @@
           v-on:click="emitUpdateConfirmation(modal.trigger)">{{modal.buttons.warning}}</button>
           <!-- Cancel Update Modal-->
           <button v-if="modal.name == 'cancel_update'" class="btn btn-danger" 
-          v-on:click="emitDiscardConfirmation(modal.triggerItem.itemId, modal.indexes.itemIndex, modal.indexes.catIndex)">{{modal.buttons.warning}}</button>
+          v-on:click="emitDiscardConfirmation(modal.trigger.item.itemId, modal.trigger.itemIndex, modal.trigger.catIndex)">{{modal.buttons.warning}}</button>
           <!-- Confirm Delete Modal -->
           <button v-if="modal.name == 'confirm_delete'" class="btn btn-danger" 
-          v-on:click="emitDeleteConfirmation(modal.triggerItem.itemId)">{{modal.buttons.warning}}</button>
+          v-on:click="emitDeleteConfirmation(modal.trigger)">{{modal.buttons.warning}}</button>
           <!-- This button simply hides the modal when the primary button is clicked; appears on all modals -->
           <button class="btn btn-primary" 
           v-on:click="hideModal">{{modal.buttons.primary}}</button>
@@ -39,10 +39,6 @@ export default {
         modalName: null,
         isVisible: false,
         trigger: {},
-        indexes: {
-          itemIndex: null, 
-          catIndex: null
-        },
         title: null,
         buttons: {}
       }
@@ -60,16 +56,15 @@ export default {
       this.modal.isVisible = false;
     },
 
-    emitDiscardConfirmation(itemId, itemIndex, catIndex) {
+    emitDiscardConfirmation(trigger) {
       // When the user confirms they want to discard their item updates, we inform the menu, triggering a reset of the view item
-      const itemData = {itemId: itemId, itemIndex: itemIndex, catIndex: catIndex};
-      this.$emit('emitDiscardConfirmation', itemData);
+      this.$emit('emitDiscardConfirmation', trigger);
       this.hideModal();
     },
 
     // When the user confirms they want to delete the item, we inform the menu, triggering item deletion
-    emitDeleteConfirmation(itemId) {
-      this.$emit('userConfirmedDeleteIntention', itemId);
+    emitDeleteConfirmation(trigger) {
+      this.$emit('userConfirmedDeleteIntention', trigger);
       this.hideModal();
     },
 

@@ -45,7 +45,7 @@
                     </td>
                     <td class="buttons col-md-2">
                       <button v-if="editableItem.id != item.itemId" class="btn btn-danger pull-left align-middle" 
-                      v-on:click="showConfirmDeleteModal(item)">Delete</button>
+                      v-on:click="showConfirmDeleteModal(item/itemId, category.items.indexOf(item), categories.indexOf(category))">Delete</button>
                       <button v-if="editableItem.id == item.itemId" class="btn btn-primary pull-left align-middle" 
                       v-on:click="showConfirmUpdateModal(item, category.items.indexOf(item), categories.indexOf(category))">Save</button>
                       <button v-if="editableItem.id == item.itemId" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
@@ -170,10 +170,10 @@ export default {
           name: 'cancel_update',
           isVisible: true,
           title: 'Are you sure you want to discard your changes to "' + itemState.name + '"?',
-          triggerItem: item,
-          indexes: {
+          trigger: {
+            item: item,
             itemIndex: itemIndex,
-            catIndex: catIndex
+            catIndex: catIndex,
           },
           buttons: {
             primary: 'Continue Editing',
@@ -184,9 +184,9 @@ export default {
       }
     },
 
-    resetItem(itemData) {
-      const viewItem = this.categories[itemData.catIndex].items[itemData.itemIndex];
-      const itemState = this.categoryItemsState[itemData.catIndex].items[itemData.itemIndex];
+    resetItem(trigger) {
+      const viewItem = this.categories[trigger.catIndex].items[trigger.itemIndex];
+      const itemState = this.categoryItemsState[trigger.catIndex].items[trigger.itemIndex];
       // Set the view item to its pre-edit state
       Object.assign(viewItem, itemState);
       // Set editableItem to null (and the item will exit edit mode)
@@ -233,16 +233,19 @@ export default {
       this.exitEditMode();
     },
 
-    showConfirmDeleteModal(item) {
-      console.log(item.itemId);
-      const itemState = this.getSingleItem(item.itemId, this.categoryItemsState).item;
+    showConfirmDeleteModal(itemId, itemIndex, catIndex) {
+      const itemState = this.categoryItemsState[catIndex].items[itemIndex];
       // Display the warning modal 
       const modal = this.modal;
       const modalObj = {
         name: 'confirm_delete',
         isVisible: true,
         title: 'Are you sure you want to delete "' + itemState.name + '"? It will become invisible to your customers.',
-        triggerItem: item,
+        trigger: {
+          itemId: itemId,
+          itemIndex: itemIndex,
+          catIndex: catIndex
+        },
         buttons: {
           primary: 'Cancel',
           warning: 'Delete Item'
@@ -251,12 +254,13 @@ export default {
       this.renderModal(modalObj);
     },
 
-    deleteItem(itemId) {
-      // Make API call, and if successful..
-      // ...delete the item from the state and update the clone
-      this.$store.commit('deleteItem', itemId);
+    deleteItem(trigger) {
+      /**
+        Make the deleteItem API call
+        If successful, udpdat the state and create a new view clone
+      **/
+      this.$store.commit('deleteItem', trigger);
       this.categories = cloneDeep(this.categoryItemsState);
-      // ... and in any case, show flash message if successful (later this will be done from the store, inside the API call)
       this.showSuccessMessage('Your item was successfully deleted!');
     },
 
@@ -367,8 +371,7 @@ export default {
   }
 
   table {
-    border-right: 0;
-    border-bottom: 0;
+    border: 0 !important;
     margin-bottom: 0 !important;
   }
 
@@ -380,6 +383,10 @@ export default {
     border: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
+  }
+
+  .panel {
+    border: none !important;
   }
 
   .panel-body {
