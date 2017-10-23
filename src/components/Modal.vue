@@ -7,20 +7,42 @@
           <h4 class="modal-title">
           </h4>
         </div>
+
         <div class="modal-body">{{modal.title}}</div>
+
         <div class="modal-footer">
-          <!-- Confirm Update Modal -->
-          <button v-if="modal.name == 'confirm_update'" class="btn btn-danger" 
-          v-on:click="emitUpdateConfirmation(modal.triggerItem)">{{modal.buttons.warning}}</button>
-          <!-- Cancel Update Modal-->
-          <button v-if="modal.name == 'cancel_update'" class="btn btn-danger" 
-          v-on:click="emitDiscardConfirmation(modal.triggerItem.itemId)">{{modal.buttons.warning}}</button>
-          <!-- Confirm Delete Modal -->
-          <button v-if="modal.name == 'confirm_delete'" class="btn btn-danger" 
-          v-on:click="emitDeleteConfirmation(modal.triggerItem.itemId)">{{modal.buttons.warning}}</button>
+
+          <!-- Triggers Confirm Update Modal -->
+          <button 
+            class="btn btn-danger" 
+            v-if="modal.name == 'confirm_update'"
+            v-on:click="emitUpdateConfirmation(modal.trigger)">
+            {{modal.buttons.warning}}
+          </button>
+
+          <!-- Triggers Cancel Update Modal-->
+          <button 
+            class="btn btn-danger" 
+            v-if="modal.name == 'cancel_update'" 
+            v-on:click="emitDiscardConfirmation(modal.trigger)">
+            {{modal.buttons.warning}}
+          </button>
+
+          <!-- Triggers Confirm Delete Modal -->
+          <button 
+            class="btn btn-danger"
+            v-if="modal.name == 'confirm_delete'" 
+            v-on:click="emitDeleteConfirmation(modal.trigger)">
+            {{modal.buttons.warning}}
+          </button>
+
           <!-- This button simply hides the modal when the primary button is clicked; appears on all modals -->
-          <button class="btn btn-primary" 
-          v-on:click="hideModal">{{modal.buttons.primary}}</button>
+          <button 
+            class="btn btn-primary" 
+            v-on:click="hideModal">
+            {{modal.buttons.primary}}
+          </button>
+
         </div>
       </div>
     </div>
@@ -38,7 +60,7 @@ export default {
       defaultModal: {
         modalName: null,
         isVisible: false,
-        triggerItem: null,
+        trigger: {},
         title: null,
         buttons: {}
       }
@@ -51,27 +73,28 @@ export default {
     }
   },
   methods: {
+    // When the user confirms they want to discard their item updates, we inform the menu component, triggering a reset of the view item
+    emitDiscardConfirmation(trigger) {
+      this.$emit('emitDiscardConfirmation', trigger);
+      this.hideModal();
+    },
+
+    // When the user confirms they want to delete the item, we inform the menu component, triggering item deletion
+    emitDeleteConfirmation(trigger) {
+      this.$emit('userConfirmedDeleteIntention', trigger);
+      this.hideModal();
+    },
+
+    // When the user confirms they want to save the updates made to their item, we inform the menu component, triggering item update
+    emitUpdateConfirmation(trigger) {
+      this.$emit('userConfirmedUpdateIntention', trigger);
+      this.hideModal();
+    },
+
     // The modal should be hidden once the user initiates a confirmation/conclusive action 
     hideModal() {
       this.modal.isVisible = false;
     },
-
-    emitDiscardConfirmation(itemId) {
-      // When the user confirms they want to discard their item updates, we inform the menu, triggering a reset of the view item
-      this.$emit('emitDiscardConfirmation', itemId);
-      this.hideModal();
-    },
-
-    // When the user confirms they want to delete the item, we inform the menu, triggering item deletion
-    emitDeleteConfirmation(itemId) {
-      this.$emit('userConfirmedDeleteIntention', itemId);
-      this.hideModal();
-    },
-
-    emitUpdateConfirmation(item) {
-      this.$emit('userConfirmedUpdateIntention', item);
-      this.hideModal();
-    }
 
   }
 }

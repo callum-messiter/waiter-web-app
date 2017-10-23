@@ -15,21 +15,18 @@ export default new Vuex.Store({
 						name: 'Lamb',
 						price: '15.00',
 						description: 'Roast lamb with vegetables',
-						isEditable: false
 					},
 					{
 						itemId: 2,
 						name: 'Sausages',
 						price: '5.00',
 						description: '100% British beef sausages',
-						isEditable: false
 					},
 					{
 						itemId: 3,
 						name: 'Potatoes',
 						price: '7.00',
 						description: 'Irish potatoes with a golden shine',
-						isEditable: false
 					}
 				]
 			},
@@ -42,21 +39,18 @@ export default new Vuex.Store({
 						name: 'Ribs',
 						price: '10.00',
 						description: 'At vero eos et accusamus et iusto odio dignissimos ',
-						isEditable: false
 					},
 					{
 						itemId: 5,
 						name: 'Nachos',
 						price: '7.00',
 						description: 'Nam libero tempore, cum soluta nobis est eligendi optio',
-						isEditable: false
 					},
 					{
 						itemId: 6,
 						name: 'Soup',
 						price: '4.00',
 						description: 'Itaque earum rerum hic tenetur a sapiente',
-						isEditable: false
 					}
 				]
 			},
@@ -65,25 +59,22 @@ export default new Vuex.Store({
 				name: 'Desserts',
 				items: [
 					{
-						itemId: 1,
+						itemId: 7,
 						name: 'Apple Crumble',
 						price: '6.00',
 						description: 'Excepteur sint occaecat cupidatat non proident',
-						isEditable: false
 					},
 					{
-						itemId: 2,
+						itemId: 8,
 						name: 'Cheesecake',
 						price: '5.00',
 						description: 'Quis autem vel eum iure reprehenderit qui in',
-						isEditable: false
 					},
 					{
-						itemId: 3,
+						itemId: 9,
 						name: 'Sundae',
 						price: '5.00',
 						description: 'Ut enim ad minima veniam, quis nostrum',
-						isEditable: false
 					}
 				]
 			},
@@ -92,25 +83,22 @@ export default new Vuex.Store({
 				name: 'Drinks',
 				items: [
 					{
-						itemId: 1,
+						itemId: 10,
 						name: 'Heineken',
 						price: '3.80',
 						description: 'Sed ut perspiciatis unde omnis iste natus error sit ',
-						isEditable: false
 					},
 					{
-						itemId: 2,
+						itemId: 11,
 						name: 'Milkshake',
 						price: '5.00',
 						description: 'Nemo enim ipsam voluptatem quia voluptas sit ',
-						isEditable: false
 					},
 					{
-						itemId: 3,
+						itemId: 12,
 						name: 'Coca Cola',
 						price: '3.00',
 						description: 'Neque porro quisquam est, qui dolorem',
-						isEditable: false
 					}
 				]
 			}
@@ -118,19 +106,12 @@ export default new Vuex.Store({
 		
 	},
 	mutations: {
-		deleteItem(state, itemId) {
-			// Find the item by the ID
-			const categories = state.categories;
-			for(var i = 0; i < categories.length; i++) {
-				var itemIndex = null; 
-				const items = categories[i].items;
-				const itemIndex = items.findIndex((item => item.itemId == itemId));
-			  if(itemIndex > -1) {
-			  	items.splice(itemIndex, 1);
-			  	return true;
-			  }
-			}
-			return false;
+		updateItem(state, trigger) {
+			const itemState = state.categories[trigger.catIndex].items[trigger.itemIndex];
+			Object.assign(itemState, trigger.item);
+		},
+		deleteItem(state, trigger) {
+			state.categories[trigger.catIndex].items.splice(trigger.itemIndex, 1);
 		}
 	},
 	actions: {},
