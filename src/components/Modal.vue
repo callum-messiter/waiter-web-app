@@ -11,7 +11,7 @@
         <div class="modal-footer">
           <!-- Confirm Update Modal -->
           <button v-if="modal.name == 'confirm_update'" class="btn btn-danger" 
-          v-on:click="emitUpdateConfirmation(modal.triggerItem)">{{modal.buttons.warning}}</button>
+          v-on:click="emitUpdateConfirmation(modal.trigger)">{{modal.buttons.warning}}</button>
           <!-- Cancel Update Modal-->
           <button v-if="modal.name == 'cancel_update'" class="btn btn-danger" 
           v-on:click="emitDiscardConfirmation(modal.triggerItem.itemId, modal.indexes.itemIndex, modal.indexes.catIndex)">{{modal.buttons.warning}}</button>
@@ -38,7 +38,7 @@ export default {
       defaultModal: {
         modalName: null,
         isVisible: false,
-        triggerItem: null,
+        trigger: {},
         indexes: {
           itemIndex: null, 
           catIndex: null
@@ -73,8 +73,8 @@ export default {
       this.hideModal();
     },
 
-    emitUpdateConfirmation(item) {
-      this.$emit('userConfirmedUpdateIntention', item);
+    emitUpdateConfirmation(trigger) {
+      this.$emit('userConfirmedUpdateIntention', trigger);
       this.hideModal();
     }
 

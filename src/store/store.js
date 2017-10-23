@@ -106,19 +106,12 @@ export default new Vuex.Store({
 		
 	},
 	mutations: {
-		deleteItem(state, itemId) {
-			// Find the item by the ID
-			const categories = state.categories;
-			for(var i = 0; i < categories.length; i++) {
-				var itemIndex = null; 
-				const items = categories[i].items;
-				const itemIndex = items.findIndex((item => item.itemId == itemId));
-			  if(itemIndex > -1) {
-			  	items.splice(itemIndex, 1);
-			  	return true;
-			  }
-			}
-			return false;
+		updateItem(state, trigger) {
+			const itemState = state.categories[trigger.catIndex].items[trigger.itemIndex];
+			Object.assign(itemState, trigger.item);
+		},
+		deleteItem(state, trigger) {
+			state.categories[trigger.catIndex].items.splice(trigger.itemIndex, 1);
 		}
 	},
 	actions: {},

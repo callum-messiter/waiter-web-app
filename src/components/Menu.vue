@@ -47,7 +47,7 @@
                       <button v-if="editableItem.id != item.itemId" class="btn btn-danger pull-left align-middle" 
                       v-on:click="showConfirmDeleteModal(item)">Delete</button>
                       <button v-if="editableItem.id == item.itemId" class="btn btn-primary pull-left align-middle" 
-                      v-on:click="showConfirmUpdateModal(item)">Save</button>
+                      v-on:click="showConfirmUpdateModal(item, category.items.indexOf(item), categories.indexOf(category))">Save</button>
                       <button v-if="editableItem.id == item.itemId" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
                       v-on:click="cancelUpdate(item, category.items.indexOf(item), categories.indexOf(category))">Cancel</button>
                     </td>
@@ -91,8 +91,7 @@ export default {
   },
   data() {
     return {
-      categories: [
-      ],
+      categories: [],
       editableItem: {
         id: null,
         catId: null,
@@ -144,40 +143,25 @@ export default {
     makeItemEditable(itemId, itemIndex, catId, catIndex) {
       // Only one item at a time can be editable: If there currently are no editable items, then make the clicked view-item editable
       if(this.editableItem.index == null || this.editableItem.catIndex == null) {
-        this.editableItem = {
-          index: itemIndex, 
-          id: itemId, 
-          catIndex: catIndex, 
-          catId: catId
-        }
+        this.makeClickedItemEditable(itemIndex, itemId, catIndex, catId);
       // If there is another view item that is already editable...
       } else {
         // Check if the view has departed from the state
         const viewHasDepartedFromState = this.compareViewWithState(this.categories, this.categoryItemsState);
         // If edit mode was activated, but the user didn't modify the item, then we can activate edit mode on the clicked item
         if(viewHasDepartedFromState) {
-          this.editableItem = {
-            index: itemIndex, 
-            id: itemId, 
-            catIndex: catIndex, 
-            catId: catId
-          }
+          this.makeClickedItemEditable(itemIndex, itemId, catIndex, catId);
         }
         // If the editable view-item has departed from its state, then the user should be warned about discarding their changes
       }
     },
 
     cancelUpdate(item, itemIndex, catIndex) {
-      // Compare the view item with the item state
+      // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then nclick cancel without making any changes)
       const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
       if(viewItemIsEqualToItemState) {
         // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
-        this.editableItem = {
-          index: null, 
-          id: null, 
-          catIndex: null, 
-          catId: null
-        }
+        this.exitEditMode();
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
         const modal = this.modal;
@@ -206,38 +190,29 @@ export default {
       // Set the view item to its pre-edit state
       Object.assign(viewItem, itemState);
       // Set editableItem to null (and the item will exit edit mode)
-      this.editableItem = {
-        index: null, 
-        id: null, 
-        catIndex: null, 
-        catId: null
-      }
+      this.exitEditMode();
     },
 
-    showConfirmUpdateModal(item) {
-      // Check if the item has actually changed
-      const itemState = this.getSingleItem(item.itemId, this.categoryItemsState);
-      const state = itemState.item;
-      const itemIndex = itemState.itemIndex;
-      const catIndex = itemState.catIndex;
+    showConfirmUpdateModal(item, itemIndex, catIndex) {
       // Compare the view item with the item state
-      const viewItemIsEqualToItemState = this.compareViewWithState(item, state);
+      const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
       
       if(viewItemIsEqualToItemState) {
         // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
-        this.categories[catIndex].items[itemIndex].isEditable = false;
+        this.exitEditMode();
       } else {
         // Display the warning modal 
         const modal = this.modal;
+        const itemState = this.categoryItemsState[catIndex].items[itemIndex];
         const modalObj = {
           name: 'confirm_update',
           isVisible: true,
-          title: 'Are you sure you want to update "' + state.name + '"? This will take effect immediately in your live menu.',
-          triggerItem: {
+          title: 'Are you sure you want to update "' + itemState.name + '"? This will take effect immediately in your live menu.',
+          trigger: {
             item: item,
+            itemStateName: itemState.name,
             itemIndex: itemIndex,
             catIndex: catIndex,
-            itemStateName: state.name 
           },
           buttons: {
             primary: 'Continue Editing',
@@ -248,13 +223,14 @@ export default {
       }
     },
 
-    updateItem(triggerItem) {
-      // If it has, then make the API call
-      // If successful, update the state
-      const itemStateIndex = this.categories[triggerItem.catIndex].items[triggerItem.itemIndex];
-      itemStateIndex.isEditable = false;
-      Object.assign(itemStateIndex, triggerItem.item);
-      this.showSuccessMessage('Your item "' + triggerItem.itemStateName + '" was successfully updated!');
+    updateItem(trigger) {
+      /**
+        Make the updateItem API call
+        If successful, udpdat the state, create a new view clone, and exit edit mode
+      **/
+      this.$store.commit('updateItem', trigger);
+      this.showSuccessMessage('Your item "' + trigger.itemStateName + '" was successfully updated!');
+      this.exitEditMode();
     },
 
     showConfirmDeleteModal(item) {
@@ -293,6 +269,24 @@ export default {
 
     renderModal(modalObj) {
       Object.assign(this.modal, modalObj);
+    },
+
+    exitEditMode() {
+      this.editableItem = {
+        index: null, 
+        id: null, 
+        catIndex: null, 
+        catId: null
+      }
+    },
+
+    makeClickedItemEditable(itemIndex, itemId, catIndex, catId) {
+      this.editableItem = {
+        index: itemIndex, 
+        id: itemId, 
+        catIndex: catIndex, 
+        catId: catId
+      }
     },
 
     getSingleItem(itemId, categories) {
