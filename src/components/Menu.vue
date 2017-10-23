@@ -49,7 +49,7 @@
                       <button v-if="editableItem.id == item.itemId" class="btn btn-primary pull-left align-middle" 
                       v-on:click="showConfirmUpdateModal(item)">Save</button>
                       <button v-if="editableItem.id == item.itemId" class="btn btn-danger pull-left align-middle" id="cancelUpdateBtn"
-                      v-on:click="cancelUpdate(item)">Cancel</button>
+                      v-on:click="cancelUpdate(item, category.items.indexOf(item), categories.indexOf(category))">Cancel</button>
                     </td>
                 </tr>
               </tbody>
@@ -167,25 +167,30 @@ export default {
       }
     },
 
-    cancelUpdate(item) {
-      const itemState = this.getSingleItem(item.itemId, this.categoryItemsState);
-      const state = itemState.item;
-      const catIndex = itemState.catIndex;
-      const itemIndex = itemState.itemIndex;
+    cancelUpdate(item, itemIndex, catIndex) {
       // Compare the view item with the item state
-      const viewItemIsEqualToItemState = this.compareViewWithState(item, state);
-      
+      const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
       if(viewItemIsEqualToItemState) {
         // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
-        this.categories[catIndex].items[itemIndex].isEditable = false;
+        this.editableItem = {
+          index: null, 
+          id: null, 
+          catIndex: null, 
+          catId: null
+        }
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
         const modal = this.modal;
+        const itemState = this.categoryItemsState[catIndex].items[itemIndex];
         const modalObj = {
           name: 'cancel_update',
           isVisible: true,
-          title: 'Are you sure you want to discard your changes to "' + state.name + '"?',
+          title: 'Are you sure you want to discard your changes to "' + itemState.name + '"?',
           triggerItem: item,
+          indexes: {
+            itemIndex: itemIndex,
+            catIndex: catIndex
+          },
           buttons: {
             primary: 'Continue Editing',
             warning: 'Discard'
@@ -195,11 +200,18 @@ export default {
       }
     },
 
-    resetItem(itemId) {
-      // Get the item from the state by referencing the itemId
-      const state = this.getSingleItem(itemId, this.categoryItemsState);
+    resetItem(itemData) {
+      const viewItem = this.categories[itemData.catIndex].items[itemData.itemIndex];
+      const itemState = this.categoryItemsState[itemData.catIndex].items[itemData.itemIndex];
       // Set the view item to its pre-edit state
-      Object.assign(this.categories[state.catIndex].items[state.itemIndex], state.item);
+      Object.assign(viewItem, itemState);
+      // Set editableItem to null (and the item will exit edit mode)
+      this.editableItem = {
+        index: null, 
+        id: null, 
+        catIndex: null, 
+        catId: null
+      }
     },
 
     showConfirmUpdateModal(item) {
