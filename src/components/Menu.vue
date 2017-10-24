@@ -190,12 +190,15 @@ export default {
       // If there is another view item that is already editable...
       } else {
         // Check if the view has departed from the state
-        const viewHasDepartedFromState = this.compareViewWithState(this.categories, this.categoryItemsState);
+        const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
         // If edit mode was activated, but the user didn't modify the item, then we can activate edit mode on the clicked item
-        if(viewHasDepartedFromState) {
+        if(viewItemIsEqualToItemState) {
           this.makeClickedItemEditable(itemIndex, itemId, catIndex, catId);
+        } else {
+          // We need to find a way to make the clicked item editable after discarding the edits of the other item
+          // const editableItem = this.categories[this.editableItem.catIndex].items[this.editableItem.index];
+          // this.showConfirmDiscardModal(editableItem, this.editableItem.index, this.editableItem.catIndex);
         }
-        // If the editable view-item has departed from its state, then the user should be warned about discarding their changes
       }
     },
 
@@ -252,7 +255,7 @@ export default {
         this.exitEditMode();
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal
-        const modal = this.modal;
+        const modal = this.modal; 
         const itemState = this.categoryItemsState[catIndex].items[itemIndex];
         const modalObj = {
           name: 'cancel_update',

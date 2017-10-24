@@ -39,7 +39,7 @@
           <!-- This button simply hides the modal when the primary button is clicked; appears on all modals -->
           <button 
             class="btn btn-primary" 
-            v-on:click="hideModal">
+            v-on:click="modal.isVisible = false;">
             {{modal.buttons.primary}}
           </button>
 
