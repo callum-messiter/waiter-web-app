@@ -2,7 +2,9 @@
   <div id="app">
     <div class="container-fluid">
       <!-- Navbar -->
-      
+
+      <alert></alert>
+      <modal></modal>
       <!-- Main page content -->
       <router-view/>
     </div>
@@ -10,8 +12,17 @@
 </template>
 
 <script>
+
+// Global components
+import Alert from './components/alert';
+import Modal from './components/modal';
+
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    'alert': Alert,
+    'modal': Modal
+  }
 }
 </script>
 

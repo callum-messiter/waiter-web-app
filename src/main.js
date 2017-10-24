@@ -15,6 +15,8 @@ let cloneDeep = require('clone-deep');
 
 Vue.config.productionTip = false
 
+export const bus = new Vue();
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
