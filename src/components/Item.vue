@@ -85,6 +85,7 @@
 
 <script>
 
+import cloneDeep from 'clone-deep';
 import lodash from 'lodash';
 
 import { bus } from '../main';
@@ -109,7 +110,14 @@ export default {
   },
 
   created() {
+
+    bus.$on('userConfirmedDiscardIntention', (trigger) => {
+      console.log('bus: ' + trigger.item);
+      this.resetItem(trigger);
+    });
+
     bus.$on('userConfirmedUpdateIntention', (data) => {
+      console.log('bus: ' + trigger.item);
       // Make the updateItem API call
       // If successful, udpdate the state, create a new view clone, exit edit mode, and show a success msg
       this.$store.commit('updateItem', data);
@@ -124,9 +132,10 @@ export default {
       this.exitEditMode();
     });
 
-    bus.$on('userConfirmedDiscardIntention', (trigger) => {
-      this.resetItem(trigger);
-    });
+  },
+
+  beforeDestroy () {
+    this.$off('userConfirmedDeleteIntention');
   },
 
   computed: {
@@ -199,12 +208,18 @@ export default {
         // Emit the event to the modal component
         const itemState = this.categoryItemsState[catIndex].items[itemIndex];
         const modalData = {
+          name: 'confirm_update',
+          isVisible: true,
           title: 'Are you sure you want to update "' + itemState.name + '"? This will take effect immediately in your live menu.',
           trigger: {
             item: item,
             itemStateName: itemState.name,
             itemIndex: itemIndex,
             catIndex: catIndex,
+          },
+          buttons: {
+            primary: 'Continue Editing',
+            warning: 'Save Changes'
           }
         }
         bus.$emit('showModal', modalData);
@@ -254,6 +269,26 @@ export default {
       Object.assign(viewItem, itemState);
       // Set editableItem to null (and the item will exit edit mode)
       this.exitEditMode();
+    },
+
+    showConfirmDeleteModal(itemId, itemIndex, catIndex) {
+      const itemState = this.categoryItemsState[catIndex].items[itemIndex];
+      // Build the confirm_delete modal
+      const modalData = {
+        name: 'confirm_delete',
+        isVisible: true,
+        title: 'Are you sure you want to delete "' + itemState.name + '"? It will become invisible to your customers.',
+        trigger: {
+          itemId: itemId,
+          itemIndex: itemIndex,
+          catIndex: catIndex
+        },
+        buttons: {
+          primary: 'Cancel',
+          warning: 'Delete Item'
+        }
+      }
+      bus.$emit('showModal', modalData);
     },
 
   }

@@ -59,7 +59,7 @@ export default {
   data: function() {
     return {
       modal: {
-        modalName: null,
+        name: null,
         isVisible: false,
         trigger: {},
         title: null,
@@ -69,7 +69,6 @@ export default {
   },
   created () {
     bus.$on('showModal', (modal) => {
-      console.log(modal);
       Object.assign(this.modal, modal);
     });
   },
