@@ -46,10 +46,29 @@
               )"
           >
         </td>
-        <td class="buttons col-md-2">
+        <td class="buttons col-md-2" v-if="editableItem.id == item.itemId">
           <button 
-            class="btn btn-danger pull-left align-middle"
-            v-if="editableItem.id != item.itemId"
+            class="btn btn-xs btn-primary pull-left align-middle"
+            v-on:click="
+              showConfirmUpdateModal(
+                item, 
+                category.items.indexOf(item),
+                categories.indexOf(category)
+              )"
+            >Save
+          </button>
+          <button 
+            class="btn btn-xs btn-danger pull-left align-middle cancelBtn" 
+            v-on:click="
+              showConfirmDiscardModal(
+                item, 
+                category.items.indexOf(item),
+                categories.indexOf(category)
+              )"
+            >Cancel
+          </button>
+          <button 
+            class="btn btn-xs btn-danger pull-left align-middle"
             v-on:click="
               showConfirmDeleteModal(
                 item.itemId, 
@@ -58,26 +77,6 @@
               )"
             >Delete
           </button>
-          <button 
-            class="btn btn-primary pull-left align-middle"
-            v-if="editableItem.id == item.itemId" 
-            v-on:click="
-              showConfirmUpdateModal(
-                item, 
-                category.items.indexOf(item),
-                categories.indexOf(category)
-              )"
-            >Save</button>
-          <button 
-            class="btn btn-danger pull-left align-middle cancelBtn"
-            v-if="editableItem.id == item.itemId" 
-            v-on:click="
-              showConfirmDiscardModal(
-                item, 
-                category.items.indexOf(item),
-                categories.indexOf(category)
-              )"
-            >Cancel</button>
         </td>
     </tr>
   </tbody>
@@ -99,6 +98,13 @@ export default {
         id: null,
         catId: null,
         index: null,
+        catIndex: null
+      },
+      deletableItem: {
+        id: null, 
+        catId: null, 
+        index: null,
+        catIndex: null
       },
       alert: {
         isVisible: true,
@@ -300,6 +306,7 @@ export default {
 <style scoped>
   td {
     padding: 0 !important;
+    border: none !important;
   }
   /** Inputs should  have no border **/
   input {
@@ -317,10 +324,8 @@ export default {
   }
 
   button {
-    height: 32px;
-    width: 67px;
     margin-left: 3px;
-    margin-top: 1px;
+    margin-top: 5px;
   }
 
   .buttons {
@@ -328,7 +333,8 @@ export default {
   }
 
   .cancelBtn {
-    background-color: #404040
+    background-color: #404040;
+    border-color: #404040;
   }
 
   .cancelBtn:hover {
