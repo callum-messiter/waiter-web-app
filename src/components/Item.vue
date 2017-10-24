@@ -112,20 +112,18 @@ export default {
   created() {
 
     bus.$on('userConfirmedDiscardIntention', (trigger) => {
-      console.log('bus: ' + trigger.item);
       this.resetItem(trigger);
     });
 
-    bus.$on('userConfirmedUpdateIntention', (data) => {
-      console.log('bus: ' + trigger.item);
+    bus.$on('userConfirmedUpdateIntention', (trigger) => {
       // Make the updateItem API call
       // If successful, udpdate the state, create a new view clone, exit edit mode, and show a success msg
-      this.$store.commit('updateItem', data);
+      this.$store.commit('updateItem', trigger);
 
       const alert = {
         isVisible: true,
         type: 'success',
-        message: 'Your item "' + data.itemStateName + '" was successfully updated!'
+        message: 'Your item "' + trigger.itemStateName + '" was successfully updated!'
       }
       bus.$emit('showAlert', alert);
 

@@ -17,12 +17,13 @@
           <table class="table table-bordered">
             <thead class="thead-default">
               <tr>
-                  <th class="text-center">Name</th>
-                  <th class="text-center">Price</th>
-                  <th class="text-center">Description</th>
+                <th class="text-center">Name</th>
+                <th class="text-center">Price</th>
+                <th class="text-center">Description</th>
               </tr>
             </thead>
-            <!-- Each item is a row (<tr>) in the table body (<tbody>) -->
+            <!-- Each item is a row (<tr>) in the table body (<tbody>). We have to pass the categories object in too, because
+                 we need the category index, which we get by using "categories.indexOf(category)" in the item component" -->
             <item :categoriesObj="categories" :categoryItems="category"></item>
           </table>
         </div>  
