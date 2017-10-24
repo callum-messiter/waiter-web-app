@@ -8,25 +8,31 @@
 </template>
 
 <script>
+
+import { bus } from '../main';
+
 export default {
 	name: 'Alert',
-	props: ['showAlert'],
 	data() {
 		return {
-			defaultAlert: {
-		        isVisible: false,
-		        itemModificationSuccess: false,
-		        itemModificationError: false,
-		        summary: null,
-		        message: null,
-	      	}
+			alert: {
+        isVisible: false,
+        type: null,
+        summary: null,
+        message: null,
+    	}
 		}
 	},
-	computed: {
-	    alert () {
-	      return this.showAlert;
-	    }
-  	}
+	created () {
+		bus.$on('showSuccessAlert', (itemStateName) => {
+			this.alert.isVisible = true;
+      this.alert.type = 'success';
+      this.alert.message = 'Your item "' + itemStateName + '" was successfully updated!';
+      setTimeout(() =>{ 
+        this.alert.isVisible = false;
+      }, 2000);
+		});
+	}
 }
 </script>
 

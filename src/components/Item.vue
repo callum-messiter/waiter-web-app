@@ -87,6 +87,8 @@
 
 import lodash from 'lodash';
 
+import { bus } from '../main';
+
 export default {
   name: 'Item',
   props: ['categoriesObj', 'categoryItems'],
@@ -97,25 +99,32 @@ export default {
         catId: null,
         index: null,
       },
-      modal: {
-        name: null,
-        isVisible: false,
-        triggerItem: null,
-        title: null,
-        buttons: {
-          primary: null,
-          warning: null
-        }
+      alert: {
+        isVisible: true,
+        type: null,
+        summary: null,
+        message: null,
       }
     }
   },
+
+  created() {
+    bus.$on('userConfirmedUpdateIntention', (data) => {
+      // Make the updateItem API call
+      // If successful, udpdat the state, create a new view clone, and exit edit mode
+      this.$store.commit('updateItem', data);
+      bus.$emit('showSuccessAlert', data.itemStateName);
+      this.exitEditMode();
+    });
+  },
+
   computed: {
     category () {
       return this.categoryItems;
     },
 
     // In order to get the index of the category, we are passing the entire categories object down as a prop.
-    // Is there a better way?
+    // Is there a better way? 
     categories () {
       return this.categoriesObj;
     },
@@ -177,26 +186,18 @@ export default {
         // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
         this.exitEditMode();
       } else {
-        // Display the warning modal 
-        const modal = this.modal;
+        // Emit the event to the modal component
         const itemState = this.categoryItemsState[catIndex].items[itemIndex];
-        const modalObj = {
-          name: 'confirm_update',
-          isVisible: true,
+        const modalData = {
           title: 'Are you sure you want to update "' + itemState.name + '"? This will take effect immediately in your live menu.',
           trigger: {
             item: item,
             itemStateName: itemState.name,
             itemIndex: itemIndex,
             catIndex: catIndex,
-          },
-          buttons: {
-            primary: 'Continue Editing',
-            warning: 'Save Changes'
           }
         }
-        // Set the modal object, which will trigger the displaying of the modal
-        Object.assign(this.modal, modalObj);
+        bus.$emit('showModal', modalData);
       }
     },
 
@@ -209,13 +210,15 @@ export default {
       }
     },
 
-    updateItem(trigger) {
-      // Make the updateItem API call
-      // If successful, udpdat the state, create a new view clone, and exit edit mode
-      this.$store.commit('updateItem', trigger);
-      this.showSuccessMessage('Your item "' + trigger.itemStateName + '" was successfully updated!');
+    resetItem(trigger) {
+      const viewItem = this.categories[trigger.catIndex].items[trigger.itemIndex];
+      const itemState = this.categoryItemsState[trigger.catIndex].items[trigger.itemIndex];
+      // Set the view item to its pre-edit state
+      Object.assign(viewItem, itemState);
+      // Set editableItem to null (and the item will exit edit mode)
       this.exitEditMode();
     },
+
   }
 }
 </script>

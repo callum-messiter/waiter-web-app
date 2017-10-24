@@ -52,12 +52,13 @@
 
 <script>
 
+import { bus } from '../main';
+
 export default {
   name: 'Modal',
-  props: ['showModal'],
   data: function() {
     return {
-      defaultModal: {
+      modal: {
         modalName: null,
         isVisible: false,
         trigger: {},
@@ -66,28 +67,38 @@ export default {
       }
     }
   },
-  // Create a computed property, which is a clone of the menu prop (see defaultModal for a template), that is bound to the template
-  computed: {
-    modal () {
-      return this.showModal;
-    }
+  created () {
+    bus.$on('showModal', (data) => {
+      this.modal = {
+        name: 'confirm_update', 
+        isVisible: true,
+        title: 'Are you sure you want to update "' + data.itemStateName + '"? This will take effect immediately in your live menu.',
+        title: data.title,
+        trigger: data.trigger,
+        buttons: {
+          primary: 'Continue Editing',
+          warning: 'Save Changes'
+        }
+      }
+    });
   },
+
   methods: {
     // When the user confirms they want to discard their item updates, we inform the menu component, triggering a reset of the view item
     emitDiscardConfirmation(trigger) {
-      this.$emit('emitDiscardConfirmation', trigger);
+      bus.$emit('userConfirmedDiscardIntention', trigger);
       this.modal.isVisible = false;
     },
 
     // When the user confirms they want to delete the item, we inform the menu component, triggering item deletion
     emitDeleteConfirmation(trigger) {
-      this.$emit('userConfirmedDeleteIntention', trigger);
+      bus.$emit('userConfirmedDeleteIntention', trigger);
       this.modal.isVisible = false;
     },
 
     // When the user confirms they want to save the updates made to their item, we inform the menu component, triggering item update
     emitUpdateConfirmation(trigger) {
-      this.$emit('userConfirmedUpdateIntention', trigger);
+      bus.$emit('userConfirmedUpdateIntention', trigger);
       this.modal.isVisible = false;
     },
 
