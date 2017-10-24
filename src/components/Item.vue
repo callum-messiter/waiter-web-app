@@ -111,10 +111,12 @@ export default {
 
   created() {
 
+    // This event is emitted by the modal component, when the user clicks the "Discard Changes" button
     bus.$on('userConfirmedDiscardIntention', (trigger) => {
       this.resetItem(trigger);
     });
 
+    // This event is emitted by the modal component, when the user clicks the "Save Changes" button
     bus.$on('userConfirmedUpdateIntention', (trigger) => {
       // Make the updateItem API call
       // If successful, udpdate the state, create a new view clone, exit edit mode, and show a success msg
@@ -132,17 +134,12 @@ export default {
 
   },
 
-  beforeDestroy () {
-    this.$off('userConfirmedDeleteIntention');
-  },
-
   computed: {
     category () {
       return this.categoryItems;
     },
 
-    // In order to get the index of the category, we are passing the entire categories object down as a prop.
-    // Is there a better way? 
+    // In order to get the index of the category, we are passing the entire categories object down as a prop. Is there a better way? 
     categories () {
       return this.categoriesObj;
     },
@@ -233,6 +230,9 @@ export default {
       }
     },
 
+    /**
+      Discarding updates made in edit mode
+    **/
     showConfirmDiscardModal(item, itemIndex, catIndex) {
       // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then nclick cancel without making any changes)
       const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
@@ -260,6 +260,7 @@ export default {
       }
     },
 
+    // Returns the view item back to its pre-edit state
     resetItem(trigger) {
       const viewItem = this.categories[trigger.catIndex].items[trigger.itemIndex];
       const itemState = this.categoryItemsState[trigger.catIndex].items[trigger.itemIndex];
@@ -267,8 +268,11 @@ export default {
       Object.assign(viewItem, itemState);
       // Set editableItem to null (and the item will exit edit mode)
       this.exitEditMode();
-    },
+    }, 
 
+    /**
+      When the user clicks the delete button, we want to show a modal so they can confirm their deletion
+    **/
     showConfirmDeleteModal(itemId, itemIndex, catIndex) {
       const itemState = this.categoryItemsState[catIndex].items[itemIndex];
       // Build the confirm_delete modal

@@ -13,6 +13,7 @@
 
 <script>
 
+// Global components
 import Alert from './components/alert';
 import Modal from './components/modal';
 

@@ -39,7 +39,7 @@ export default {
     // Clone the item's state so we can compare the view with the state
     this.categories = cloneDeep(this.categoryItemsState);
 
-    // PROBLEM; if we listen for this event in the item component, all the items in a category are deleted.
+    // PROBLEM: if we listen for this event in the item component, all the items in a category are deleted.
     // This is because the item component is rendered four times in the for loop (item in category.items).
     // So the event is caught four times, by each item instance, if you delete any item that isn't the last one of the category.
     // This isn't a huge problem for resetting, updating items, because in this instance 
