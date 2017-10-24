@@ -2,7 +2,7 @@
 	<transition name="fade" v-if="alert.isVisible">
 		<div class="alert" 
 		v-bind:class="{'alert-success': alert.type == 'success', 'alert-danger': alert.type == 'error'}">
-			<strong>{{alert.summary}}</strong> {{alert.message}}
+		{{alert.message}}
 		</div>
 	</transition>
 </template>
@@ -18,20 +18,22 @@ export default {
 			alert: {
         isVisible: false,
         type: null,
-        summary: null,
         message: null,
     	}
 		}
 	},
 	created () {
-		bus.$on('showSuccessAlert', (itemStateName) => {
-			this.alert.isVisible = true;
-      this.alert.type = 'success';
-      this.alert.message = 'Your item "' + itemStateName + '" was successfully updated!';
-      setTimeout(() =>{ 
+		bus.$on('showAlert', (alert) => {
+			this.displayFlashMsg(alert);
+		});
+	},
+	methods: {
+		displayFlashMsg(alert) {
+			Object.assign(this.alert, alert);
+      setTimeout(() => { 
         this.alert.isVisible = false;
       }, 2000);
-		});
+		}
 	}
 }
 </script>

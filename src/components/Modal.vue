@@ -68,18 +68,9 @@ export default {
     }
   },
   created () {
-    bus.$on('showModal', (data) => {
-      this.modal = {
-        name: 'confirm_update', 
-        isVisible: true,
-        title: 'Are you sure you want to update "' + data.itemStateName + '"? This will take effect immediately in your live menu.',
-        title: data.title,
-        trigger: data.trigger,
-        buttons: {
-          primary: 'Continue Editing',
-          warning: 'Save Changes'
-        }
-      }
+    bus.$on('showModal', (modal) => {
+      console.log(modal);
+      Object.assign(this.modal, modal);
     });
   },
 

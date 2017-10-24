@@ -111,10 +111,21 @@ export default {
   created() {
     bus.$on('userConfirmedUpdateIntention', (data) => {
       // Make the updateItem API call
-      // If successful, udpdat the state, create a new view clone, and exit edit mode
+      // If successful, udpdate the state, create a new view clone, exit edit mode, and show a success msg
       this.$store.commit('updateItem', data);
-      bus.$emit('showSuccessAlert', data.itemStateName);
+
+      const alert = {
+        isVisible: true,
+        type: 'success',
+        message: 'Your item "' + data.itemStateName + '" was successfully updated!'
+      }
+      bus.$emit('showAlert', alert);
+
       this.exitEditMode();
+    });
+
+    bus.$on('userConfirmedDiscardIntention', (trigger) => {
+      this.resetItem(trigger);
     });
   },
 
@@ -178,7 +189,6 @@ export default {
       Updating an item
     **/
     showConfirmUpdateModal(item, itemIndex, catIndex) {
-      console.log(catIndex);
       // Compare the view item with the item state
       const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
       
@@ -207,6 +217,33 @@ export default {
         id: null, 
         catId: null,
         catIndex: null
+      }
+    },
+
+    showConfirmDiscardModal(item, itemIndex, catIndex) {
+      // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then nclick cancel without making any changes)
+      const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
+      if(viewItemIsEqualToItemState) {
+        // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
+        this.exitEditMode();
+      } else {
+        // If the item has actually been edited by the user, then we want to display the cancel-warning modal 
+        const itemState = this.categoryItemsState[catIndex].items[itemIndex];
+        const modalData = {
+          name: 'cancel_update',
+          isVisible: true,
+          title: 'Are you sure you want to discard your changes to "' + itemState.name + '"?',
+          trigger: {
+            item: item,
+            itemIndex: itemIndex,
+            catIndex: catIndex,
+          },
+          buttons: {
+            primary: 'Continue Editing',
+            warning: 'Discard'
+          }
+        }
+        bus.$emit('showModal', modalData);
       }
     },
 
