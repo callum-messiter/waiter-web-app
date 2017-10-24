@@ -11,7 +11,7 @@
               makeItemEditable(
                 item.itemId, 
                 category.items.indexOf(item), 
-                category.categoryId, 
+                category.categoryId,
                 categories.indexOf(category)
               )"
           > 
@@ -26,7 +26,7 @@
               makeItemEditable(
                 item.itemId, 
                 category.items.indexOf(item), 
-                category.categoryId, 
+                category.categoryId,
                 categories.indexOf(category)
               )"
           >
@@ -41,7 +41,7 @@
               makeItemEditable(
                 item.itemId, 
                 category.items.indexOf(item), 
-                category.categoryId, 
+                category.categoryId,
                 categories.indexOf(category)
               )"
           >
@@ -53,7 +53,7 @@
             v-on:click="
               showConfirmDeleteModal(
                 item.itemId, 
-                category.items.indexOf(item), 
+                category.items.indexOf(item),
                 categories.indexOf(category)
               )"
             >Delete
@@ -64,7 +64,7 @@
             v-on:click="
               showConfirmUpdateModal(
                 item, 
-                category.items.indexOf(item), 
+                category.items.indexOf(item),
                 categories.indexOf(category)
               )"
             >Save</button>
@@ -74,7 +74,7 @@
             v-on:click="
               showConfirmDiscardModal(
                 item, 
-                category.items.indexOf(item), 
+                category.items.indexOf(item),
                 categories.indexOf(category)
               )"
             >Cancel</button>
@@ -85,23 +85,137 @@
 
 <script>
 
+import lodash from 'lodash';
+
 export default {
   name: 'Item',
-  props: ['renderCategoryItems'],
+  props: ['categoriesObj', 'categoryItems'],
   data() {
     return {
       editableItem: {
         id: null,
         catId: null,
         index: null,
-        catIndex: null
+      },
+      modal: {
+        name: null,
+        isVisible: false,
+        triggerItem: null,
+        title: null,
+        buttons: {
+          primary: null,
+          warning: null
+        }
       }
     }
   },
   computed: {
     category () {
-      return this.renderCategoryItems;
+      return this.categoryItems;
+    },
+
+    // In order to get the index of the category, we are passing the entire categories object down as a prop.
+    // Is there a better way?
+    categories () {
+      return this.categoriesObj;
+    },
+
+    categoryItemsState () {
+      return this.$store.getters.getCategoriesAndItems;
     }
+  },
+
+  methods: {
+    /** 
+      When a user clicks on a row (item), we want to make each input in this row writable. 
+      There must only ever be *one* item in edit mode
+    **/
+    makeItemEditable(itemId, itemIndex, catId, catIndex) {
+      // Only one item at a time can be editable: If there currently are no editable items, then make the clicked view-item editable
+      if(this.editableItem.index == null && this.editableItem.catIndex == null) {
+        this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
+      // If there is another view item that is already editable...
+      } else {
+        // Check if the view has departed from the state
+        const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
+        // If edit mode was activated, but the user didn't modify the item, then we can activate edit mode on the clicked item
+        if(viewItemIsEqualToItemState) {
+          this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
+        } else {
+          // We need to find a way to make the clicked item editable after discarding the edits of the other item
+          // const editableItem = this.categories[this.editableItem.catIndex].items[this.editableItem.index];
+          // this.showConfirmDiscardModal(editableItem, this.editableItem.index, this.editableItem.catIndex);
+        }
+      }
+    },
+
+    compareViewWithState(viewItems, itemsState) {
+      return _.isEqual(
+          _.omit(viewItems), 
+          _.omit(itemsState)
+      );
+    },
+
+    makeClickedItemEditable(itemIndex, itemId, catIndex, catId) {
+      this.editableItem = {
+        index: itemIndex, 
+        id: itemId, 
+        catId: catId,
+        catIndex: catIndex
+      }
+    },
+
+    /**
+      Updating an item
+    **/
+    showConfirmUpdateModal(item, itemIndex, catIndex) {
+      console.log(catIndex);
+      // Compare the view item with the item state
+      const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
+      
+      if(viewItemIsEqualToItemState) {
+        // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
+        this.exitEditMode();
+      } else {
+        // Display the warning modal 
+        const modal = this.modal;
+        const itemState = this.categoryItemsState[catIndex].items[itemIndex];
+        const modalObj = {
+          name: 'confirm_update',
+          isVisible: true,
+          title: 'Are you sure you want to update "' + itemState.name + '"? This will take effect immediately in your live menu.',
+          trigger: {
+            item: item,
+            itemStateName: itemState.name,
+            itemIndex: itemIndex,
+            catIndex: catIndex,
+          },
+          buttons: {
+            primary: 'Continue Editing',
+            warning: 'Save Changes'
+          }
+        }
+        // Set the modal object, which will trigger the displaying of the modal
+        Object.assign(this.modal, modalObj);
+      }
+    },
+
+    exitEditMode() {
+      this.editableItem = {
+        index: null, 
+        id: null, 
+        catId: null,
+        catIndex: null
+      }
+    },
+
+    updateItem(trigger) {
+      // Make the updateItem API call
+      // If successful, udpdat the state, create a new view clone, and exit edit mode
+      this.$store.commit('updateItem', trigger);
+      this.showSuccessMessage('Your item "' + trigger.itemStateName + '" was successfully updated!');
+      this.exitEditMode();
+    },
   }
 }
 </script>
@@ -131,7 +245,7 @@ export default {
     margin-left: 3px;
     margin-top: 1px;
   }
-  
+
   .buttons {
     border: none !important;
   }

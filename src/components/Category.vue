@@ -23,7 +23,7 @@
               </tr>
             </thead>
             <!-- Each item is a row (<tr>) in the table body (<tbody>) -->
-            <item :renderCategoryItems="category"></item>
+            <item :categoriesObj="categories" :categoryItems="category"></item>
           </table>
         </div>  
       </div>
@@ -36,7 +36,7 @@ import Item from './Item';
 
 export default {
   name: 'Category',
-  props: ['renderCategories'],
+  props: ['categoriesObj'],
   components: {
     'item': Item
   },
@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     categories () {
-      return this.renderCategories;
+      return this.categoriesObj;
     }
   }
 }

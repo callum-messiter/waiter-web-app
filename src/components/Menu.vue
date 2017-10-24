@@ -1,11 +1,13 @@
 <template>
   <div class="menu-wrapper col-md-10 col-md-offset-1">
+    <!-- Menu name/title, other information -->
 
     <!-- Notification alerts for item/category updates/deletions --> 
     <alert :showAlert="alert"></alert>
     
+    <!-- The menu content -->
     <div class="categories-accordion">
-      <category :renderCategories="categories"></category>
+      <category :categoriesObj="categories"></category>
     </div>
 
     <!-- Confirmation modals triggered when the user initialises an "update" or "deletion" -->
