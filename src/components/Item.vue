@@ -124,17 +124,6 @@ export default {
 
     // This event is emitted by the modal component, when the user clicks the "Save Changes" button
     bus.$on('userConfirmedUpdateIntention', (trigger) => {
-      // Make the updateItem API call
-      // If successful, udpdate the state, create a new view clone, exit edit mode, and show a success msg
-      this.$store.commit('updateItem', trigger);
-
-      const alert = {
-        isVisible: true,
-        type: 'success',
-        message: 'Your item "' + trigger.itemStateName + '" was successfully updated!'
-      }
-      bus.$emit('showAlert', alert);
-
       this.exitEditMode();
     });
 

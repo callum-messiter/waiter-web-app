@@ -64,6 +64,12 @@ export default {
         trigger: {},
         title: null,
         buttons: {}
+      },
+      alert: {
+        isVisible: true,
+        type: null,
+        summary: null,
+        message: null,
       }
     }
   },
@@ -82,13 +88,31 @@ export default {
 
     // When the user confirms they want to delete the item, we inform the menu component, triggering item deletion
     emitDeleteConfirmation(trigger) {
-      bus.$emit('userConfirmedDeleteIntention', trigger);
+      this.$store.commit('deleteItem', trigger);
+
+      const alert = {
+        isVisible: true,
+        type: 'success',
+        message: 'Your item was successfully deleted!'
+      }
+      bus.$emit('showAlert', alert);
+
       this.modal.isVisible = false;
     },
 
     // When the user confirms they want to save the updates made to their item, we inform the menu component, triggering item update
     emitUpdateConfirmation(trigger) {
+      this.$store.commit('updateItem', trigger);
+
+      const alert = {
+        isVisible: true,
+        type: 'success',
+        message: 'Your item "' + trigger.itemStateName + '" was successfully updated!'
+      }
+      bus.$emit('showAlert', alert);
+
       bus.$emit('userConfirmedUpdateIntention', trigger);
+
       this.modal.isVisible = false;
     },
 

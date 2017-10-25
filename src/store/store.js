@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import cloneDeep from 'clone-deep';
+
 Vue.use(Vuex);
 
 export default new Vuex.Store({
@@ -118,6 +120,9 @@ export default new Vuex.Store({
 	getters: {
 		getCategoriesAndItems(state) {
 			return state.categories;
+		},
+		getCategoriesAndItemsView(state) {
+			return cloneDeep(state.categories);
 		}
 	}
 });
