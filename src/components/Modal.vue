@@ -64,6 +64,12 @@ export default {
         trigger: {},
         title: null,
         buttons: {}
+      },
+      alert: {
+        isVisible: true,
+        type: null,
+        summary: null,
+        message: null,
       }
     }
   },
@@ -76,19 +82,47 @@ export default {
   methods: {
     // When the user confirms they want to discard their item updates, we inform the menu component, triggering a reset of the view item
     emitDiscardConfirmation(trigger) {
+      // PROBLEM: We could do this by directly calling a setter in the store, which would reset the clone of the state
       bus.$emit('userConfirmedDiscardIntention', trigger);
+      
+      // Hide the modal
       this.modal.isVisible = false;
     },
 
     // When the user confirms they want to delete the item, we inform the menu component, triggering item deletion
     emitDeleteConfirmation(trigger) {
-      bus.$emit('userConfirmedDeleteIntention', trigger);
+      // Update the item state
+      this.$store.commit('deleteItem', trigger);
+
+      // Display the alert if successfu
+      const alert = {
+        isVisible: true,
+        type: 'success',
+        message: 'Your item was successfully deleted!'
+      }
+      bus.$emit('showAlert', alert);
+
+      // Hide the modal
       this.modal.isVisible = false;
     },
 
     // When the user confirms they want to save the updates made to their item, we inform the menu component, triggering item update
     emitUpdateConfirmation(trigger) {
+      // Update the item state
+      this.$store.commit('updateItem', trigger);
+
+      // Display the alert if successful
+      const alert = {
+        isVisible: true,
+        type: 'success',
+        message: 'Your item "' + trigger.itemStateName + '" was successfully updated!'
+      }
+      bus.$emit('showAlert', alert);
+
+      // Notify the item component so edit mode is exited
       bus.$emit('userConfirmedUpdateIntention', trigger);
+
+      // Hide the modal
       this.modal.isVisible = false;
     },
 

@@ -79,14 +79,55 @@
           </button>
         </td>
     </tr>
+
+    <!-- The template item, for adding a new item -->
+    <tr class="newItem-row">
+        <td class="item-name text-left col-md-2">
+          <input 
+            type="text" 
+            class="form-control newItem"
+            placeholder="E.g. Fish 'N' Chips"
+            v-model="newItem.name"
+          > 
+        </td>
+        <td class="item-price text-left col-md-2">
+          <input 
+            type="text" 
+            class="form-control newItem"
+            placeholder="E.g. 10.00"
+            v-model="newItem.price"
+          > 
+        </td>
+        <td class="item-description text-left col-md-2">
+          <input 
+            type="text" 
+            class="form-control newItem"
+            placeholder="E.g. The tastiest dish in town!"
+            v-model="newItem.description"
+          > 
+        </td>
+        <td v-if="newItem.name != null || newItem.price != null || newItem.description != null" class="col-md-2">
+          <button 
+            class="btn btn-xs btn-primary pull-left align-middle"
+            >Save
+          </button>
+          <button 
+            class="btn btn-xs btn-danger pull-left align-middle cancelBtn"
+            >Cancel
+          </button>
+        </td>
+    </tr>
+
   </tbody>
 </template>
 
 <script>
 
+// Dependencies
 import cloneDeep from 'clone-deep';
 import lodash from 'lodash';
 
+// Events bus
 import { bus } from '../main';
 
 export default {
@@ -100,17 +141,10 @@ export default {
         index: null,
         catIndex: null
       },
-      deletableItem: {
-        id: null, 
-        catId: null, 
-        index: null,
-        catIndex: null
-      },
-      alert: {
-        isVisible: true,
-        type: null,
-        summary: null,
-        message: null,
+      newItem: {
+        name: null,
+        price: null,
+        description: null
       }
     }
   },
@@ -124,17 +158,6 @@ export default {
 
     // This event is emitted by the modal component, when the user clicks the "Save Changes" button
     bus.$on('userConfirmedUpdateIntention', (trigger) => {
-      // Make the updateItem API call
-      // If successful, udpdate the state, create a new view clone, exit edit mode, and show a success msg
-      this.$store.commit('updateItem', trigger);
-
-      const alert = {
-        isVisible: true,
-        type: 'success',
-        message: 'Your item "' + trigger.itemStateName + '" was successfully updated!'
-      }
-      bus.$emit('showAlert', alert);
-
       this.exitEditMode();
     });
 
@@ -145,7 +168,7 @@ export default {
       return this.categoryItems;
     },
 
-    // In order to get the index of the category, we are passing the entire categories object down as a prop. Is there a better way? 
+    // PROBLEM: In order to get the index of the category, we are passing the entire categories object down as a prop. Is there a better way? 
     categories () {
       return this.categoriesObj;
     },
@@ -156,6 +179,19 @@ export default {
   },
 
   methods: {
+    addItem(catIndex) {
+      const item = {
+        itemId: 90,
+        name: 'crips',
+        price: 6.70,
+        description: 'Lovely golden chips!'
+      }
+      const data = {
+        item: item,
+        catIndex: catIndex
+      }
+      this.$store.commit('addItem', data);
+    },
     /** 
       When a user clicks on a row (item), we want to make each input in this row writable. 
       There must only ever be *one* item in edit mode
@@ -343,5 +379,13 @@ export default {
 
   .cancelBtn:active {
     background-color: #000000
+  }
+
+  .newItem {
+    background-color: #f7f9fc;
+  }
+
+  .newItem-row {
+    margin-top: 10px !important;
   }
 </style>

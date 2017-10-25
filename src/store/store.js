@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import cloneDeep from 'clone-deep';
+
 Vue.use(Vuex);
 
 export default new Vuex.Store({
@@ -106,6 +108,9 @@ export default new Vuex.Store({
 		
 	},
 	mutations: {
+		addItem(state, data) {
+			state.categories[data.catIndex].items.push(data.item);
+		},
 		updateItem(state, trigger) {
 			const itemState = state.categories[trigger.catIndex].items[trigger.itemIndex];
 			Object.assign(itemState, trigger.item);
@@ -118,6 +123,9 @@ export default new Vuex.Store({
 	getters: {
 		getCategoriesAndItems(state) {
 			return state.categories;
+		},
+		getCategoriesAndItemsView(state) {
+			return cloneDeep(state.categories);
 		}
 	}
 });

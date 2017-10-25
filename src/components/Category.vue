@@ -22,8 +22,7 @@
                 <th class="text-center">Description</th>
               </tr>
             </thead>
-            <!-- Each item is a row (<tr>) in the table body (<tbody>). We have to pass the categories object in too, because
-                 we need the category index, which we get by using "categories.indexOf(category)" in the item component" -->
+            <!-- Each item is a row (<tr>) in the table body (<tbody>). We have to pass the categories object in too, because we need the category index, which we get by using "categories.indexOf(category)" in the item component" -->
             <item :categoriesObj="categories" :categoryItems="category"></item>
           </table>
         </div>  
@@ -33,11 +32,12 @@
 </template>
 
 <script>
+
+// Components 
 import Item from './Item';
 
 export default {
   name: 'Category',
-  props: ['categoriesObj'],
   components: {
     'item': Item
   },
@@ -47,7 +47,7 @@ export default {
   },
   computed: {
     categories () {
-      return this.categoriesObj;
+      return this.$store.getters.getCategoriesAndItemsView;
     }
   }
 }
