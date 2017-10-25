@@ -79,6 +79,45 @@
           </button>
         </td>
     </tr>
+
+    <!-- The template item, for adding a new item -->
+    <tr class="newItem-row">
+        <td class="item-name text-left col-md-2">
+          <input 
+            type="text" 
+            class="form-control newItem"
+            placeholder="E.g. Fish 'N' Chips"
+            v-model="newItem.name"
+          > 
+        </td>
+        <td class="item-price text-left col-md-2">
+          <input 
+            type="text" 
+            class="form-control newItem"
+            placeholder="E.g. 10.00"
+            v-model="newItem.price"
+          > 
+        </td>
+        <td class="item-description text-left col-md-2">
+          <input 
+            type="text" 
+            class="form-control newItem"
+            placeholder="E.g. The tastiest dish in town!"
+            v-model="newItem.description"
+          > 
+        </td>
+        <td v-if="newItem.name != null || newItem.price != null || newItem.description != null" class="col-md-2">
+          <button 
+            class="btn btn-xs btn-primary pull-left align-middle"
+            >Save
+          </button>
+          <button 
+            class="btn btn-xs btn-danger pull-left align-middle cancelBtn"
+            >Cancel
+          </button>
+        </td>
+    </tr>
+
   </tbody>
 </template>
 
@@ -101,6 +140,11 @@ export default {
         catId: null,
         index: null,
         catIndex: null
+      },
+      newItem: {
+        name: null,
+        price: null,
+        description: null
       }
     }
   },
@@ -135,6 +179,19 @@ export default {
   },
 
   methods: {
+    addItem(catIndex) {
+      const item = {
+        itemId: 90,
+        name: 'crips',
+        price: 6.70,
+        description: 'Lovely golden chips!'
+      }
+      const data = {
+        item: item,
+        catIndex: catIndex
+      }
+      this.$store.commit('addItem', data);
+    },
     /** 
       When a user clicks on a row (item), we want to make each input in this row writable. 
       There must only ever be *one* item in edit mode
@@ -322,5 +379,13 @@ export default {
 
   .cancelBtn:active {
     background-color: #000000
+  }
+
+  .newItem {
+    background-color: #f7f9fc;
+  }
+
+  .newItem-row {
+    margin-top: 10px !important;
   }
 </style>

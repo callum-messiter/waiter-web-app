@@ -108,6 +108,9 @@ export default new Vuex.Store({
 		
 	},
 	mutations: {
+		addItem(state, data) {
+			state.categories[data.catIndex].items.push(data.item);
+		},
 		updateItem(state, trigger) {
 			const itemState = state.categories[trigger.catIndex].items[trigger.itemIndex];
 			Object.assign(itemState, trigger.item);
