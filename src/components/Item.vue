@@ -84,9 +84,11 @@
 
 <script>
 
+// Dependencies
 import cloneDeep from 'clone-deep';
 import lodash from 'lodash';
 
+// Events bus
 import { bus } from '../main';
 
 export default {
@@ -99,18 +101,6 @@ export default {
         catId: null,
         index: null,
         catIndex: null
-      },
-      deletableItem: {
-        id: null, 
-        catId: null, 
-        index: null,
-        catIndex: null
-      },
-      alert: {
-        isVisible: true,
-        type: null,
-        summary: null,
-        message: null,
       }
     }
   },
@@ -134,7 +124,7 @@ export default {
       return this.categoryItems;
     },
 
-    // In order to get the index of the category, we are passing the entire categories object down as a prop. Is there a better way? 
+    // PROBLEM: In order to get the index of the category, we are passing the entire categories object down as a prop. Is there a better way? 
     categories () {
       return this.categoriesObj;
     },
