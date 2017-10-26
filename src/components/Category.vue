@@ -67,21 +67,26 @@ export default {
 
   methods: {
     deleteCategory(catIndex, catName, numItems) {
-       // Show warning modal
-       const modalData = {
-        name: 'confirm_delete_category',
-        isVisible: true,
-        title: 'Are you sure you want to delete your category "' + catName + '"? ' +
-               'The category, and its ' + numItems  + ' items, will become invisible to your customers.',
-        trigger: {
-          catIndex: catIndex
-        },
-        buttons: {
-          primary: 'Cancel',
-          warning: 'Delete Category'
+      // If the category has no items, just delete it without showing a warning
+      if(numItems < 1) {
+        this.$store.commit('deleteCategory', catIndex);
+      // If the category does have items, then show a warning
+      } else {
+        const modalData = {
+          name: 'confirm_delete_category',
+          isVisible: true,
+          title: 'Are you sure you want to delete your category "' + catName + '"? ' +
+                 'The category, and its ' + numItems  + ' items, will become invisible to your customers.',
+          trigger: {
+            catIndex: catIndex
+          },
+          buttons: {
+            primary: 'Cancel',
+            warning: 'Delete Category'
+          }
         }
+        bus.$emit('showModal', modalData);
       }
-      bus.$emit('showModal', modalData);
     }
   }
 }
