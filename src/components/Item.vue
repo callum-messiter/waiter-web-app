@@ -81,13 +81,15 @@
     </tr>
 
     <!-- The template item, for adding a new item -->
-    <tr class="newItem-row">
+    <tr class="newItem-row" v-bind:class="{'newItemDefault': !newItem.isBeingEdited}">
         <td class="item-name text-left col-md-2">
           <input 
             type="text" 
             class="form-control newItem"
             placeholder="E.g. Fish 'N' Chips"
-            v-model="newItem.name"
+            v-model="newItem.data.name"
+            v-bind:readonly="!newItem.isBeingEdited"
+            v-on:click="activateNewItemEditMode"
           > 
         </td>
         <td class="item-price text-left col-md-2">
@@ -95,7 +97,9 @@
             type="text" 
             class="form-control newItem"
             placeholder="E.g. 10.00"
-            v-model="newItem.price"
+            v-model="newItem.data.price"
+            v-bind:readonly="!newItem.isBeingEdited"
+            v-on:click="activateNewItemEditMode"
           > 
         </td>
         <td class="item-description text-left col-md-2">
@@ -103,17 +107,15 @@
             type="text" 
             class="form-control newItem"
             placeholder="E.g. The tastiest dish in town!"
-            v-model="newItem.description"
+            v-model="newItem.data.description"
+            v-bind:readonly="!newItem.isBeingEdited"
+            v-on:click="activateNewItemEditMode"
           > 
         </td>
-        <td v-if="newItem.name != null || newItem.price != null || newItem.description != null" class="col-md-2">
+        <td v-if="newItem.isBeingEdited" class="col-md-2">
           <button 
             class="btn btn-xs btn-primary pull-left align-middle"
-            >Save
-          </button>
-          <button 
-            class="btn btn-xs btn-danger pull-left align-middle cancelBtn"
-            >Cancel
+            >Save New Item
           </button>
         </td>
     </tr>
@@ -142,9 +144,13 @@ export default {
         catIndex: null
       },
       newItem: {
-        name: null,
-        price: null,
-        description: null
+        isBeingEdited: false,
+        data: {
+          itemId: null,
+          name: null,
+          price: null,
+          description: null
+        }
       }
     }
   },
@@ -179,6 +185,10 @@ export default {
   },
 
   methods: {
+    activateNewItemEditMode() {
+      this.newItem.isBeingEdited = true;
+    },
+
     addItem(catIndex) {
       const item = {
         itemId: 90,
@@ -197,6 +207,12 @@ export default {
       There must only ever be *one* item in edit mode
     **/
     makeItemEditable(itemId, itemIndex, catId, catIndex) {
+      // In any case, set the newItem to its default view state
+      if(this.newItem.isBeingEdited) {
+        this.newItem.data = {itemId: null, name: null, price: null, description: null}
+        this.newItem.isBeingEdited = false;
+      }
+
       // Only one item at a time can be editable: If there currently are no editable items, then make the clicked view-item editable
       if(this.editableItem.index == null && this.editableItem.catIndex == null) {
         this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
@@ -381,11 +397,7 @@ export default {
     background-color: #000000
   }
 
-  .newItem {
-    background-color: #f7f9fc;
-  }
-
-  .newItem-row {
-    margin-top: 10px !important;
+  .newItemDefault {
+    opacity: 0.4;
   }
 </style>
