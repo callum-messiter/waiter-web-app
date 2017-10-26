@@ -6,7 +6,7 @@
             type="text" 
             class="form-control" 
             v-model="item.name" 
-            v-bind:readonly="editableItem.id != item.itemId" 
+            v-bind:readonly="editMode.item.id != item.itemId" 
             v-on:dblclick="
               makeItemEditable(
                 item.itemId, 
@@ -21,7 +21,7 @@
             type="text" 
             class="form-control" 
             v-model="item.price" 
-            v-bind:readonly="editableItem.id != item.itemId" 
+            v-bind:readonly="editMode.item.id != item.itemId" 
             v-on:dblclick="
               makeItemEditable(
                 item.itemId, 
@@ -36,7 +36,7 @@
             type="text" 
             class="form-control" 
             v-model="item.description" 
-            v-bind:readonly="editableItem.id != item.itemId" 
+            v-bind:readonly="editMode.item.id != item.itemId" 
             v-on:dblclick="
               makeItemEditable(
                 item.itemId, 
@@ -46,7 +46,7 @@
               )"
           >
         </td>
-        <td class="buttons col-md-2" v-if="editableItem.id == item.itemId">
+        <td class="buttons col-md-2" v-if="editMode.item.id == item.itemId">
           <button 
             class="btn btn-xs btn-primary pull-left align-middle"
             v-on:click="
@@ -143,11 +143,14 @@ export default {
   props: ['categoriesObj', 'categoryItems'],
   data() {
     return {
-      editableItem: {
-        id: null,
-        catId: null,
-        index: null,
-        catIndex: null
+      editMode: {
+        active: false,
+        item: {
+          id: null,
+          catId: null,
+          index: null,
+          catIndex: null
+        }
       },
       newItem: {
         isBeingEdited: false,
@@ -200,7 +203,7 @@ export default {
     **/
     activateNewItemEditMode() {
       // Only activate edit mode on the new item, if none of the existing items are in edit mode
-      if(this.editableItem.id == null) {
+      if(!this.editMode.active) {
         this.newItem.isBeingEdited = true;
       }
     },
@@ -242,14 +245,14 @@ export default {
       There must only ever be *one* item in edit mode
     **/
     makeItemEditable(itemId, itemIndex, catId, catIndex) {
-      // In any case, set the newItem to its default view state
+      // In any case, set the newItem to its default view state when a user double-clicks an existing item
       if(this.newItem.isBeingEdited) {
         this.newItem.data = {itemId: null, name: null, price: null, description: null}
         this.newItem.isBeingEdited = false;
       }
 
       // Only one item at a time can be editable: If there currently are no editable items, then make the clicked view-item editable
-      if(this.editableItem.index == null && this.editableItem.catIndex == null) {
+      if(!this.editMode.active) {
         this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
       // If there is another view item that is already editable...
       } else {
@@ -260,25 +263,9 @@ export default {
           this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
         } else {
           // We need to find a way to make the clicked item editable after discarding the edits of the other item
-          // const editableItem = this.categories[this.editableItem.catIndex].items[this.editableItem.index];
-          // this.showConfirmDiscardModal(editableItem, this.editableItem.index, this.editableItem.catIndex);
+          // const editMode.item = this.categories[this.editMode.item.catIndex].items[this.editMode.item.index];
+          // this.showConfirmDiscardModal(editMode.item, this.editMode.item.index, this.editMode.item.catIndex);
         }
-      }
-    },
-
-    compareViewWithState(viewItems, itemsState) {
-      return _.isEqual(
-          _.omit(viewItems), 
-          _.omit(itemsState)
-      );
-    },
-
-    makeClickedItemEditable(itemIndex, itemId, catIndex, catId) {
-      this.editableItem = {
-        index: itemIndex, 
-        id: itemId, 
-        catId: catId,
-        catIndex: catIndex
       }
     },
 
@@ -315,11 +302,14 @@ export default {
     },
 
     exitEditMode() {
-      this.editableItem = {
-        index: null, 
-        id: null, 
-        catId: null,
-        catIndex: null
+      this.editMode = {
+        active: false,
+        item: {
+          index: null, 
+          id: null, 
+          catId: null,
+          catIndex: null
+        }
       }
     },
 
@@ -359,7 +349,7 @@ export default {
       const itemState = this.categoryItemsState[trigger.catIndex].items[trigger.itemIndex];
       // Set the view item to its pre-edit state
       Object.assign(viewItem, itemState);
-      // Set editableItem to null (and the item will exit edit mode)
+      // Set editMode.item to null (and the item will exit edit mode)
       this.exitEditMode();
     }, 
 
@@ -385,6 +375,25 @@ export default {
       }
       bus.$emit('showModal', modalData);
     },
+
+    compareViewWithState(viewItems, itemsState) {
+      return _.isEqual(
+          _.omit(viewItems), 
+          _.omit(itemsState)
+      );
+    },
+
+    makeClickedItemEditable(itemIndex, itemId, catIndex, catId) {
+      this.editMode = {
+        active: true,
+        item: {
+          index: itemIndex, 
+          id: itemId, 
+          catId: catId,
+          catIndex: catIndex
+        }
+      }
+    }
 
   }
 }
