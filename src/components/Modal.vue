@@ -31,8 +31,16 @@
           <!-- Triggers Confirm Delete Modal -->
           <button 
             class="btn btn-danger"
-            v-if="modal.name == 'confirm_delete'" 
+            v-if="modal.name == 'confirm_delete_item'" 
             v-on:click="emitDeleteConfirmation(modal.trigger)">
+            {{modal.buttons.warning}}
+          </button>
+
+          <!-- Triggers Confirm Delete Modal -->
+          <button 
+            class="btn btn-danger"
+            v-if="modal.name == 'confirm_delete_category'" 
+            v-on:click="emitDeleteCategoryConfirmation(modal.trigger.catIndex)">
             {{modal.buttons.warning}}
           </button>
 
@@ -127,6 +135,22 @@ export default {
       this.modal.isVisible = false;
     },
 
+    emitDeleteCategoryConfirmation(catIndex) {
+      // Delete the category state
+      this.$store.commit('deleteCategory', catIndex);
+
+      // Display the alert if successfu
+      const alert = {
+        isVisible: true,
+        type: 'success',
+        message: 'Your category was successfully deleted!'
+      }
+      bus.$emit('showAlert', alert);
+
+      // Hide the modal
+      this.modal.isVisible = false;
+    }
+
   }
 }
 </script>
@@ -134,6 +158,6 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .modal-dialog {
-    padding-top: 5%;
+    padding-top: 10%;
   }
 </style>

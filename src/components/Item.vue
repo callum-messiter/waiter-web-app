@@ -360,7 +360,7 @@ export default {
       const itemState = this.categoryItemsState[catIndex].items[itemIndex];
       // Build the confirm_delete modal
       const modalData = {
-        name: 'confirm_delete',
+        name: 'confirm_delete_item',
         isVisible: true,
         title: 'Are you sure you want to delete "' + itemState.name + '"? It will become invisible to your customers.',
         trigger: {

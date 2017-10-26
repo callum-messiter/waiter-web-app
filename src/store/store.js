@@ -108,6 +108,9 @@ export default new Vuex.Store({
 		
 	},
 	mutations: {
+		/**
+			Items
+		**/
 		addItem(state, data) {
 			state.categories[data.catIndex].items.unshift(data.item);
 			console.log(state.categories[data.catIndex]);
@@ -119,9 +122,16 @@ export default new Vuex.Store({
 		deleteItem(state, trigger) {
 			state.categories[trigger.catIndex].items.splice(trigger.itemIndex, 1);
 		},
+
+		/**
+			Categories
+		**/
 		addCategory(state, category) {
 			console.log(category);
 			state.categories.unshift(category);
+		},
+		deleteCategory(state, catIndex) {
+			state.categories.splice(catIndex, 1);
 		}
 	},
 	actions: {},

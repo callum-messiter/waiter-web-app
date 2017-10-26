@@ -3,8 +3,18 @@
     <div v-for="category in categories" class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#accordion" v-bind:href="'#' + category.categoryId">
-          {{category.name}}</a>
+          <a 
+            data-toggle="collapse" 
+            data-parent="#accordion" 
+            v-bind:href="'#' + category.categoryId">
+            {{category.name}}
+          </a>
+          <a href="#" v-on:click="deleteCategory(categories.indexOf(category), category.name, category.items.length)">
+            <span class="glyphicon glyphicon-trash pull-right align-middle"></span>
+          </a>
+          <a href="#" v-on:click="editCategoryName(categories.indexOf(category))">
+            <span class="glyphicon glyphicon-pencil pull-right align-middle"></span>
+          </a>
         </h4>
       </div>
       <div 
@@ -36,18 +46,42 @@
 // Components 
 import Item from './Item';
 
+import { bus } from '../main';
+
 export default {
   name: 'Category',
   components: {
     'item': Item
   },
+
   data() {
     return {
     }
   },
+
   computed: {
     categories () {
       return this.$store.getters.getCategoriesAndItemsView;
+    }
+  },
+
+  methods: {
+    deleteCategory(catIndex, catName, numItems) {
+       // Show warning modal
+       const modalData = {
+        name: 'confirm_delete_category',
+        isVisible: true,
+        title: 'Are you sure you want to delete your category "' + catName + '"? ' +
+               'The category, and its ' + numItems  + ' items, will become invisible to your customers.',
+        trigger: {
+          catIndex: catIndex
+        },
+        buttons: {
+          primary: 'Cancel',
+          warning: 'Delete Category'
+        }
+      }
+      bus.$emit('showModal', modalData);
     }
   }
 }
@@ -79,6 +113,14 @@ export default {
   table {
     border: 0 !important;
     margin-bottom: 0 !important;
+  }
+
+  .glyphicon-trash {
+    left: 5px;
+  }
+
+  .glyphicon-pencil {
+    right: 5px;
   }
 
 </style>
