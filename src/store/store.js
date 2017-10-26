@@ -118,6 +118,10 @@ export default new Vuex.Store({
 		},
 		deleteItem(state, trigger) {
 			state.categories[trigger.catIndex].items.splice(trigger.itemIndex, 1);
+		},
+		addCategory(state, category) {
+			console.log(category);
+			state.categories.unshift(category);
 		}
 	},
 	actions: {},

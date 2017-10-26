@@ -201,7 +201,6 @@ export default {
     activateNewItemEditMode() {
       // Only activate edit mode on the new item, if none of the existing items are in edit mode
       if(this.editableItem.id == null) {
-        console.log(this.editableItem.id);
         this.newItem.isBeingEdited = true;
       }
     },
@@ -214,7 +213,7 @@ export default {
     createNewItem(catIndex) {
       const newItem = this.newItem.data;
       // For testing, we need unique IDs (these will be assigned by the server)
-      newItem.itemId = new Date().getTime() / 1000
+      newItem.itemId = new Date().getTime();
       // Check that none of the items are empty
       if(newItem.name == '' || newItem.price == '' || newItem.description == '') {
         // Prompt the user to fill in the fields
