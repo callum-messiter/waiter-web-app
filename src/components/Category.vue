@@ -12,9 +12,6 @@
           <a href="#" v-on:click="deleteCategory(categories.indexOf(category), category.name, category.items.length)">
             <span class="glyphicon glyphicon-trash pull-right align-middle"></span>
           </a>
-          <a href="#" v-on:click="editCategoryName(categories.indexOf(category))">
-            <span class="glyphicon glyphicon-pencil pull-right align-middle"></span>
-          </a>
         </h4>
       </div>
       <div 
