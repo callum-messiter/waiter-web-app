@@ -56,7 +56,7 @@ import { bus } from '../main';
 
 export default {
   name: 'Modal',
-  data: function() {
+  data () {
     return {
       modal: {
         name: null,

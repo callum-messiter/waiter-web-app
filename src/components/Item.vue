@@ -65,7 +65,7 @@
                 category.items.indexOf(item),
                 categories.indexOf(category)
               )"
-            >Cancel
+            >Discard
           </button>
           <button 
             class="btn btn-xs btn-danger pull-left align-middle"
@@ -218,7 +218,16 @@ export default {
       // Check that none of the items are empty
       if(newItem.name == '' || newItem.price == '' || newItem.description == '') {
         // Prompt the user to fill in the fields
-        alert('Fill in all the fields!');
+        const modalData = {
+          name: 'empty_fields',
+          isVisible: true,
+          title: "You can't add a new item without filling in all the details!",
+          buttons: {
+            primary: 'Back to the menu',
+          }
+        }
+        bus.$emit('showModal', modalData);
+
       } else {
         this.$store.commit('addItem', {
           item: newItem,
