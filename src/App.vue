@@ -1,7 +1,8 @@
 <template>
   <div id="app">
+    <!-- Navbar -->
+    <navbar></navbar>
     <div class="container-fluid">
-      <!-- Navbar -->
 
       <alert></alert>
       <modal></modal>
@@ -14,12 +15,14 @@
 <script>
 
 // Global components
+import Navbar from './components/navbar';
 import Alert from './components/alert';
 import Modal from './components/modal';
 
 export default {
   name: 'app',
   components: {
+    'navbar': Navbar,
     'alert': Alert,
     'modal': Modal
   }

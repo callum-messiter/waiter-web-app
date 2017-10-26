@@ -7,6 +7,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
 	state: {
+		isUserAuthenticated: false,
 		categories: [
 			{
 				categoryId: 1,
@@ -136,11 +137,21 @@ export default new Vuex.Store({
 	},
 	actions: {},
 	getters: {
+		/** 
+			Categories and Items 
+		**/
 		getCategoriesAndItems(state) {
 			return state.categories;
 		},
 		getCategoriesAndItemsView(state) {
 			return cloneDeep(state.categories);
+		},
+
+		/**
+			Auth
+		**/
+		isUserAuthenticated(state) {
+			return state.isUserAuthenticated;
 		}
 	}
 });
