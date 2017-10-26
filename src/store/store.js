@@ -109,7 +109,8 @@ export default new Vuex.Store({
 	},
 	mutations: {
 		addItem(state, data) {
-			state.categories[data.catIndex].items.push(data.item);
+			state.categories[data.catIndex].items.unshift(data.item);
+			console.log(state.categories[data.catIndex]);
 		},
 		updateItem(state, trigger) {
 			const itemState = state.categories[trigger.catIndex].items[trigger.itemIndex];

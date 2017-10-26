@@ -101,6 +101,7 @@ export default {
         message: 'Your item was successfully deleted!'
       }
       bus.$emit('showAlert', alert);
+      bus.$emit('userConfirmedDeleteIntention');
 
       // Hide the modal
       this.modal.isVisible = false;
@@ -120,7 +121,7 @@ export default {
       bus.$emit('showAlert', alert);
 
       // Notify the item component so edit mode is exited
-      bus.$emit('userConfirmedUpdateIntention', trigger);
+      bus.$emit('userConfirmedUpdateIntention');
 
       // Hide the modal
       this.modal.isVisible = false;

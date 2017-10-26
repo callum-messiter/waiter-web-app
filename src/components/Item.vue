@@ -115,7 +115,13 @@
         <td v-if="newItem.isBeingEdited" class="col-md-2">
           <button 
             class="btn btn-xs btn-primary pull-left align-middle"
+            v-on:click="createNewItem(categories.indexOf(category))"
             >Save New Item
+          </button>
+          <button 
+            class="btn btn-xs btn-danger pull-left align-middle cancelBtn"
+            v-on:click="resetNewItem"
+            >Discard
           </button>
         </td>
     </tr>
@@ -146,10 +152,10 @@ export default {
       newItem: {
         isBeingEdited: false,
         data: {
-          itemId: null,
-          name: null,
-          price: null,
-          description: null
+          itemId: '',
+          name: '',
+          price: '',
+          description: ''
         }
       }
     }
@@ -163,7 +169,11 @@ export default {
     });
 
     // This event is emitted by the modal component, when the user clicks the "Save Changes" button
-    bus.$on('userConfirmedUpdateIntention', (trigger) => {
+    bus.$on('userConfirmedUpdateIntention', () => {
+      this.exitEditMode();
+    });
+
+    bus.$on('userConfirmedDeleteIntention', () => {
       this.exitEditMode();
     });
 
@@ -185,23 +195,40 @@ export default {
   },
 
   methods: {
+    /**
+      All functions related to the "newItem" 
+    **/
     activateNewItemEditMode() {
-      this.newItem.isBeingEdited = true;
+      // Only activate edit mode on the new item, if none of the existing items are in edit mode
+      if(this.editableItem.id == null) {
+        console.log(this.editableItem.id);
+        this.newItem.isBeingEdited = true;
+      }
     },
 
-    addItem(catIndex) {
-      const item = {
-        itemId: 90,
-        name: 'crips',
-        price: 6.70,
-        description: 'Lovely golden chips!'
-      }
-      const data = {
-        item: item,
-        catIndex: catIndex
-      }
-      this.$store.commit('addItem', data);
+    resetNewItem() {
+      this.newItem.data = {itemId: '', name: '', price: '', description: ''}
+      this.newItem.isBeingEdited = false;
     },
+
+    createNewItem(catIndex) {
+      const newItem = this.newItem.data;
+      // For testing, we need unique IDs (these will be assigned by the server)
+      newItem.itemId = new Date().getTime() / 1000
+      // Check that none of the items are empty
+      if(newItem.name == '' || newItem.price == '' || newItem.description == '') {
+        // Prompt the user to fill in the fields
+        alert('Fill in all the fields!');
+      } else {
+        this.$store.commit('addItem', {
+          item: newItem,
+          catIndex: catIndex
+        });
+        // If successful, show success message deactivate edit mode for the newItem
+        this.resetNewItem();
+      }
+    },
+
     /** 
       When a user clicks on a row (item), we want to make each input in this row writable. 
       There must only ever be *one* item in edit mode
