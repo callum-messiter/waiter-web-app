@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Menu from '@/components/Menu'
 import Home from '@/components/Home'
 import LiveKitchen from '@/components/LiveKitchen'
+import UserSettings from '@/components/UserSettings'
 
 Vue.use(Router)
 
@@ -23,6 +24,11 @@ export default new Router({
       path: '/live-kitchen',
       name: 'LiveKitchen',
       component: LiveKitchen
+    },
+    {
+      path: '/me',
+      name: 'settings',
+      component: UserSettings
     }
   ]
 })

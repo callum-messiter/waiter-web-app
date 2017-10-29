@@ -3,8 +3,6 @@
     <!-- Navbar -->
     <navbar></navbar>
     <div class="container-fluid">
-
-      <alert></alert>
       <modal></modal>
       <!-- Main page content -->
       <router-view/>
@@ -25,6 +23,21 @@ export default {
     'navbar': Navbar,
     'alert': Alert,
     'modal': Modal
+  },
+
+  created() {
+    if(!this.userIsAuthenticated) {
+      // If the user is not logged in, redirect them to the home page when they visit any other page
+      if(this.$route.path != '/') {
+        this.$router.push('/');
+      } 
+    }
+  },
+
+  computed: {
+    userIsAuthenticated() {
+      return this.$store.getters.isUserAuthenticated;
+    }
   }
 }
 </script>

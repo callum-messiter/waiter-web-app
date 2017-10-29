@@ -1,79 +1,81 @@
 <template>
-<div class="container">
-  <div class="col-md-6 col-md-offset-3">
-    <div id="logbox" v-bind:class="{'raised': !loginFormIsVisible}">
-      <!-- Registration form -->
-      <form id="signup" v-if="!loginFormIsVisible">
-        <h1>Sign up to waiter</h1>
-        <input 
-          class="input pass" 
-          type="email" 
-          placeholder="Email address" 
-          v-model="form.signup.email"
-        />
-        <input 
-          class="input pass" 
-          type="password" 
-          placeholder="Choose a password" 
-          v-model="form.signup.password"
-        />
-        <input 
-          class="input pass" 
-          type="password" 
-          placeholder="Confirm password" 
-          v-model="form.signup.confirmPassword"
-        />
-        <button 
-          class="inputButton" 
-          v-on:click="registerUser()" 
-          type="button">
-          Sign me up!
-        </button>
-        <div class="text-center">
-          Already have an account?
-          <a 
-            class="formLink" 
-            v-on:click="showLoginForm">
-            Login
-          </a>
-        </div>
-      </form>
-      <!-- Login form -->
-      <form id="login" v-else>
-        <h1>Login</h1>
-        <input 
-          class="input pass"
-          type="email" 
-          placeholder="Enter your email" 
-          v-model="form.login.email"
-        />
-        <input 
-          class="input pass" 
-          type="password" 
-          placeholder="Enter your password" 
-          v-model="form.login.password"
-        />
-        <button 
-          type="button"
-          class="inputButton">
-          Sign me in
-        </button>
-        <div class="text-center"">
+  <div class="container">
+    <div class="col-md-6 col-md-offset-3">
+      <div id="logbox" v-bind:class="{'raised': !loginFormIsVisible}">
+        <alert></alert>
+        <!-- Registration form -->
+        <form id="signup" v-if="!loginFormIsVisible">
+          <h1>Sign up to waiter</h1>
+          <input 
+            class="input pass" 
+            type="email" 
+            placeholder="Email address" 
+            v-model="form.signup.email"
+          />
+          <input 
+            class="input pass" 
+            type="password" 
+            placeholder="Choose a password" 
+            v-model="form.signup.password"
+          />
+          <input 
+            class="input pass" 
+            type="password" 
+            placeholder="Confirm password" 
+            v-model="form.signup.confirmPassword"
+          />
+          <button 
+            class="inputButton" 
+            v-on:click="registerUser()" 
+            type="button">
+            Sign me up!
+          </button>
+          <div class="text-center">
+            Already have an account?
             <a 
               class="formLink" 
-              v-on:click="hideLoginForm">
-              Sign up
+              v-on:click="showLoginForm">
+              Login
             </a>
-            - 
-            <a 
-              class="formLink">
-              Forgot password
-            </a>
-        </div>
-      </form>
+          </div>
+        </form>
+        <!-- Login form -->
+        <form id="login" v-else>
+          <h1>Login</h1>
+          <input 
+            class="input pass"
+            type="email" 
+            placeholder="Enter your email" 
+            v-model="form.login.email"
+          />
+          <input 
+            class="input pass" 
+            type="password" 
+            placeholder="Enter your password" 
+            v-model="form.login.password"
+          />
+          <button 
+            type="button"
+            class="inputButton"
+            v-on:click="logUserIn()">
+            Sign me in
+          </button>
+          <div class="text-center"">
+              <a 
+                class="formLink" 
+                v-on:click="hideLoginForm">
+                Sign up
+              </a>
+              - 
+              <a 
+                class="formLink">
+                Forgot password
+              </a>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -82,9 +84,13 @@
 import { bus } from '../main';
 
 // Components
+import Alert from './alert';
 
 export default {
-  name: 'Home', 
+  name: 'Home',
+  components: {
+    'alert': Alert
+  },
   data() {
     return {
       loginFormIsVisible: false,
@@ -98,11 +104,21 @@ export default {
           password: '',
           confirmPassword: ''
         }
+      },
+      alert: {
+        isVisible: true,
+        type: null,
+        summary: null,
+        message: null,
       }
     }
   },
 
   created () {
+    // If the user is logged in, redirect them to their dashboard when they visit the home page
+    if(this.userIsAuthenticated) {
+      this.$router.push('/dashboard'); 
+    }
   },
   
   methods: {
@@ -114,21 +130,53 @@ export default {
       this.loginFormIsVisible = false;
     },
 
-    registerUser(email, password, confirmPassword) {
+    logUserIn() {
       // Validate the data
       // Make an API call
-      this.$http.get("http://localhost:3000/api/auth/login?"+email+"&password="+password, {
-      }).then((data) => {
-        console.log(data);
+      this.$http.get("http://localhost:3000/api/auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
+      }).then((res) => {
+        if(res.status == 200 || res.status == 201) {
+          console.log(this.userIsAuthenticated);
+          // Add auth to local storage
+          const data = JSON.stringify(res.body.data);
+          localStorage.setItem('user', data);
+          localStorage.setItem('isAuth', true);
+
+          // Set auth state to true
+          this.$store.commit('authenticateUser');
+
+
+          // Redirect user to their dashboard
+          this.$router.push('/dashboard');
+        }
+      }).catch((res) => {
+        if(res.body && res.body.error) {
+          // Display the error message
+          const alert = {
+            isVisible: true,
+            type: 'error',
+            message: res.body.msg
+          }
+          bus.$emit('showAlert', alert);
+
+          // console.log(res.body.error);
+        } else if(res.status && res.statusText) {
+          console.log(res.status + " " + res.statusText);
+        } else {
+          console.log(res);
+        }
       });
       // If 200, authenticate the user in the store
       // this.$router.push('/dashboard');
+    },
+
+    registerUser(email, password, confirmPassword) {
     }
   },
 
   computed: {
-    comparePasswords() {
-      return this.form.signup.password == this.form.signup.confirmPassword ? '' : 'Passwords do not match'
+    userIsAuthenticated() {
+      return this.$store.getters.isUserAuthenticated;
     }
   }
 }

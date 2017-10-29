@@ -7,7 +7,9 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
 	state: {
-		isUserAuthenticated: true,
+		auth: {
+			isUserAuthenticated: (localStorage.isAuth == true || localStorage.isAuth == 'true')
+		},
 		categories: [
 			{
 				categoryId: 1,
@@ -133,6 +135,16 @@ export default new Vuex.Store({
 		},
 		deleteCategory(state, catIndex) {
 			state.categories.splice(catIndex, 1);
+		},
+
+		/**
+			Auth
+		**/
+		authenticateUser(state) {
+			state.auth.isUserAuthenticated = true;
+		},
+		deauthenticateUser(state) {
+			state.auth.isUserAuthenticated = false;
 		}
 	},
 	actions: {},
@@ -151,7 +163,7 @@ export default new Vuex.Store({
 			Auth
 		**/
 		isUserAuthenticated(state) {
-			return state.isUserAuthenticated;
+			return state.auth.isUserAuthenticated;
 		}
 	}
 });

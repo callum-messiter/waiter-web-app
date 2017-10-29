@@ -19,6 +19,7 @@
     </div>
     <!-- The menu content -->
     <div class="categories-accordion">
+      <alert></alert>
       <category></category>
     </div>
 
@@ -32,11 +33,13 @@ import { bus } from '../main';
 
 // Components
 import Category from './Category';
+import Alert from './Alert';
 
 export default {
   name: 'Menu',
   components: {
     'category': Category,
+    'alert': Alert
   },
   data() {
     return {
