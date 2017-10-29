@@ -5,69 +5,120 @@
         <alert></alert>
         <!-- Registration form -->
         <form id="signup" v-if="!loginFormIsVisible">
-          <h1>Sign up to waiter</h1>
-          <!-- Email address -->
-          <input 
-            :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('email') }"
-            name="email"
-            type="email" 
-            placeholder="Email address" 
-            v-model="form.signup.email"
-            v-validate="'required|email'"
-            v-on:blur="updateInputStatus('email')"
-          />
-          <span
-            class="help is-danger" 
-            v-show="errors.has('email')">
-            {{ errors.first('email') }}
-          </span>
-          
-          <!-- Password -->
-          <input 
-            :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('password') }"
-            name="password"
-            type="password" 
-            placeholder="Choose a password" 
-            v-model="form.signup.password"
-            v-validate="'required'"
-            v-on:blur="updateInputStatus('password')"
-          />
-          <span 
-            class="help is-danger"
-            v-show="errors.has('password')">
-            {{ errors.first('password') }}
-          </span>
-          
-          <!-- Confirm Password -->
-          <input 
-            :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1}"
-            name="confirmPassword" 
-            type="password" 
-            placeholder="Confirm password" 
-            v-model="form.signup.confirmPassword"
-            v-validate="'confirmed:password|required'"
-            v-on:blur="updateInputStatus('confirmPassword')"
-          />
-          <span 
-            class="help is-danger"
-            v-show="errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1">
-            {{ errors.first('confirmPassword') }}
-          </span>
+          <div class="row">
+            <h1>Sign up to waiter</h1>
+          </div>
+          <!-- First name -->
+          <div class="row">
+            <div class="col-sm-6">
+              <input 
+                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('firstName') }"
+                name="firstName"
+                type="text" 
+                placeholder="First name" 
+                v-model="form.signup.firstName"
+                v-validate="'required'"
+                v-on:blur="updateInputStatus('firstName')"
+              />
+              <span
+                class="help is-danger" 
+                v-show="errors.has('firstName')">
+                {{ errors.first('firstName') }}
+              </span>
+            </div>
 
-          <!-- Registration button and links -->
-          <button 
-            class="inputButton" 
-            v-on:click="registerUser()" 
-            type="button">
-            Sign me up!
-          </button>
-          <div class="text-center">
-            Already have an account?
-            <a 
-              class="formLink" 
-              v-on:click="showLoginForm">
-              Login
-            </a>
+            <!-- Last name -->
+            <div class="col-sm-6">
+              <input 
+                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('lastName') }"
+                name="lastName"
+                type="text" 
+                placeholder="Last name" 
+                v-model="form.signup.lastName"
+                v-validate="'required'"
+                v-on:blur="updateInputStatus('lastName')"
+              />
+              <span
+                class="help is-danger" 
+                v-show="errors.has('lastName')">
+                {{ errors.first('lastName') }}
+              </span>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-10 col-sm-offset-1">
+              <!-- Email address -->
+              <input 
+                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('email') }"
+                name="email"
+                type="email" 
+                placeholder="Email address" 
+                v-model="form.signup.email"
+                v-validate="'required|email'"
+                v-on:blur="updateInputStatus('email')"
+              />
+              <span
+                class="help is-danger" 
+                v-show="errors.has('email')">
+                {{ errors.first('email') }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-sm-6">
+              <!-- Password -->
+              <input 
+                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('password') }"
+                name="password"
+                type="password" 
+                placeholder="Choose a password" 
+                v-model="form.signup.password"
+                v-validate="'required'"
+                v-on:blur="updateInputStatus('password')"
+              />
+              <span 
+                class="help is-danger"
+                v-show="errors.has('password')">
+                {{ errors.first('password') }}
+              </span>
+            </div>
+            <div class="col-sm-6">
+              <!-- Confirm Password -->
+              <input 
+                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1}"
+                name="confirmPassword" 
+                type="password" 
+                placeholder="Confirm password" 
+                v-model="form.signup.confirmPassword"
+                v-validate="'confirmed:password|required'"
+                v-on:blur="updateInputStatus('confirmPassword')"
+              />
+              <span 
+                class="help is-danger"
+                v-show="errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1">
+                {{ errors.first('confirmPassword') }}
+              </span>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Registration button and links -->
+            <button 
+              class="inputButton" 
+              v-on:click="registerUser()" 
+              type="button">
+              Sign me up!
+            </button>
+            <div class="text-center">
+              Already have an account?
+              <a 
+                class="formLink" 
+                v-on:click="showLoginForm">
+                Login
+              </a>
+            </div>
           </div>
         </form>
 
@@ -132,6 +183,8 @@ export default {
           password: '',
         },
         signup: {
+          firstName: '',
+          lastName: '',
           email: '',
           password: '',
           confirmPassword: ''
@@ -210,10 +263,18 @@ export default {
       // this.$router.push('/dashboard');
     },
 
-    registerUser(email, password, confirmPassword) {
+    registerUser() {
       // Validate inputs (betters: if there are errors, set the button to red/unclickable using a computed property)
       if(!this.errors.any()) {
         // Make the API call
+        this.$http.post('http://localhost:3000/api/user/create/restaurateur', {
+          email: this.form.signup.email,
+          password: this.form.signup.password
+        }).then((res) => {
+          console.log(res);
+        }).catch((res) => {
+          console.log(res);
+        });
       }
     }
   },
@@ -230,21 +291,22 @@ export default {
 <style scoped>
 
 .help {
-  color: red !important;
+  color: #dd0d0d !important;
   font-size: 10px;
 }
 
 .is-danger-input {
-  border-bottom: 2px solid red !important;
+  border-bottom: 2px solid #dd0d0d !important;
   margin-bottom: 0px !important;
 }
 
 .is-danger-input:focus {
-  border-bottom: 2px solid red !important;
+  border-bottom: 2px solid #dd0d0d !important;
 }
 
 .raised {
   margin-top: 10px !important;
+  width: 430px !important;
 }
 
 ::selection {
@@ -294,6 +356,7 @@ h1, input {
   padding: 0 15px;
   border: none;
   border-bottom: 2px solid #ebebeb;
+  text-align: center;
 }
 
 .input:focus {
@@ -345,6 +408,25 @@ h1, input {
 
 .formLink {
   cursor: pointer;
+}
+
+::-webkit-input-placeholder {
+    text-align: center;
+    font-size: 12px;
+}
+:-moz-placeholder {
+    /* Firefox 18- */
+    text-align: center;
+    font-size: 12px;
+}
+::-moz-placeholder {
+    /* Firefox 19+ */
+    text-align: center;
+    font-size: 12px;
+}
+:-ms-input-placeholder {
+    text-align: center;
+    font-size: 12px;
 }
 
 </style>
