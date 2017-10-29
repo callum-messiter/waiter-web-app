@@ -6,24 +6,55 @@
         <!-- Registration form -->
         <form id="signup" v-if="!loginFormIsVisible">
           <h1>Sign up to waiter</h1>
+          <!-- Email address -->
           <input 
-            class="input pass" 
+            :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('email') }"
+            name="email"
             type="email" 
             placeholder="Email address" 
             v-model="form.signup.email"
+            v-validate="'required|email'"
+            v-on:blur="updateInputStatus('email')"
           />
+          <span
+            class="help is-danger" 
+            v-show="errors.has('email')">
+            {{ errors.first('email') }}
+          </span>
+          
+          <!-- Password -->
           <input 
-            class="input pass" 
+            :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('password') }"
+            name="password"
             type="password" 
             placeholder="Choose a password" 
             v-model="form.signup.password"
+            v-validate="'required'"
+            v-on:blur="updateInputStatus('password')"
           />
+          <span 
+            class="help is-danger"
+            v-show="errors.has('password')">
+            {{ errors.first('password') }}
+          </span>
+          
+          <!-- Confirm Password -->
           <input 
-            class="input pass" 
+            :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1}"
+            name="confirmPassword" 
             type="password" 
             placeholder="Confirm password" 
             v-model="form.signup.confirmPassword"
+            v-validate="'confirmed:password|required'"
+            v-on:blur="updateInputStatus('confirmPassword')"
           />
+          <span 
+            class="help is-danger"
+            v-show="errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1">
+            {{ errors.first('confirmPassword') }}
+          </span>
+
+          <!-- Registration button and links -->
           <button 
             class="inputButton" 
             v-on:click="registerUser()" 
@@ -39,6 +70,7 @@
             </a>
           </div>
         </form>
+
         <!-- Login form -->
         <form id="login" v-else>
           <h1>Login</h1>
@@ -105,6 +137,10 @@ export default {
           confirmPassword: ''
         }
       },
+      inputs: {
+        hasFocus: '',
+        hasHadFocus: []
+      },
       alert: {
         isVisible: true,
         type: null,
@@ -122,6 +158,10 @@ export default {
   },
   
   methods: {
+    updateInputStatus(input) {
+      this.inputs.hasFocus = input;
+      this.inputs.hasHadFocus.push(input);
+    },
     showLoginForm() {
       this.loginFormIsVisible = true;
     },
@@ -171,6 +211,10 @@ export default {
     },
 
     registerUser(email, password, confirmPassword) {
+      // Validate inputs (betters: if there are errors, set the button to red/unclickable using a computed property)
+      if(!this.errors.any()) {
+        // Make the API call
+      }
     }
   },
 
@@ -184,6 +228,20 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
+.help {
+  color: red !important;
+  font-size: 10px;
+}
+
+.is-danger-input {
+  border-bottom: 2px solid red !important;
+  margin-bottom: 0px !important;
+}
+
+.is-danger-input:focus {
+  border-bottom: 2px solid red !important;
+}
 
 .raised {
   margin-top: 10px !important;

@@ -5,8 +5,11 @@ import App from './App'
 import router from './router'
 import store from './store/store'
 import vueResource from 'vue-resource'
+import VeeValidate from 'vee-validate';
+
 
 Vue.use(vueResource);
+Vue.use(VeeValidate);
 
 // Use Bootstrap across the application
 import jQuery from 'jquery';

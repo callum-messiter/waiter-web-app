@@ -16,10 +16,10 @@ export default {
 	data() {
 		return {
 			alert: {
-        isVisible: false,
-        type: null,
-        message: null,
-    	}
+	      isVisible: false,
+	      type: null,
+	      message: null,
+	  	}
 		}
 	},
 	created () {
