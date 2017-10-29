@@ -1,16 +1,24 @@
 <template>
-<nav v-if="isUserAuthenticated" class="navbar navbar-inverse navbar-fixed-top">
+<nav v-if="userIsSignedIn" class="navbar navbar-default navbar-fixed-top">
   <div class="container-fluid">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">waiter</a>
+    <div v-bind:class="{'active': $route.path == '/'}" class="navbar-header">
+      <router-link class="navbar-brand" to="/">
+        <span class="glyphicon glyphicon-cutlery"></span>
+      </router-link>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Dashboard</a></li>
-        <li><a href="#">LiveKitchen!</a></li>
+        <li v-bind:class="{'active': $route.path == '/dashboard'}">
+          <router-link to="/dashboard">Dashboard</router-link>
+        </li>
+        <li v-bind:class="{'active': $route.path == '/live-kitchen'}">
+          <router-link to="/live-kitchen">LiveKitchen</router-link>
+        </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">{{user.firstName}} {{user.lastName}}</a></li>
+        <li v-bind:class="{'active': $route.path == '/me'}">
+          <router-link to="/me">{{user.firstName}} {{user.lastName}}</router-link>
+        </li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container-fluid -->

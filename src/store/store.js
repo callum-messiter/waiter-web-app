@@ -7,7 +7,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
 	state: {
-		isUserAuthenticated: false,
+		isUserAuthenticated: true,
 		categories: [
 			{
 				categoryId: 1,

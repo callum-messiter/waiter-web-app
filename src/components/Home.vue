@@ -1,24 +1,74 @@
 <template>
-<div class="container" :style="{ 'background-image': 'url(' + backgroundImage + ')' }">
+<div class="container">
   <div class="col-md-6 col-md-offset-3">
     <div id="logbox" v-bind:class="{'raised': !loginFormIsVisible}">
-      <form id="signin" v-if="loginFormIsVisible">
-        <h1>Login</h1>
-        <input type="email" placeholder="Enter your email" class="input pass"/>
-        <input type="password" placeholder="Enter your password" required="required" class="input pass"/>
-        <input type="submit" value="Sign me in!" class="inputButton"/>
-        <div class="text-center"">
-            <a v-on:click="hideLoginForm" href="#" id="">Sign up</a> - <a href="#" id="">Forgot password</a>
+      <!-- Registration form -->
+      <form id="signup" v-if="!loginFormIsVisible">
+        <h1>Sign up to waiter</h1>
+        <input 
+          class="input pass" 
+          type="email" 
+          placeholder="Email address" 
+          v-model="form.signup.email"
+        />
+        <input 
+          class="input pass" 
+          type="password" 
+          placeholder="Choose a password" 
+          v-model="form.signup.password"
+        />
+        <input 
+          class="input pass" 
+          type="password" 
+          placeholder="Confirm password" 
+          v-model="form.signup.confirmPassword"
+        />
+        <button 
+          class="inputButton" 
+          v-on:click="registerUser()" 
+          type="button">
+          Sign me up!
+        </button>
+        <div class="text-center">
+          Already have an account?
+          <a 
+            class="formLink" 
+            v-on:click="showLoginForm">
+            Login
+          </a>
         </div>
       </form>
-      <form id="signup" v-else>
-        <h1>Sign up to waiter</h1>
-        <input type="email" placeholder="Email address" class="input pass"/>
-        <input type="password" placeholder="Choose a password"  class="input pass"/>
-        <input type="password" placeholder="Confirm password" class="input pass"/>
-        <input type="submit" value="Sign me up!" class="inputButton"/>
-        <div class="text-center">
-            Already have an account? <a v-on:click="showLoginForm" href="#" id="login_id">Login</a>
+      <!-- Login form -->
+      <form id="login" v-else>
+        <h1>Login</h1>
+        <input 
+          class="input pass"
+          type="email" 
+          placeholder="Enter your email" 
+          v-model="form.login.email"
+        />
+        <input 
+          class="input pass" 
+          type="password" 
+          placeholder="Enter your password" 
+          v-model="form.login.password"
+        />
+        <button 
+          type="button"
+          class="inputButton">
+          Sign me in
+        </button>
+        <div class="text-center"">
+            <a 
+              class="formLink" 
+              v-on:click="hideLoginForm">
+              Sign up
+            </a>
+            - 
+            <a 
+              class="formLink">
+              Forgot password
+            </a>
         </div>
       </form>
     </div>
@@ -37,12 +87,23 @@ export default {
   name: 'Home', 
   data() {
     return {
-      backgroundImage: './src/assets/home-image.jpg',
-      loginFormIsVisible: false
+      loginFormIsVisible: false,
+      form: {
+        login: {
+          email: '',
+          password: '',
+        },
+        signup: {
+          email: '',
+          password: '',
+          confirmPassword: ''
+        }
+      }
     }
   },
 
-  created () {},
+  created () {
+  },
   
   methods: {
     showLoginForm() {
@@ -51,19 +112,30 @@ export default {
 
     hideLoginForm() {
       this.loginFormIsVisible = false;
+    },
+
+    registerUser(email, password, confirmPassword) {
+      // Validate the data
+      // Make an API call
+      this.$http.get("http://localhost:3000/api/auth/login?"+email+"&password="+password, {
+      }).then((data) => {
+        console.log(data);
+      });
+      // If 200, authenticate the user in the store
+      // this.$router.push('/dashboard');
     }
   },
 
-  computed: {}
+  computed: {
+    comparePasswords() {
+      return this.form.signup.password == this.form.signup.confirmPassword ? '' : 'Passwords do not match'
+    }
+  }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.background-image {
-  height: 1000px;
-  width: 600px;
-}
 
 .raised {
   margin-top: 10px !important;
@@ -117,13 +189,16 @@ h1, input {
   border: none;
   border-bottom: 2px solid #ebebeb;
 }
+
 .input:focus {
   outline: none;
   border-bottom-color: #22262d !important;
 }
+
 .input:hover {
   border-bottom-color: #dcdcdc;
 }
+
 .input:invalid {
   box-shadow: none;
 }
@@ -145,17 +220,25 @@ h1, input {
   -moz-box-shadow: 0 5px 0 #6f7682;
   box-shadow: 0 5px 0 #6f7682;
 }
+
 .inputButton:hover {
   top: 2px;
   -webkit-box-shadow: 0 3px 0 #818ea5;
   -moz-box-shadow: 0 3px 0 #818ea5;
   box-shadow: 0 3px 0 #818ea5;
 }
+
 .inputButton:active {
   top: 5px;
   box-shadow: none;
 }
+
 .inputButton:focus {
   outline: none;
 }
+
+.formLink {
+  cursor: pointer;
+}
+
 </style>
