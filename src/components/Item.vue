@@ -31,7 +31,7 @@
               )"
           >
         </td>
-        <td class="item-description text-left col-md-5">
+        <td class="item-description text-left col-md-9">
           <input 
             type="text" 
             class="form-control" 
@@ -46,7 +46,7 @@
               )"
           >
         </td>
-        <td class="buttons col-md-2" v-if="editMode.item.id == item.itemId">
+        <td class="buttons" v-if="editMode.item.id == item.itemId">
           <button 
             class="btn btn-xs btn-primary pull-left align-middle"
             v-on:click="
@@ -112,7 +112,7 @@
             v-on:click="activateNewItemEditMode"
           > 
         </td>
-        <td v-if="newItem.isBeingEdited" class="col-md-2">
+        <td v-if="newItem.isBeingEdited" class="buttons">
           <button 
             class="btn btn-xs btn-primary pull-left align-middle"
             v-on:click="createNewItem(categories.indexOf(category))"
@@ -421,10 +421,13 @@ export default {
 
   button {
     margin-left: 3px;
-    margin-top: 5px;
+    margin-top: 6px;
   }
 
   .buttons {
+    width: 200px;
+    position: absolute;
+    right: -30px;
     border: none !important;
   }
 
