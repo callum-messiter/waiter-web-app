@@ -17,8 +17,9 @@
                 type="text" 
                 placeholder="First name" 
                 v-model="form.signup.firstName"
-                v-validate="'required'"
+                v-validate="{required: true, max: 100}"
                 v-on:blur="updateInputStatus('firstName')"
+                data-vv-as="first name"
               />
               <span
                 class="help is-danger" 
@@ -35,8 +36,9 @@
                 type="text" 
                 placeholder="Last name" 
                 v-model="form.signup.lastName"
-                v-validate="'required'"
+                v-validate="{required: true, max: 100}"
                 v-on:blur="updateInputStatus('lastName')"
+                data-vv-as="last name"
               />
               <span
                 class="help is-danger" 
@@ -55,7 +57,7 @@
                 type="email" 
                 placeholder="Email address" 
                 v-model="form.signup.email"
-                v-validate="'required|email'"
+                v-validate="{required: true, max: 150}"
                 v-on:blur="updateInputStatus('email')"
               />
               <span
@@ -75,7 +77,7 @@
                 type="password" 
                 placeholder="Choose a password" 
                 v-model="form.signup.password"
-                v-validate="'required'"
+                v-validate="{required: true, min: 6, max: 30}"
                 v-on:blur="updateInputStatus('password')"
               />
               <span 
@@ -94,6 +96,7 @@
                 v-model="form.signup.confirmPassword"
                 v-validate="'confirmed:password|required'"
                 v-on:blur="updateInputStatus('confirmPassword')"
+                data-vv-as="confirm password"
               />
               <span 
                 class="help is-danger"
@@ -229,7 +232,6 @@ export default {
       this.$http.get("http://localhost:3000/api/auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
-          console.log(this.userIsAuthenticated);
           // Add auth to local storage
           const data = JSON.stringify(res.body.data);
           localStorage.setItem('user', data);
@@ -237,7 +239,6 @@ export default {
 
           // Set auth state to true
           this.$store.commit('authenticateUser');
-
 
           // Redirect user to their dashboard
           this.$router.push('/dashboard');
@@ -265,15 +266,35 @@ export default {
 
     registerUser() {
       // Validate inputs (betters: if there are errors, set the button to red/unclickable using a computed property)
-      if(!this.errors.any()) {
+      if(!this.errors.any() && this.inputs.hasHadFocus.length > 0) {
         // Make the API call
-        this.$http.post('http://localhost:3000/api/user/create/restaurateur', {
+        this.$http.post('http://localhost:3000/api/user/create', {
+          userType: 'restaurateur',
+          firstName: this.form.signup.firstName,
+          lastName: this.form.signup.lastName,
           email: this.form.signup.email,
           password: this.form.signup.password
         }).then((res) => {
-          console.log(res);
+          // For now just log the user in; later we will handle email verification
+          this.form.login.email = this.form.signup.email;
+          this.form.login.password = this.form.signup.password;
+          this.logUserIn();
         }).catch((res) => {
-          console.log(res);
+          if(res.body && res.body.error) {
+            // Display the error message
+            const alert = {
+              isVisible: true,
+              type: 'error',
+              message: res.body.msg
+            }
+            bus.$emit('showAlert', alert);
+
+            // console.log(res.body.error);
+          } else if(res.status && res.statusText) {
+            console.log(res.status + " " + res.statusText);
+          } else {
+            console.log(res);
+          }
         });
       }
     }

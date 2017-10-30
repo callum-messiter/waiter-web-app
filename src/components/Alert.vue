@@ -16,10 +16,10 @@ export default {
 	data() {
 		return {
 			alert: {
-	      isVisible: false,
-	      type: null,
-	      message: null,
-	  	}
+		      isVisible: false,
+		      type: null,
+		      message: null,
+		  	}
 		}
 	},
 	created () {
@@ -32,7 +32,7 @@ export default {
 			Object.assign(this.alert, alert);
       setTimeout(() => { 
         this.alert.isVisible = false;
-      }, 2000);
+      }, 3000);
 		}
 	}
 }
