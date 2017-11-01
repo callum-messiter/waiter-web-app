@@ -1,28 +1,34 @@
 <template>
   <div class="menu-wrapper col-md-10 col-md-offset-1">
     <!-- Menu name/title, other information -->
-    <div class="input-group col-md-4 col-md-offset-4">
-      <input 
-        class="form-control"
-        type="text" 
-        placeholder="E.g. Starters"
-        v-model="newCategory.name"
-      >
-      <span class="input-group-btn">
-        <button 
-          class="btn btn-primary" 
-          type="button"
-          v-on:click="addCategory"
-          >Add Category
-        </button>
-      </span>
+    <div class="row">
+      <div class="col-md-8">
+        <h2 class="pull-left restaurantName">{{restaurantName}}</h2>
+      </div>
+      <div class="input-group col-md-4 pull-right newCatInput">
+        <input 
+          class="form-control"
+          type="text" 
+          placeholder="E.g. Starters"
+          v-model="newCategory.name"
+        >
+        <span class="input-group-btn">
+          <button 
+            class="btn btn-primary" 
+            type="button"
+            v-on:click="addCategory"
+            >Add Category
+          </button>
+        </span>
+      </div>
     </div>
-    <!-- The menu content -->
-    <div class="categories-accordion">
-      <alert></alert>
-      <category></category>
+    <div class="row">
+      <!-- The menu content -->
+      <div class="categories-accordion">
+        <alert></alert>
+        <category></category>
+      </div>
     </div>
-
   </div>
 </template>
 
@@ -36,13 +42,14 @@ import Category from './Category';
 import Alert from './Alert';
 
 export default {
-  name: 'Menu',
+  name: 'RestaurantMenu',
   components: {
     'category': Category,
     'alert': Alert
   },
   data() {
     return {
+      restaurantName: "Peter's Pizza",
       newCategory: {
         categoryId: null,
         name: null,
@@ -92,5 +99,19 @@ export default {
 <style scoped>
   .categories-accordion {
     margin-top: 20px;
+  }
+
+  img {
+    left: 20px;
+    height: 70px;
+    width: 70px;
+  }
+
+  .restaurantName {
+    margin-top: 42px;
+  }
+
+  .newCatInput {
+    top: 40px;
   }
 </style>

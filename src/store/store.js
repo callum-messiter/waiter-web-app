@@ -10,6 +10,7 @@ export default new Vuex.Store({
 		auth: {
 			isUserAuthenticated: (localStorage.isAuth == true || localStorage.isAuth == 'true')
 		},
+		/**
 		categories: [
 			{
 				categoryId: 1,
@@ -108,7 +109,34 @@ export default new Vuex.Store({
 				]
 			}
 		]
-		
+		**/
+		categories: [
+			{
+				categoryId: 1,
+				name: 'Starters',
+				items: []
+			},
+			{
+				categoryId: 2,
+				name: 'Mains',
+				items: []
+			},
+			{
+				categoryId: 3,
+				name: 'Sides',
+				items: []
+			},
+			{
+				categoryId: 4,
+				name: 'Desserts',
+				items: []
+			},
+			{
+				categoryId: 5,
+				name: 'Drinks',
+				items: []
+			}
+		]
 	},
 	mutations: {
 		/**

@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Menu from '@/components/Menu'
 import Home from '@/components/Home'
 import LiveKitchen from '@/components/LiveKitchen'
 import UserSettings from '@/components/UserSettings'
+import Dashboard from '@/components/Dashboard'
 
 Vue.use(Router)
 
@@ -17,8 +17,8 @@ export default new Router({
   	},
     {
       path: '/dashboard',
-      name: 'Menu',
-      component: Menu
+      name: 'Dashboard',
+      component: Dashboard
     },
     {
       path: '/live-kitchen',
@@ -27,7 +27,7 @@ export default new Router({
     },
     {
       path: '/me',
-      name: 'settings',
+      name: 'Settings',
       component: UserSettings
     }
   ]

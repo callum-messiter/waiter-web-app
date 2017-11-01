@@ -12,11 +12,11 @@
 		data() {
 			return {
 				alert: {
-	        isVisible: true,
-	        type: null,
-	        summary: null,
-	        message: null,
-	      }
+			        isVisible: true,
+			        type: null,
+			        summary: null,
+			        message: null,
+	      		}
 			}
 		},
 		methods: {
@@ -24,7 +24,7 @@
 				localStorage.removeItem('user');
 				this.$store.commit('deauthenticateUser');
 				localStorage.isAuth = false;
-        this.$router.push('/');
+        		this.$router.push('/');
 			}
 		}
 	}

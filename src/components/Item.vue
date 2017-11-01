@@ -82,7 +82,7 @@
 
     <!-- The template item, for adding a new item -->
     <tr class="newItem-row" v-bind:class="{'newItemDefault': !newItem.isBeingEdited}">
-        <td class="item-name text-left col-md-2">
+        <td class="item-name text-left col-md-3">
           <input 
             type="text" 
             class="form-control newItem"
@@ -102,7 +102,7 @@
             v-on:click="activateNewItemEditMode"
           > 
         </td>
-        <td class="item-description text-left col-md-2">
+        <td class="item-description text-left col-md-7">
           <input 
             type="text" 
             class="form-control newItem"

@@ -69,11 +69,14 @@ export default {
         this.$store.commit('deleteCategory', catIndex);
       // If the category does have items, then show a warning
       } else {
+        var noun;
+        (numItems == 1) ? noun = 'item' : noun = 'items';
+        
         const modalData = {
           name: 'confirm_delete_category',
           isVisible: true,
           title: 'Are you sure you want to delete your category "' + catName + '"? ' +
-                 'The category, and its ' + numItems  + ' items, will become invisible to your customers.',
+                 'The category, and its ' + numItems  + ' ' + noun + ', will become invisible to your customers.',
           trigger: {
             catIndex: catIndex
           },
