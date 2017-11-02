@@ -56,9 +56,18 @@ export default {
     }
   },
 
+  created() {
+    // Create the menu skeleton with default categories
+    //this.$http.post('http://localhost:3000/api/menu/create/')
+  },
+
   computed: {
     categories () {
       return this.$store.getters.getCategoriesAndItemsView;
+    },
+
+    restaurantId () {
+      return this.$store.getters.restaurant.restaurantId;
     }
   },
 

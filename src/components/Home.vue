@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-8 col-md-offset-2">
       <div id="logbox" v-bind:class="{'raised': !loginFormIsVisible}">
         <alert></alert>
         <!-- Registration form -->
@@ -49,7 +49,7 @@
           </div>
 
           <div class="row">
-            <div class="col-sm-10 col-sm-offset-1">
+            <div class="col-sm-6">
               <!-- Email address -->
               <input 
                 :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('email') }"
@@ -64,6 +64,24 @@
                 class="help is-danger" 
                 v-show="errors.has('email')">
                 {{ errors.first('email') }}
+              </span>
+            </div>
+            <div class="col-sm-6">
+              <!-- Restaurant name -->
+              <input 
+                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('restaurantName') }"
+                name="restaurantName"
+                type="restaurantName" 
+                placeholder="Restaurant name" 
+                v-model="form.signup.restaurantName"
+                v-validate="{required: true, max: 150}"
+                v-on:blur="updateInputStatus('restaurantName')"
+                data-vv-as="restaurant name"
+              />
+              <span
+                class="help is-danger" 
+                v-show="errors.has('restaurantName')">
+                {{ errors.first('restaurantName') }}
               </span>
             </div>
           </div>
@@ -189,6 +207,7 @@ export default {
           firstName: '',
           lastName: '',
           email: '',
+          restaurantName: '',
           password: '',
           confirmPassword: ''
         }
@@ -227,14 +246,12 @@ export default {
     },
 
     logUserIn() {
-      // Validate the data
       // Make an API call
       this.$http.get("http://localhost:3000/api/auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
           // Add auth to local storage
-          const data = JSON.stringify(res.body.data);
-          localStorage.setItem('user', data);
+          localStorage.setItem('user', JSON.stringify(res.body.data));
           localStorage.setItem('isAuth', true);
 
           // Set auth state to true
@@ -273,8 +290,10 @@ export default {
           firstName: this.form.signup.firstName,
           lastName: this.form.signup.lastName,
           email: this.form.signup.email,
+          restaurantName: this.form.signup.restaurantName,
           password: this.form.signup.password
         }).then((res) => {
+          localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant));
           // For now just log the user in; later we will handle email verification
           this.form.login.email = this.form.signup.email;
           this.form.login.password = this.form.signup.password;
@@ -326,6 +345,7 @@ export default {
 }
 
 .raised {
+
   margin-top: 10px !important;
   width: 430px !important;
 }
@@ -351,7 +371,7 @@ body {
 #logbox {
   padding: 10px;
   margin: 50px auto;
-  width: 340px;
+  width: 500px;
   background-color: #fff;
   -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
   -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
@@ -370,7 +390,7 @@ h1, input {
 }
 
 .input {
-  width: 75%;
+  width: 100%;
   height: 50px;
   display: block;
   margin: 0 auto 15px;
@@ -378,6 +398,7 @@ h1, input {
   border: none;
   border-bottom: 2px solid #ebebeb;
   text-align: center;
+  font-size: 12px;
 }
 
 .input:focus {

@@ -10,6 +10,7 @@ export default new Vuex.Store({
 		auth: {
 			isUserAuthenticated: (localStorage.isAuth == true || localStorage.isAuth == 'true')
 		},
+		restaurant: (localStorage.restaurant) ? JSON.parse(localStorage.restaurant) : null,
 		/**
 		categories: [
 			{
@@ -173,10 +174,24 @@ export default new Vuex.Store({
 		},
 		deauthenticateUser(state) {
 			state.auth.isUserAuthenticated = false;
+		},
+
+		/**
+			Restaurant
+		**/
+		setRestaurantDetails(state, name) {
+			state.restaurant.name = name;
 		}
 	},
 	actions: {},
 	getters: {
+		/**
+			Restaurant
+		**/
+		getRestaurant(state) {
+			return state.restaurant;
+		},
+
 		/** 
 			Categories and Items 
 		**/

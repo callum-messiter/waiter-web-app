@@ -49,7 +49,6 @@ export default {
   },
   data() {
     return {
-      restaurantName: "Peter's Pizza",
       newCategory: {
         categoryId: null,
         name: null,
@@ -58,7 +57,10 @@ export default {
     }
   },
 
-  created () {},
+  created () {
+    console.log('NAME FROM STORE: ' + this.restaurantName);
+    console.log()
+  },
   
   methods: {
     addCategory() {
@@ -91,7 +93,11 @@ export default {
     }
   },
 
-  computed: {}
+  computed: {
+    restaurantName() {
+      return this.$store.getters.getRestaurant.restaurantName;
+    }
+  }
 }
 </script>
 

@@ -22,6 +22,7 @@
 		methods: {
 			logUserOut() {
 				localStorage.removeItem('user');
+				localStorage.removeItem('restaurant');
 				this.$store.commit('deauthenticateUser');
 				localStorage.isAuth = false;
         		this.$router.push('/');
