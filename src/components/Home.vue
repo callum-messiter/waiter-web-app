@@ -253,7 +253,7 @@ export default {
         if(res.status == 200 || res.status == 201) {
           console.log(res.body.data);
           // Add data to local storage
-          localStorage.setItem('user', JSON.stringify(res.body.data));
+          localStorage.setItem('user', JSON.stringify(res.body.data.user));
           localStorage.setItem('isAuth', true);
           localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
           localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name

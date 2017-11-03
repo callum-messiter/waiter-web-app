@@ -60,6 +60,7 @@ export default {
   created () {
     const menuId = JSON.parse(localStorage.menu).menuId;
     const token = JSON.parse(localStorage.user).token;
+    console.log(token);
     // Get the menu object and add it to the store
     this.$http.get('http://localhost:3000/api/menu/'+menuId, { 
       headers: {Authorization: token}
