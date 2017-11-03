@@ -5,12 +5,17 @@ import cloneDeep from 'clone-deep';
 
 Vue.use(Vuex);
 
+// We must define the default state, reflecting the entire object, in order for computed properties to be reactive
 export default new Vuex.Store({
 	state: {
 		auth: {
 			isUserAuthenticated: (localStorage.isAuth == true || localStorage.isAuth == 'true')
 		},
-		menu: null,
+		menu: {
+			menuId: null,
+			name: null,
+			categories: []
+		},
 		/**
 		categories: [
 			{

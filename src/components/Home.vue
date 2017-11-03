@@ -251,16 +251,13 @@ export default {
       this.$http.get("http://localhost:3000/api/auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
-          console.log(res.body.data);
           // Add data to local storage
           localStorage.setItem('user', JSON.stringify(res.body.data.user));
           localStorage.setItem('isAuth', true);
           localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
           localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
-
           // Set auth state to true
           this.$store.commit('authenticateUser');
-
           // Redirect user to their dashboard
           this.$router.push('/dashboard');
         }

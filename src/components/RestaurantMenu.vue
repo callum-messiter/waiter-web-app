@@ -56,33 +56,6 @@ export default {
       }
     }
   },
-
-  created () {
-    const menuId = JSON.parse(localStorage.menu).menuId;
-    const token = JSON.parse(localStorage.user).token;
-    console.log(token);
-    // Get the menu object and add it to the store
-    this.$http.get('http://localhost:3000/api/menu/'+menuId, { 
-      headers: {Authorization: token}
-    }).then((res) => {
-      this.$store.commit('setMenu', res.body.data);
-    }).catch((res) => {
-      if(res.body && res.body.error) {
-        // Display the error message
-        const alert = {
-          isVisible: true,
-          type: 'error',
-          message: res.body.msg
-        }
-        bus.$emit('showAlert', alert);
-
-      } else if(res.status && res.statusText) {
-        console.log(res.status + " " + res.statusText);
-      } else {
-        console.log(res);
-      }
-    });
-  },
   
   methods: {
     addCategory() {
