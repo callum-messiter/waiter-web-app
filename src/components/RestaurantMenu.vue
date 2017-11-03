@@ -3,7 +3,7 @@
     <!-- Menu name/title, other information -->
     <div class="row">
       <div class="col-md-8">
-        <h2 class="pull-left restaurantName">{{restaurantName}}</h2>
+        <h2 class="pull-left restaurantName">{{restaurant.name}}</h2>
       </div>
       <div class="input-group col-md-4 pull-right newCatInput">
         <input 
@@ -58,8 +58,29 @@ export default {
   },
 
   created () {
-    console.log('NAME FROM STORE: ' + this.restaurantName);
-    console.log()
+    const menuId = JSON.parse(localStorage.menu).menuId;
+    const token = JSON.parse(localStorage.user).token;
+    // Get the menu object and add it to the store
+    this.$http.get('http://localhost:3000/api/menu/' + menuId, { 
+      headers: {Authorization: token}
+    }).then((res) => {
+      this.$store.commit('setMenu', res.body.data);
+    }).catch((res) => {
+      if(res.body && res.body.error) {
+        // Display the error message
+        const alert = {
+          isVisible: true,
+          type: 'error',
+          message: res.body.msg
+        }
+        bus.$emit('showAlert', alert);
+
+      } else if(res.status && res.statusText) {
+        console.log(res.status + " " + res.statusText);
+      } else {
+        console.log(res);
+      }
+    });
   },
   
   methods: {
@@ -94,8 +115,8 @@ export default {
   },
 
   computed: {
-    restaurantName() {
-      return this.$store.getters.getRestaurant.restaurantName;
+    restaurant() {
+      return this.$store.getters.getRestaurant;
     }
   }
 }

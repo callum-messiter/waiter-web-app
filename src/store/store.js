@@ -11,6 +11,7 @@ export default new Vuex.Store({
 			isUserAuthenticated: (localStorage.isAuth == true || localStorage.isAuth == 'true')
 		},
 		restaurant: (localStorage.restaurant) ? JSON.parse(localStorage.restaurant) : null,
+		menu: null,
 		/**
 		categories: [
 			{
@@ -111,33 +112,6 @@ export default new Vuex.Store({
 			}
 		]
 		**/
-		categories: [
-			{
-				categoryId: 1,
-				name: 'Starters',
-				items: []
-			},
-			{
-				categoryId: 2,
-				name: 'Mains',
-				items: []
-			},
-			{
-				categoryId: 3,
-				name: 'Sides',
-				items: []
-			},
-			{
-				categoryId: 4,
-				name: 'Desserts',
-				items: []
-			},
-			{
-				categoryId: 5,
-				name: 'Drinks',
-				items: []
-			}
-		]
 	},
 	mutations: {
 		/**
@@ -179,8 +153,19 @@ export default new Vuex.Store({
 		/**
 			Restaurant
 		**/
-		setRestaurantDetails(state, name) {
-			state.restaurant.name = name;
+		setRestaurant(state, restaurant) {
+			state.restaurant = restaurant;
+		},
+
+		resetRestaurant(state) {
+			state.restaurant = null;
+		},
+
+		/**
+			Menu
+		**/
+		setMenu(state, menu) {
+			state.menu = menu;
 		}
 	},
 	actions: {},
@@ -196,10 +181,10 @@ export default new Vuex.Store({
 			Categories and Items 
 		**/
 		getCategoriesAndItems(state) {
-			return state.categories;
+			return state.menu.categories;
 		},
 		getCategoriesAndItemsView(state) {
-			return cloneDeep(state.categories);
+			return cloneDeep(state.menu.categories);
 		},
 
 		/**

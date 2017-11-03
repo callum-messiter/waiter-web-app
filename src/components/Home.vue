@@ -246,10 +246,12 @@ export default {
     },
 
     logUserIn() {
+      // Validate the data
       // Make an API call
       this.$http.get("http://localhost:3000/api/auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
+          console.log(res.body.data);
           // Add auth to local storage
           localStorage.setItem('user', JSON.stringify(res.body.data));
           localStorage.setItem('isAuth', true);
@@ -289,11 +291,14 @@ export default {
           userType: 'restaurateur',
           firstName: this.form.signup.firstName,
           lastName: this.form.signup.lastName,
-          email: this.form.signup.email,
           restaurantName: this.form.signup.restaurantName,
+          email: this.form.signup.email,
           password: this.form.signup.password
         }).then((res) => {
+          // Add the restaurant to local storage
           localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant));
+          this.$store.commit('setRestaurant', res.body.data.restaurant);
+          localStorage.setItem('menu', JSON.stringify(res.body.data.menu));
           // For now just log the user in; later we will handle email verification
           this.form.login.email = this.form.signup.email;
           this.form.login.password = this.form.signup.password;
