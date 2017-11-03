@@ -252,9 +252,11 @@ export default {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
           console.log(res.body.data);
-          // Add auth to local storage
+          // Add data to local storage
           localStorage.setItem('user', JSON.stringify(res.body.data));
           localStorage.setItem('isAuth', true);
+          localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
+          localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
 
           // Set auth state to true
           this.$store.commit('authenticateUser');
@@ -295,10 +297,6 @@ export default {
           email: this.form.signup.email,
           password: this.form.signup.password
         }).then((res) => {
-          // Add the restaurant to local storage
-          localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant));
-          this.$store.commit('setRestaurant', res.body.data.restaurant);
-          localStorage.setItem('menu', JSON.stringify(res.body.data.menu));
           // For now just log the user in; later we will handle email verification
           this.form.login.email = this.form.signup.email;
           this.form.login.password = this.form.signup.password;

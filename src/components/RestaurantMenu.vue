@@ -61,7 +61,7 @@ export default {
     const menuId = JSON.parse(localStorage.menu).menuId;
     const token = JSON.parse(localStorage.user).token;
     // Get the menu object and add it to the store
-    this.$http.get('http://localhost:3000/api/menu/' + menuId, { 
+    this.$http.get('http://localhost:3000/api/menu/'+menuId, { 
       headers: {Authorization: token}
     }).then((res) => {
       this.$store.commit('setMenu', res.body.data);
@@ -116,7 +116,7 @@ export default {
 
   computed: {
     restaurant() {
-      return this.$store.getters.getRestaurant;
+      return JSON.parse(localStorage.restaurant);
     }
   }
 }

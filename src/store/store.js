@@ -10,7 +10,6 @@ export default new Vuex.Store({
 		auth: {
 			isUserAuthenticated: (localStorage.isAuth == true || localStorage.isAuth == 'true')
 		},
-		restaurant: (localStorage.restaurant) ? JSON.parse(localStorage.restaurant) : null,
 		menu: null,
 		/**
 		categories: [
@@ -151,17 +150,6 @@ export default new Vuex.Store({
 		},
 
 		/**
-			Restaurant
-		**/
-		setRestaurant(state, restaurant) {
-			state.restaurant = restaurant;
-		},
-
-		resetRestaurant(state) {
-			state.restaurant = null;
-		},
-
-		/**
 			Menu
 		**/
 		setMenu(state, menu) {
@@ -170,13 +158,6 @@ export default new Vuex.Store({
 	},
 	actions: {},
 	getters: {
-		/**
-			Restaurant
-		**/
-		getRestaurant(state) {
-			return state.restaurant;
-		},
-
 		/** 
 			Categories and Items 
 		**/
