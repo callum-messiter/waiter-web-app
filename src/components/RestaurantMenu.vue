@@ -87,7 +87,7 @@ export default {
             const alert = {
               isVisible: true,
               type: 'success',
-              message: 'Your new category "' + newCategory.name + '" was successfully added to your menu!' // Must update these to user-friendly messages (API -> devMsg, userMsg)
+              message: 'New category "' + newCategory.name + '" was successfully added to your menu!' // Must update these to user-friendly messages (API -> devMsg, userMsg)
             }
             bus.$emit('showAlert', alert);
           }

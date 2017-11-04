@@ -105,6 +105,23 @@ export default {
     }
   },
 
+  created() {
+    bus.$on('deleteCategoryConfirmation', (index) => {
+      /**
+      this.$store.commit('deleteCategory', catIndex);
+
+      // Display the alert if successfu
+      const alert = {
+        isVisible: true,
+        type: 'success',
+        message: 'Your category was successfully deleted!'
+      }
+      bus.$emit('showAlert', alert);
+      **/
+      console.log('Delete category button clicked: ' + index);
+    });
+  },
+
   computed: {
     categories () {
       return this.$store.getters.getCategoriesAndItemsView;

@@ -136,17 +136,8 @@ export default {
     },
 
     emitDeleteCategoryConfirmation(catIndex) {
-      // Delete the category state
-      this.$store.commit('deleteCategory', catIndex);
-
-      // Display the alert if successfu
-      const alert = {
-        isVisible: true,
-        type: 'success',
-        message: 'Your category was successfully deleted!'
-      }
-      bus.$emit('showAlert', alert);
-
+      // Emit an event back to the category component which will handle deletion
+      bus.$emit('deleteCategoryConfirmation', index);
       // Hide the modal
       this.modal.isVisible = false;
     }
