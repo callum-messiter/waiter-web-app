@@ -2,8 +2,8 @@
   <div class="menu-wrapper col-md-10 col-md-offset-1">
     <!-- Menu name/title, other information -->
     <div class="row">
-      <div class="col-md-8">
-        <h2 class="pull-left restaurantName">{{restaurant.name}}</h2>
+      <div class="col-md-6">
+        <h2 class="pull-left restaurantName">{{restaurant.name}} | Menu</h2>
       </div>
       <div class="input-group col-md-4 pull-right newCatInput">
         <input 
@@ -110,6 +110,7 @@ export default {
 
   .restaurantName {
     margin-top: 42px;
+    word-break: keep-all  
   }
 
   .newCatInput {
