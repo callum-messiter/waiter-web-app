@@ -72,10 +72,42 @@ export default {
         }
         bus.$emit('showModal', modalData);
       } else {
-        // For testing, we need unique IDs (these will be assigned by the server)
-        newCategory.categoryId = new Date().getTime();
-        this.$store.commit('addCategory', newCategory);
-        this.resetNewCategory();
+        // 
+        this.$http.post('http://localhost:3000/api/category/create', {
+          name: newCategory.name,
+          menuId: JSON.parse(localStorage.menu).menuId
+        }, {
+          headers: {Authorization: JSON.parse(localStorage.user).token}
+        }).then((res) => {
+          if(res.status == 200) {
+            newCategory.categoryId = res.body.data.createdCategoryId;
+            this.$store.commit('addCategory', newCategory);
+            this.resetNewCategory();
+
+            const alert = {
+              isVisible: true,
+              type: 'success',
+              message: 'Your new category "' + newCategory.name + '" was successfully added to your menu!' // Must update these to user-friendly messages (API -> devMsg, userMsg)
+            }
+            bus.$emit('showAlert', alert);
+          }
+        }).catch((res) => {
+          this.resetNewCategory();
+          if(res.body && res.body.error) {
+            // Display the error message
+            const alert = {
+              isVisible: true,
+              type: 'error',
+              message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
+            }
+            bus.$emit('showAlert', alert);
+
+          } else if(res.status && res.statusText) {
+            console.log(res.status + " " + res.statusText);
+          } else {
+            console.log(res);
+          }
+        });
       }
     },
 
@@ -91,6 +123,10 @@ export default {
   computed: {
     restaurant() {
       return JSON.parse(localStorage.restaurant);
+    },
+
+    categoriesState () {
+      return this.$store.getters.getCategoriesAndItems;
     }
   }
 }
