@@ -49,7 +49,7 @@
           <a 
             href="#" 
             v-if="editMode.active && editMode.category.id == category.categoryId"
-            v-on:click="updateCategoryName()">
+            v-on:click="updateCategoryName(category.name)">
             <span class="glyphicon glyphicon-floppy-disk pull-right align-middle"></span>
           </a>
         </h4>
@@ -124,30 +124,66 @@ export default {
       this.editMode.active = true;
       this.editMode.category.id = categoryId;
       this.editMode.category.index = index;
-      this.accordion = '';
-    },
-
-    updateCategoryName() {
-      // Check first if it has departed from its state
-      console.log(this.categories[this.editMode.category.index].name);
-      // API call
-
-      // If successful update the state, and show a success alert
-      //this.$store.commit('updateCategoryName',)
-      // Exit edit mode
-      this.exitEditMode();
     },
 
     discardChanges() {
-      // Check if the category name has departed from its state
+      // Check first if it has departed from its state
       if(!_.isEqual(this.categories, this.categoriesState)) {
-        // Show a warning
-        alert('Are you sure you want to discard your changes?');
-        // Set the category back to its pre-edit state
-        // On Confirmation: this.categories[this.editMode.category.index].name = this.categoriesState[this.editMode.category.index].name;
-      } 
-      // Exit edit mode
+        // Show confirmation modal
+        // Set the view item to its pre-edit state
+        const index = this.editMode.category.index;
+        Object.assign(this.categories[index], this.categoriesState[index]);
+        // Set editMode.item to null (and the item will exit edit mode)
+      }
       this.exitEditMode();
+    },
+
+    updateCategoryName(name) {
+      // Check first if it has departed from its state
+      if(_.isEqual(this.categories, this.categoriesState)) {
+        this.exitEditMode();
+      } else {
+        // API call
+        this.$http.put('http://localhost:3000/api/category/update/'+this.editMode.category.id, {
+          name: name,
+          menuId: JSON.parse(localStorage.menu).menuId
+        }, {
+          headers: {Authorization: JSON.parse(localStorage.user).token}
+        }).then((res) => {
+          console.log('editMode ' + JSON.stringify(this.editMode.category));
+          if(res.status == 200) {
+            // Update the state
+            this.$store.commit('updateCategoryName', {
+              name: this.categories[this.editMode.category.index].name, 
+              index: this.editMode.category.index
+            });
+            // Exist edit mode and show success alert
+            this.exitEditMode();
+
+            const alert = {
+              isVisible: true,
+              type: 'success',
+              message: 'Your category was successfully updated!'
+            }
+            bus.$emit('showAlert', alert);
+          }
+        }).catch((res) => {
+          if(res.body && res.body.error) {
+            // Display the error message
+            const alert = {
+              isVisible: true,
+              type: 'error',
+              message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
+            }
+            bus.$emit('showAlert', alert);
+
+          } else if(res.status && res.statusText) {
+            console.log(res.status + " " + res.statusText);
+          } else {
+            console.log(res);
+          }
+        });
+      }
     },
 
     exitEditMode() {

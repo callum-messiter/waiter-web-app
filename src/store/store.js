@@ -143,6 +143,12 @@ export default new Vuex.Store({
 		deleteCategory(state, catIndex) {
 			state.menu.categories.splice(catIndex, 1);
 		},
+		updateCategoryName(state, cat) {
+			state.menu.categories[cat.index].name = cat.name;
+		},
+		resetCategory(state) {
+			state.menu = state.menu;
+		},
 
 		/**
 			Auth
