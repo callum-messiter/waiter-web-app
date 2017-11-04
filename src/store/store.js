@@ -122,15 +122,15 @@ export default new Vuex.Store({
 			Items
 		**/
 		addItem(state, data) {
-			state.categories[data.catIndex].items.unshift(data.item);
-			console.log(state.categories[data.catIndex]);
+			state.menu.categories[data.catIndex].items.unshift(data.item);
+			console.log(state.menu.categories[data.catIndex]);
 		},
 		updateItem(state, trigger) {
-			const itemState = state.categories[trigger.catIndex].items[trigger.itemIndex];
+			const itemState = state.menu.categories[trigger.catIndex].items[trigger.itemIndex];
 			Object.assign(itemState, trigger.item);
 		},
 		deleteItem(state, trigger) {
-			state.categories[trigger.catIndex].items.splice(trigger.itemIndex, 1);
+			state.menu.categories[trigger.catIndex].items.splice(trigger.itemIndex, 1);
 		},
 
 		/**
@@ -138,10 +138,10 @@ export default new Vuex.Store({
 		**/
 		addCategory(state, category) {
 			console.log(category);
-			state.categories.unshift(category);
+			state.menu.categories.unshift(category);
 		},
 		deleteCategory(state, catIndex) {
-			state.categories.splice(catIndex, 1);
+			state.menu.categories.splice(catIndex, 1);
 		},
 
 		/**
