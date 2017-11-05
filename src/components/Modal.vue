@@ -48,7 +48,7 @@
           <button 
             class="btn btn-danger"
             v-if="modal.name == 'confirm_delete_category'" 
-            v-on:click="emitDeleteCategoryConfirmation(modal.trigger.catIndex)">
+            v-on:click="emitDeleteCategoryConfirmation(modal.trigger)">
             {{modal.buttons.warning}}
           </button>
 
@@ -143,9 +143,9 @@ export default {
       this.modal.isVisible = false;
     },
 
-    emitDeleteCategoryConfirmation(catIndex) {
+    emitDeleteCategoryConfirmation(trigger) {
       // Emit an event back to the category component which will handle deletion
-      bus.$emit('deleteCategoryConfirmation', index);
+      bus.$emit('deleteCategoryConfirmation', trigger);
       // Hide the modal
       this.modal.isVisible = false;
     },

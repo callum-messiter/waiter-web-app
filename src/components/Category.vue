@@ -31,7 +31,8 @@
           <a 
             href="#" 
             v-if="!editMode.active || editMode.category.id != category.categoryId"
-            v-on:click="deleteCategory(
+            v-on:click="showDeleteCategoryModal(
+              category.categoryId,
               categories.indexOf(category), 
               category.name, 
               category.items.length
@@ -116,19 +117,8 @@ export default {
   },
 
   created() {
-    bus.$on('deleteCategoryConfirmation', (index) => {
-      /**
-      this.$store.commit('deleteCategory', catIndex);
-
-      // Display the alert if successfu
-      const alert = {
-        isVisible: true,
-        type: 'success',
-        message: 'Your category was successfully deleted!'
-      }
-      bus.$emit('showAlert', alert);
-      **/
-      console.log('Delete category button clicked: ' + index);
+    bus.$on('deleteCategoryConfirmation', (trigger) => {
+      this.deleteCategory(trigger);
     });
 
     bus.$on('userConfirmedDiscardIntention_category', (index) => {
@@ -153,19 +143,17 @@ export default {
 
   methods: {
     activateEditMode(categoryId, index) {
-      // First check if editMode is already active
-      if(this.editMode.active) {
-        // If editMode is already active, but nothing has actually changed, then change the editable category
-        if(_.isEqual(this.categories, this.categoriesState)) {
-          this.editMode.category.id = categoryId;
-          this.editMode.category.index = index;
-        } else {
-          // Show a modal - "Do you want to discard the changes you made to <someCategory>?"
-        }
-      } else {
+      // If no other category is being edited currently, then make the target category editable
+      if(!this.editMode.active) {
         this.editMode.active = true;
         this.editMode.category.id = categoryId;
         this.editMode.category.index = index;
+      } else {
+        // If another category is in edit mode, but no edit has been made, then make the target category editable
+        if(_.isEqual(this.categories, this.categoriesState)) {
+          this.editMode.category.id = categoryId;
+          this.editMode.category.index = index;
+        }
       }
     },
 
@@ -235,30 +223,64 @@ export default {
       this.editMode.category.index = '';
     },
 
-    deleteCategory(catIndex, catName, numItems) {
-      // If the category has no items, just delete it without showing a warning
+    showDeleteCategoryModal(catId, catIndex, catName, numItems) {
+      // Show a warning modal
+      const prefix = 'Are you sure you want to delete your category "' + catName + '"? ';
+      var noun, msg;
       if(numItems < 1) {
-        this.$store.commit('deleteCategory', catIndex);
-      // If the category does have items, then show a warning
+        msg = 'It will become invisible to your customers.';
       } else {
-        var noun;
         (numItems == 1) ? noun = 'item' : noun = 'items';
-        
-        const modalData = {
-          name: 'confirm_delete_category',
-          isVisible: true,
-          title: 'Are you sure you want to delete your category "' + catName + '"? ' +
-                 'The category, and its ' + numItems  + ' ' + noun + ', will become invisible to your customers.',
-          trigger: {
-            catIndex: catIndex
-          },
-          buttons: {
-            primary: 'Cancel',
-            warning: 'Delete Category'
-          }
-        }
-        bus.$emit('showModal', modalData);
+        msg = 'The category, and its ' + numItems  + ' ' + noun + ', will become invisible to your customers.';
       }
+      
+      const modalData = {
+        name: 'confirm_delete_category',
+        isVisible: true,
+        title: prefix + msg,
+        trigger: {
+          catIndex: catIndex,
+          catId: catId
+        },
+        buttons: {
+          primary: 'Cancel',
+          warning: 'Delete Category'
+        }
+      }
+      bus.$emit('showModal', modalData);
+    },
+
+    deleteCategory(trigger) {
+      this.$http.put('http://localhost:3000/api/category/deactivate/'+trigger.catId, {}, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+      }).then((res) => {
+        if(res.status == 200) {
+          this.$store.commit('deleteCategory', trigger.catIndex);
+
+          const alert = {
+            isVisible: true,
+            type: 'success',
+            message: 'Your category was successfully deleted!'
+          }
+          bus.$emit('showAlert', alert); 
+        }
+      }).catch((res) => {
+       if(res.body && res.body.error) {
+          // Display the error message
+          const alert = {
+            isVisible: true,
+            type: 'error',
+            message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
+          }
+          bus.$emit('showAlert', alert);
+
+        } else if(res.status && res.statusText) {
+          console.log(res.status + " " + res.statusText);
+        } else {
+          console.log(res);
+        }
+      })
+      
     }
   }
 }
