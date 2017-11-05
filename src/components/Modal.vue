@@ -20,11 +20,19 @@
             {{modal.buttons.warning}}
           </button>
 
-          <!-- Triggers Cancel Update Modal-->
+          <!-- Triggers Cancel Update (items) Modal-->
           <button 
             class="btn btn-danger" 
             v-if="modal.name == 'cancel_update'" 
             v-on:click="emitDiscardConfirmation(modal.trigger)">
+            {{modal.buttons.warning}}
+          </button>
+
+          <!-- Triggers Cancel Update (categories) Modal-->
+          <button 
+            class="btn btn-danger" 
+            v-if="modal.name == 'cancel_category_update'" 
+            v-on:click="emitDiscardConfirmation_category(modal.trigger.catIndex)">
             {{modal.buttons.warning}}
           </button>
 
@@ -140,7 +148,15 @@ export default {
       bus.$emit('deleteCategoryConfirmation', index);
       // Hide the modal
       this.modal.isVisible = false;
-    }
+    },
+
+    emitDiscardConfirmation_category(index) {
+      // PROBLEM: We could do this by directly calling a setter in the store, which would reset the clone of the state
+      bus.$emit('userConfirmedDiscardIntention_category', index);
+      
+      // Hide the modal
+      this.modal.isVisible = false;
+    },
 
   }
 }

@@ -3,6 +3,16 @@
     <div v-for="category in categories" class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
+          <!-- 
+            WHAT's HAPPENING HERE?
+            **********************
+
+            When the user clicks the edit (pencil) icon on a category panel, we activate edit mode. This, for each of the category panels, replaces the collapsable link element with an input containing the category's name. This means that the accordion freezes whilst edit mode is activated (nothing collapses).
+
+            All the inputs are set to readonly except for the one which is being edited. This means that category(name) edit mode 
+            prevents any disruptive simulatenous actions. We don't want the to be able to collapse a category panel whilst he's
+            editing a category name. We don't want every category name to become editable when the user activates edit mode.
+          -->
           <input 
             v-if="editMode.active" 
             class="categoryName" 
@@ -120,6 +130,11 @@ export default {
       **/
       console.log('Delete category button clicked: ' + index);
     });
+
+    bus.$on('userConfirmedDiscardIntention_category', (index) => {
+      // Reset the category that is currently being edited
+      // Make the new category the editable one
+    });
   },
 
   computed: {
@@ -138,9 +153,20 @@ export default {
 
   methods: {
     activateEditMode(categoryId, index) {
-      this.editMode.active = true;
-      this.editMode.category.id = categoryId;
-      this.editMode.category.index = index;
+      // First check if editMode is already active
+      if(this.editMode.active) {
+        // If editMode is already active, but nothing has actually changed, then change the editable category
+        if(_.isEqual(this.categories, this.categoriesState)) {
+          this.editMode.category.id = categoryId;
+          this.editMode.category.index = index;
+        } else {
+          // Show a modal - "Do you want to discard the changes you made to <someCategory>?"
+        }
+      } else {
+        this.editMode.active = true;
+        this.editMode.category.id = categoryId;
+        this.editMode.category.index = index;
+      }
     },
 
     discardChanges() {
