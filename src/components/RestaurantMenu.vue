@@ -56,8 +56,31 @@ export default {
       }
     }
   },
+
+  computed: {
+    /**
+      The API login endpoint returns the user object, the restaurant object, and the menu object/
+      We store each in local storage, so that these fundamental details are globally accessible to the application
+    **/
+    restaurant() {
+      return JSON.parse(localStorage.restaurant);
+    },
+
+    /** 
+      This is the actual state. We use this only to check if the view has departed from the state, which
+      allows us to check, for example, if the user has actually changed a category name. 
+      Based on this information, we may or not may display a "Sure you want to discard your changes" warning, for example
+    **/
+    categoriesState () {
+      return this.$store.getters.getCategoriesAndItems;
+    }
+  },
   
   methods: {
+
+    /**
+      Here we send a request to the API to add the new category to the menu. If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the category panel  appears at the top of its accordion). It is important to keep the backend data and the front-end state syncronised
+    **/
     addCategory() {
       const newCategory = this.newCategory;
       // Check that the user has provided a category name
@@ -72,7 +95,7 @@ export default {
         }
         bus.$emit('showModal', modalData);
       } else {
-        // 
+        // If the user has filled in the categoryName field, post it to the API
         this.$http.post('http://localhost:3000/api/category/create', {
           name: newCategory.name,
           menuId: JSON.parse(localStorage.menu).menuId
@@ -83,57 +106,63 @@ export default {
             newCategory.categoryId = res.body.data.createdCategoryId;
             this.$store.commit('addCategory', newCategory);
             this.resetNewCategory();
-
-            const alert = {
-              isVisible: true,
-              type: 'success',
-              message: 'New category "' + newCategory.name + '" was successfully added to your menu!' // Must update these to user-friendly messages (API -> devMsg, userMsg)
-            }
-            bus.$emit('showAlert', alert);
+            this.showAlert('success', 'New category "' + newCategory.name + '" was successfully added to your menu!');
           }
+
         }).catch((res) => {
-          this.resetNewCategory();
-          if(res.body && res.body.error) {
-            // Display the error message
-            const alert = {
-              isVisible: true,
-              type: 'error',
-              message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
-            }
-            bus.$emit('showAlert', alert);
-
-          } else if(res.status && res.statusText) {
-            console.log(res.status + " " + res.statusText);
-          } else {
-            console.log(res);
-          }
+          this.handleApiError(res);
         });
       }
     },
 
+    /**
+      The "new category" data property is bound to the new-category input. The user can fill out the field, and once
+      he clicks to add the new category, or discard it, we have to reset it back to its default state
+    **/
     resetNewCategory() {
       this.newCategory = {
         categoryId: null,
         name: null,
         items: []
       }
-    }
-  },
-
-  computed: {
-    restaurant() {
-      return JSON.parse(localStorage.restaurant);
     },
 
-    categoriesState () {
-      return this.$store.getters.getCategoriesAndItems;
+    /**
+      Our success and error flash messages (the event is listened for by the Alert component)
+    **/
+    showAlert(type, msg) {
+      const alert = {
+        isVisible: true,
+        type: type,
+        message: msg
+      }
+      bus.$emit('showAlert', alert);
+    },
+
+    /**
+      We will handle every API error like this, in the catch block of our promise
+    **/
+    handleApiError(res) {
+      if(res.body && res.body.error) {
+        // Display the error message
+        this.showAlert('error', res.body.msg);
+      } else if(res.status && res.statusText) {
+        // Save to server logs (once implemented)
+        console.log(res.status + " " + res.statusText);
+      } else {
+        // Save to server logs (once implemented)
+        console.log(res);
+      }
     }
+
   }
+
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
   .categories-accordion {
     margin-top: 20px;
   }
@@ -152,4 +181,5 @@ export default {
   .newCatInput {
     top: 40px;
   }
+  
 </style>

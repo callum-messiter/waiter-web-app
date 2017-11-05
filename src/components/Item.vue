@@ -166,11 +166,18 @@ export default {
 
   created() {
 
-    // This event is emitted by the modal component, when the user clicks the "Discard Changes" button
+    /** 
+      This event is emitted by the modal component, when the user clicks the "Discard Changes" button
+    **/
     bus.$on('userConfirmedDiscardIntention', (trigger) => {
       this.resetItem(trigger);
     });
 
+    /**
+      This event is emitted by the Category component, once an item has been updated in the database.
+      Ideally we would have all item-based functionality in this component, but there is an issue with
+      events firing n times, where n = number of items (I can't figure out a better workaround yet)
+    **/
     bus.$on('exitItemEditMode', () => {
       this.exitEditMode();
     });
@@ -178,15 +185,27 @@ export default {
   },
 
   computed: {
+    /**
+      This is a prop, passed down from the (parent) Category component. It is a clone of the state, and when
+      the state is updated, the changes are reflected in the view
+    **/
     category () {
       return this.categoryItems;
     },
 
-    // PROBLEM: In order to get the index of the category, we are passing the entire categories object down as a prop. Is there a better way? 
+    /**
+       The same as above, but it represents the entire categories array (every category in the menu, plus each category's items).
+       In order to get the index of the category, we are passing the entire categories object down as a prop. Is there a better way? 
+    **/
     categories () {
       return this.categoriesObj;
     },
 
+    /** 
+      This is the actual state. We use this only to check if the view has departed from the state, which
+      allows us to check, for example, if the user has actually changed an item. 
+      Based on this information, we may or not may display a "Sure you want to discard your changes" warning, for example
+    **/
     categoryItemsState () {
       return this.$store.getters.getCategoriesAndItems;
     }
@@ -194,7 +213,7 @@ export default {
 
   methods: {
     /**
-      All functions related to the "newItem" 
+      "Edit Mode" simply means that a user has double clicked the item so that he can edit it. 
     **/
     activateNewItemEditMode() {
       // Only activate edit mode on the new item, if none of the existing items are in edit mode
@@ -203,11 +222,18 @@ export default {
       }
     },
 
+    /**
+      The "new item" is a faded template used to create a new item. The user can fill out the fields, and once
+      he saves the item, or discards it, we have to reset it back to its template form
+    **/
     resetNewItem() {
       this.newItem.data = {itemId: '', name: '', price: '', description: ''}
       this.newItem.isBeingEdited = false;
     },
 
+    /**
+      Here we send a request to the API to add the new item to the menu. If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the item appears at the top of its category's list). It is important to keep the backend data and the front-end state syncronised
+    **/
     createNewItem(catId, catIndex) {
       const newItem = this.newItem.data;
       // Check that none of the items are empty
@@ -230,7 +256,8 @@ export default {
           description: newItem.description,
           categoryId: catId
         }, 
-        {headers: {Authorization: JSON.parse(localStorage.user).token}
+          {headers: {Authorization: JSON.parse(localStorage.user).token}
+
         }).then((res) => {
           // Set the itemId that was assigned by the server
           newItem.itemId = res.body.data.createdItemId; 
@@ -238,36 +265,18 @@ export default {
             item: newItem,
             catIndex: catIndex
           });
-          // If successful, show success message deactivate edit mode for the newItem
+
           this.resetNewItem();
+          this.showAlert('success', 'Your new item was successfully added to your menu!');
 
-          const alert = {
-            isVisible: true,
-            type: 'success',
-            message: 'Your new item was successfully added to your menu!'
-          }
-          bus.$emit('showAlert', alert);
         }).catch((res) => {
-          if(res.body && res.body.error) {
-            // Display the error message
-            const alert = {
-              isVisible: true,
-              type: 'error',
-              message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
-            }
-            bus.$emit('showAlert', alert);
-
-          } else if(res.status && res.statusText) {
-            console.log(res.status + " " + res.statusText);
-          } else {
-            console.log(res);
-          }
+          this.handleApiError(res);
         });
       }
     },
 
     /** 
-      When a user clicks on a row (item), we want to make each input in this row writable. 
+      When a user double clicks a row in the table (item), we want to make each input in this row writable. 
       There must only ever be *one* item in edit mode
     **/
     makeItemEditable(itemId, itemIndex, catId, catIndex) {
@@ -276,7 +285,6 @@ export default {
         this.newItem.data = {itemId: null, name: null, price: null, description: null}
         this.newItem.isBeingEdited = false;
       }
-
       // Only one item at a time can be editable: If there currently are no editable items, then make the clicked view-item editable
       if(!this.editMode.active) {
         this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
@@ -285,16 +293,13 @@ export default {
         // If edit mode was activated, but the user didn't modify the item, then we can activate edit mode on the clicked item
         if(_.isEqual(this.categories, this.categoryItemsState)) {
           this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
-        } else {
-          // We need to find a way to make the clicked item editable after discarding the edits of the other item
-          // const editMode.item = this.categories[this.editMode.item.catIndex].items[this.editMode.item.index];
-          // this.showConfirmDiscardModal(editMode.item, this.editMode.item.index, this.editMode.item.catIndex);
         }
       }
     },
 
     /**
-      Updating an item
+      When the user makes changes to an item and clicks the "Save" button, we want to display a warning to ask
+      him to confirm that he indeed wishes to update the item
     **/
     showConfirmUpdateModal(item, itemIndex, catIndex) {
       // Compare the view item with the item state
@@ -323,20 +328,9 @@ export default {
       }
     },
 
-    exitEditMode() {
-      this.editMode = {
-        active: false,
-        item: {
-          index: null, 
-          id: null, 
-          catId: null,
-          catIndex: null
-        }
-      }
-    },
-
     /**
-      Discarding updates made in edit mode
+      When the user makes changes to an item and clicks the "Cancel" button, we want to display a warning to ask
+      him to confirm that he indeed wishes to discard the changes he has made to the item
     **/
     showConfirmDiscardModal(item, itemIndex, catIndex) {
       // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then nclick cancel without making any changes)
@@ -364,16 +358,6 @@ export default {
       }
     },
 
-    // Returns the view item back to its pre-edit state
-    resetItem(trigger) {
-      const viewItem = this.categories[trigger.catIndex].items[trigger.itemIndex];
-      const itemState = this.categoryItemsState[trigger.catIndex].items[trigger.itemIndex];
-      // Set the view item to its pre-edit state
-      Object.assign(viewItem, itemState);
-      // Set editMode.item to null (and the item will exit edit mode)
-      this.exitEditMode();
-    }, 
-
     /**
       When the user clicks the delete button, we want to show a modal so they can confirm their deletion
     **/
@@ -397,6 +381,36 @@ export default {
       bus.$emit('showModal', modalData);
     },
 
+    /**
+      This simply sets the editable item back to readonly
+    **/
+    exitEditMode() {
+      this.editMode = {
+        active: false,
+        item: {
+          index: null, 
+          id: null, 
+          catId: null,
+          catIndex: null
+        }
+      }
+    },
+
+    /**
+      This returns the view item back to its pre-edit state
+    **/
+    resetItem(trigger) {
+      const viewItem = this.categories[trigger.catIndex].items[trigger.itemIndex];
+      const itemState = this.categoryItemsState[trigger.catIndex].items[trigger.itemIndex];
+      // Set the view item to its pre-edit state
+      Object.assign(viewItem, itemState);
+      // Set editMode.item to null (and the item will exit edit mode)
+      this.exitEditMode();
+    }, 
+
+    /**
+      This makes the clicked item editable
+    **/
     makeClickedItemEditable(itemIndex, itemId, catIndex, catId) {
       this.editMode = {
         active: true,
@@ -407,6 +421,34 @@ export default {
           catIndex: catIndex
         }
       }
+    },
+
+    /**
+      Our success and error flash messages (the event is listened for by the Alert component)
+    **/
+    showAlert(type, msg) {
+      const alert = {
+        isVisible: true,
+        type: type,
+        message: msg
+      }
+      bus.$emit('showAlert', alert);
+    },
+
+    /**
+      We will handle every API error like this, in the catch block of our promise
+    **/
+    handleApiError(res) {
+      if(res.body && res.body.error) {
+        // Display the error message
+        this.showAlert('error', res.body.msg);
+      } else if(res.status && res.statusText) {
+        // Save to server logs (once implemented)
+        console.log(res.status + " " + res.statusText);
+      } else {
+        // Save to server logs (once implemented)
+        console.log(res);
+      }
     }
 
   }
@@ -414,11 +456,12 @@ export default {
 </script>
 
 <style scoped>
+
   td {
     padding: 0 !important;
     border: none !important;
   }
-  /** Inputs should  have no border **/
+
   input {
     border: 0 !important;
   }
@@ -461,4 +504,5 @@ export default {
   .newItemDefault {
     opacity: 0.4;
   }
+
 </style>

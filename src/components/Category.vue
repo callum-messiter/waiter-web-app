@@ -15,10 +15,10 @@
           -->
           <input 
             v-if="editMode.active" 
-            class="categoryName" 
-            v-model="category.name"
+            class="categoryName"
             :class="{editMode: editMode.active && editMode.category.id == category.categoryId}"
-            :readonly="editMode.category.id != category.categoryId">
+            :readonly="editMode.category.id != category.categoryId"
+            v-model="category.name">
           </input>
           <a 
             v-if="!editMode.active"
@@ -29,8 +29,8 @@
           </a>
           <!-- Delete Icon (visible by default) -->
           <a 
-            href="#" 
             v-if="!editMode.active || editMode.category.id != category.categoryId"
+            href="#" 
             v-on:click="showDeleteCategoryModal(
               category.categoryId,
               categories.indexOf(category), 
@@ -41,8 +41,8 @@
           </a>
           <!-- Edit Icon (visible by default) -->
           <a 
-            href="#"
-            v-if="!editMode.active || editMode.category.id != category.categoryId" 
+            v-if="!editMode.active || editMode.category.id != category.categoryId"
+            href="#" 
             v-on:click="activateEditMode(
               category.categoryId, 
               categories.indexOf(category)
@@ -51,15 +51,15 @@
           </a>
           <!-- Discard Icon (visible only when a category name is being edited -->
           <a 
-            href="#" 
             v-if="editMode.active && editMode.category.id == category.categoryId"
+            href="#" 
             v-on:click="discardChanges()">
             <span class="glyphicon glyphicon-repeat pull-right align-middle"></span>
           </a>
           <!-- Save Icon (visible only when a category name is being edited -->
           <a 
-            href="#" 
             v-if="editMode.active && editMode.category.id == category.categoryId"
+            href="#" 
             v-on:click="updateCategoryName(category.name)">
             <span class="glyphicon glyphicon-floppy-disk pull-right align-middle"></span>
           </a>
@@ -67,8 +67,8 @@
       </div>
       <div 
         class="panel-collapse collapse"
-        v-bind:id="category.categoryId"  
         v-bind:class="{'in': categories.indexOf(category) == 0}"
+        v-bind:id="category.categoryId"  
       >
         <!-- Each category is a collapsable panel, containing a table of the category's items -->
         <div class="panel-body">
@@ -146,7 +146,7 @@ export default {
     /** 
       This is the actual state. We use this only to check if the view has departed from the state, which
       allows us to check, for example, if the user has actually changed a category name. 
-      Based on this information, we may or not may display a "Sure you want to discard your changes" warning
+      Based on this information, we may or not may display a "Sure you want to discard your changes" warning, for example
     **/
     categoriesState () {
       return this.$store.getters.getCategoriesAndItems;
@@ -332,6 +332,9 @@ export default {
       });
     },
 
+    /**
+      We will handle every API error like this, in the catch block of our promise
+    **/
     handleApiError(res) {
       if(res.body && res.body.error) {
         // Display the error message
