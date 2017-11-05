@@ -171,8 +171,7 @@ export default {
       this.resetItem(trigger);
     });
 
-    // This event is emitted by the modal component, when the user clicks the "Save Changes" button
-    bus.$on('userConfirmedUpdateIntention', () => {
+    bus.$on('exitItemEditMode', () => {
       this.exitEditMode();
     });
 
@@ -283,10 +282,8 @@ export default {
         this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
       // If there is another view item that is already editable...
       } else {
-        // Check if the view has departed from the state
-        const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
         // If edit mode was activated, but the user didn't modify the item, then we can activate edit mode on the clicked item
-        if(viewItemIsEqualToItemState) {
+        if(_.isEqual(this.categories, this.categoryItemsState)) {
           this.makeClickedItemEditable(itemIndex, itemId, catId, catIndex);
         } else {
           // We need to find a way to make the clicked item editable after discarding the edits of the other item
@@ -301,9 +298,7 @@ export default {
     **/
     showConfirmUpdateModal(item, itemIndex, catIndex) {
       // Compare the view item with the item state
-      const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
-      
-      if(viewItemIsEqualToItemState) {
+      if(_.isEqual(this.categories, this.categoryItemsState)) {
         // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
         this.exitEditMode();
       } else {
@@ -345,8 +340,7 @@ export default {
     **/
     showConfirmDiscardModal(item, itemIndex, catIndex) {
       // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then nclick cancel without making any changes)
-      const viewItemIsEqualToItemState = this.compareViewWithState(this.categories, this.categoryItemsState);
-      if(viewItemIsEqualToItemState) {
+      if(_.isEqual(this.categories, this.categoryItemsState)) {
         // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
         this.exitEditMode();
       } else {
@@ -401,13 +395,6 @@ export default {
         }
       }
       bus.$emit('showModal', modalData);
-    },
-
-    compareViewWithState(viewItems, itemsState) {
-      return _.isEqual(
-          _.omit(viewItems), 
-          _.omit(itemsState)
-      );
     },
 
     makeClickedItemEditable(itemIndex, itemId, catIndex, catId) {

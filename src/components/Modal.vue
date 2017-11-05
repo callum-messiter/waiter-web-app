@@ -112,19 +112,8 @@ export default {
 
     // When the user confirms they want to save the updates made to their item, we inform the menu component, triggering item update
     emitUpdateConfirmation(trigger) {
-      // Update the item state
-      this.$store.commit('updateItem', trigger);
-
-      // Display the alert if successful
-      const alert = {
-        isVisible: true,
-        type: 'success',
-        message: 'Your item "' + trigger.itemStateName + '" was successfully updated!'
-      }
-      bus.$emit('showAlert', alert);
-
       // Notify the item component so edit mode is exited
-      bus.$emit('userConfirmedUpdateIntention');
+      bus.$emit('userConfirmedUpdateIntention', trigger);
 
       // Hide the modal
       this.modal.isVisible = false;

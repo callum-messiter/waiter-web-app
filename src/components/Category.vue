@@ -130,6 +130,12 @@ export default {
     bus.$on('userConfirmedDeleteItemIntention', (trigger) => {
       this.deleteItem(trigger);
     });
+
+    // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
+    bus.$on('userConfirmedUpdateIntention', (trigger) => {
+      console.log('update event');
+      this.updateItem(trigger);
+    });
   },
 
   computed: {
@@ -283,8 +289,46 @@ export default {
         } else {
           console.log(res);
         }
-      })
+      });
       
+    },
+
+    updateItem(trigger) {
+      this.$http.put('http://localhost:3000/api/item/update/'+trigger.item.itemId, {
+        name: trigger.item.name,
+        price: trigger.item.price,
+        description: trigger.item.description
+      }, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+      }).then((res) => {
+        // Update the item state
+        this.$store.commit('updateItem', trigger);
+
+        // Display the alert if successful
+        const alert = {
+          isVisible: true,
+          type: 'success',
+          message: 'Your item "' + trigger.itemStateName + '" was successfully updated!'
+        }
+        bus.$emit('showAlert', alert);
+        // We must emit an event to the item component in order to exit edit mode
+        bus.$emit('exitItemEditMode');
+      }).catch((res) => {
+        if(res.body && res.body.error) {
+          // Display the error message
+          const alert = {
+            isVisible: true,
+            type: 'error',
+            message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
+          }
+          bus.$emit('showAlert', alert);
+
+        } else if(res.status && res.statusText) {
+          console.log(res.status + " " + res.statusText);
+        } else {
+          console.log(res);
+        }
+      });
     },
 
     deleteItem(trigger) {
