@@ -291,23 +291,31 @@ export default {
       this.$http.put('http://localhost:3000/api/item/deactivate/'+trigger.itemId, {}, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
-        console.log(res);
-      }).catch((res) => {
-        console.log(res);
-      });
-      /**
-      // Update the item state
-      this.$store.commit('deleteItem', trigger);
+        this.$store.commit('deleteItem', trigger);
 
-      // Display the alert if successfu
-      const alert = {
-        isVisible: true,
-        type: 'success',
-        message: 'Your item was successfully deleted!'
-      }
-      bus.$emit('showAlert', alert);
-      bus.$emit('userConfirmedDeleteIntention');
-      **/
+        // Display the alert if successfu
+        const alert = {
+          isVisible: true,
+          type: 'success',
+          message: 'Your item was successfully deleted!'
+        }
+        bus.$emit('showAlert', alert);
+      }).catch((res) => {
+        if(res.body && res.body.error) {
+          // Display the error message
+          const alert = {
+            isVisible: true,
+            type: 'error',
+            message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
+          }
+          bus.$emit('showAlert', alert);
+
+        } else if(res.status && res.statusText) {
+          console.log(res.status + " " + res.statusText);
+        } else {
+          console.log(res);
+        }
+      });
     },
   }
 }
