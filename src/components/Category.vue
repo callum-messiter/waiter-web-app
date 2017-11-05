@@ -164,7 +164,6 @@ export default {
         // Set the view item to its pre-edit state
         const index = this.editMode.category.index;
         Object.assign(this.categories[index], this.categoriesState[index]);
-        // Set editMode.item to null (and the item will exit edit mode)
       }
       this.exitEditMode();
     },

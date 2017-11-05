@@ -115,7 +115,7 @@
         <td v-if="newItem.isBeingEdited" class="buttons">
           <button 
             class="btn btn-xs btn-primary pull-left align-middle"
-            v-on:click="createNewItem(categories.indexOf(category))"
+            v-on:click="createNewItem(category.categoryId, categories.indexOf(category))"
             >Save New Item
           </button>
           <button 
@@ -213,10 +213,8 @@ export default {
       this.newItem.isBeingEdited = false;
     },
 
-    createNewItem(catIndex) {
+    createNewItem(catId, catIndex) {
       const newItem = this.newItem.data;
-      // For testing, we need unique IDs (these will be assigned by the server)
-      newItem.itemId = new Date().getTime();
       // Check that none of the items are empty
       if(newItem.name == '' || newItem.price == '' || newItem.description == '') {
         // Prompt the user to fill in the fields
@@ -231,12 +229,45 @@ export default {
         bus.$emit('showModal', modalData);
 
       } else {
-        this.$store.commit('addItem', {
-          item: newItem,
-          catIndex: catIndex
+        this.$http.post('http://localhost:3000/api/item/create', {
+          name: newItem.name,
+          price: newItem.price,
+          description: newItem.description,
+          categoryId: catId
+        }, 
+        {headers: {Authorization: JSON.parse(localStorage.user).token}
+        }).then((res) => {
+          // Set the itemId that was assigned by the server
+          newItem.itemId = res.body.data.createdItemId; 
+          this.$store.commit('addItem', {
+            item: newItem,
+            catIndex: catIndex
+          });
+          // If successful, show success message deactivate edit mode for the newItem
+          this.resetNewItem();
+
+          const alert = {
+            isVisible: true,
+            type: 'success',
+            message: 'Your new item was successfully added to your menu!'
+          }
+          bus.$emit('showAlert', alert);
+        }).catch((res) => {
+          if(res.body && res.body.error) {
+            // Display the error message
+            const alert = {
+              isVisible: true,
+              type: 'error',
+              message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
+            }
+            bus.$emit('showAlert', alert);
+
+          } else if(res.status && res.statusText) {
+            console.log(res.status + " " + res.statusText);
+          } else {
+            console.log(res);
+          }
         });
-        // If successful, show success message deactivate edit mode for the newItem
-        this.resetNewItem();
       }
     },
 
