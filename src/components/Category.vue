@@ -121,11 +121,6 @@ export default {
       this.deleteCategory(trigger);
     });
 
-    bus.$on('userConfirmedDiscardIntention_category', (index) => {
-      // Reset the category that is currently being edited
-      // Make the new category the editable one
-    });
-
     // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
     bus.$on('userConfirmedDeleteItemIntention', (trigger) => {
       this.deleteItem(trigger);
@@ -133,26 +128,37 @@ export default {
 
     // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
     bus.$on('userConfirmedUpdateIntention', (trigger) => {
-      console.log('update event');
       this.updateItem(trigger);
     });
   },
 
   computed: {
+    /** 
+      This is the clone of the state of the menu (the categories and the items)
+      We render each category in this component, and the items in the child Item component
+      Anytime we change the state, by committing to it, the clone is updated, and thus the
+      view updates to reflect the clone and state
+    **/
     categories () {
       return this.$store.getters.getCategoriesAndItemsView;
     },
 
+    /** 
+      This is the actual state. We use this only to check if the view has departed from the state, which
+      allows us to check, for example, if the user has actually changed a category name. 
+      Based on this information, we may or not may display a "Sure you want to discard your changes" warning
+    **/
     categoriesState () {
       return this.$store.getters.getCategoriesAndItems;
-    },
-
-    restaurantId () {
-      return this.$store.getters.getRestaurant.restaurantId;
     }
   },
 
   methods: {
+
+    /**
+      "Edit Mode" simply means that a user has clicked the edit icon on the category panel. When a category is in 
+      edit mode, the accordion freezes, and the category name is enclosed by a (seamless) form input, and is thus editable
+    **/
     activateEditMode(categoryId, index) {
       // If no other category is being edited currently, then make the target category editable
       if(!this.editMode.active) {
@@ -168,73 +174,89 @@ export default {
       }
     },
 
+    /**
+      The user may begin editing a category name, and then decide against the edit. At this point
+      he can click the "reset/discard" icon, which will set the name back to its pre-edit state 
+    **/
     discardChanges() {
-      // Check first if it has departed from its state
+      // Check first if the category has departed from its state
       if(!_.isEqual(this.categories, this.categoriesState)) {
-        // Show confirmation modal
-        // Set the view item to its pre-edit state
+        // Set the view category to its pre-edit state
         const index = this.editMode.category.index;
         Object.assign(this.categories[index], this.categoriesState[index]);
       }
       this.exitEditMode();
     },
 
-    updateCategoryName(name) {
-      // Check first if it has departed from its state
-      if(_.isEqual(this.categories, this.categoriesState)) {
-        this.exitEditMode();
-      } else {
-        // API call
-        this.$http.put('http://localhost:3000/api/category/update/'+this.editMode.category.id, {
-          name: name,
-          menuId: JSON.parse(localStorage.menu).menuId
-        }, {
-          headers: {Authorization: JSON.parse(localStorage.user).token}
-        }).then((res) => {
-          console.log('editMode ' + JSON.stringify(this.editMode.category));
-          if(res.status == 200) {
-            // Update the state
-            this.$store.commit('updateCategoryName', {
-              name: this.categories[this.editMode.category.index].name, 
-              index: this.editMode.category.index
-            });
-            // Exist edit mode and show success alert
-            this.exitEditMode();
-
-            const alert = {
-              isVisible: true,
-              type: 'success',
-              message: 'Your category was successfully updated!'
-            }
-            bus.$emit('showAlert', alert);
-          }
-        }).catch((res) => {
-          if(res.body && res.body.error) {
-            // Display the error message
-            const alert = {
-              isVisible: true,
-              type: 'error',
-              message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
-            }
-            bus.$emit('showAlert', alert);
-
-          } else if(res.status && res.statusText) {
-            console.log(res.status + " " + res.statusText);
-          } else {
-            console.log(res);
-          }
-        });
+    /**
+      Our success and error flash messages (the event is listened for by the Alert component)
+    **/
+    showAlert(type, msg) {
+      const alert = {
+        isVisible: true,
+        type: type,
+        message: msg
       }
+      bus.$emit('showAlert', alert);
     },
 
+    /**
+      "Edit Mode" simply means that a user has clicked the edit icon on the category panel. When a category is in 
+      edit mode, the accordion freezes, and the category name is enclosed by a (seamless) form input, and is thus editable
+    **/
     exitEditMode() {
       this.editMode.active = false;
       this.editMode.category.id = '';
       this.editMode.category.index = '';
     },
 
+    /**
+      Here we send the updated category name to the API, and if the data is successfully persisted to the database,
+      we also update the state, which is then reflected in the view. It is important to keep the backend data and the 
+      front-end state syncronised
+    **/
+    updateCategoryName(name) {
+      // Check first if the category has departed from its state
+      if(_.isEqual(this.categories, this.categoriesState)) {
+        this.exitEditMode();
+      } else {
+        this.$http.put('http://localhost:3000/api/category/update/'+this.editMode.category.id, {
+          name: name,
+          menuId: JSON.parse(localStorage.menu).menuId
+        }, {
+          headers: {Authorization: JSON.parse(localStorage.user).token}
+        }).then((res) => {
+          if(res.status == 200) {
+            // If the updates were successfully persisted to the database, update the state to reflect the changes
+            this.$store.commit('updateCategoryName', {
+              name: this.categories[this.editMode.category.index].name, 
+              index: this.editMode.category.index
+            });
+            // Exist edit mode and show success alert
+            this.exitEditMode();
+            this.showAlert('success', 'Your category was successfully updated!')
+          }
+        }).catch((res) => {
+          if(res.body && res.body.error) {
+            // Display the error message
+            this.showAlert('error', res.body.msg);
+          } else if(res.status && res.statusText) {
+            // Save to the server logs, once implemented
+            console.log(res.status + " " + res.statusText);
+          } else {
+            // Save to the server logs, once implemented
+            console.log(res);
+          }
+        });
+      }
+    },
+
+    /**
+      Here we display a warning message to the user once they've clicked to delete a category. The Modal component
+      listens for the event we fire here
+    **/
     showDeleteCategoryModal(catId, catIndex, catName, numItems) {
-      // Show a warning modal
+      // We display this modal to force the user to confirm that they indeed wish to delete the category
       const prefix = 'Are you sure you want to delete your category "' + catName + '"? ';
       var noun, msg;
       if(numItems < 1) {
@@ -260,11 +282,15 @@ export default {
       bus.$emit('showModal', modalData);
     },
 
+    /**
+      Here we send a request to the API to deactivate the category (by setting categories.active = 0). If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the category panel disappears). It is important to keep the backend data and the front-end state syncronised
+    **/
     deleteCategory(trigger) {
       this.$http.put('http://localhost:3000/api/category/deactivate/'+trigger.catId, {}, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
         if(res.status == 200) {
+          // If the updates were successfully persisted to the database, update the state to reflect the changes
           this.$store.commit('deleteCategory', trigger.catIndex);
 
           const alert = {
@@ -275,24 +301,22 @@ export default {
           bus.$emit('showAlert', alert); 
         }
       }).catch((res) => {
-       if(res.body && res.body.error) {
+        if(res.body && res.body.error) {
           // Display the error message
-          const alert = {
-            isVisible: true,
-            type: 'error',
-            message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
-          }
-          bus.$emit('showAlert', alert);
-
+          this.showAlert('error', res.body.msg);
         } else if(res.status && res.statusText) {
           console.log(res.status + " " + res.statusText);
         } else {
           console.log(res);
         }
       });
-      
     },
 
+    /**
+      Here we send the updated item data to the API, and if it is successfully persisted to the database,
+      we also update the state, which is then reflected in the view. It is important to keep the backend data and the 
+      front-end state syncronised
+    **/
     updateItem(trigger) {
       this.$http.put('http://localhost:3000/api/item/update/'+trigger.item.itemId, {
         name: trigger.item.name,
@@ -303,26 +327,14 @@ export default {
       }).then((res) => {
         // Update the item state
         this.$store.commit('updateItem', trigger);
-
         // Display the alert if successful
-        const alert = {
-          isVisible: true,
-          type: 'success',
-          message: 'Your item "' + trigger.itemStateName + '" was successfully updated!'
-        }
-        bus.$emit('showAlert', alert);
+        this.showAlert('success','Your item "' + trigger.itemStateName + '" was successfully updated!');
         // We must emit an event to the item component in order to exit edit mode
         bus.$emit('exitItemEditMode');
       }).catch((res) => {
         if(res.body && res.body.error) {
           // Display the error message
-          const alert = {
-            isVisible: true,
-            type: 'error',
-            message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
-          }
-          bus.$emit('showAlert', alert);
-
+          this.showAlert('error', res.body.msg);
         } else if(res.status && res.statusText) {
           console.log(res.status + " " + res.statusText);
         } else {
@@ -331,36 +343,28 @@ export default {
       });
     },
 
+    /**
+      Here we send a request to the API to deactivate the item (by setting items.active = 0). If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the item disappears). It is important to keep the backend data and the front-end state syncronised
+    **/
     deleteItem(trigger) {
       this.$http.put('http://localhost:3000/api/item/deactivate/'+trigger.itemId, {}, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
         this.$store.commit('deleteItem', trigger);
-
         // Display the alert if successfu
-        const alert = {
-          isVisible: true,
-          type: 'success',
-          message: 'Your item was successfully deleted!'
-        }
-        bus.$emit('showAlert', alert);
+        this.showAlert('success', 'Your item was successfully deleted!');
       }).catch((res) => {
         if(res.body && res.body.error) {
           // Display the error message
-          const alert = {
-            isVisible: true,
-            type: 'error',
-            message: res.body.msg // Must update these to user-friendly messages (API -> devMsg, userMsg)
-          }
-          bus.$emit('showAlert', alert);
-
+          this.showAlert('error', res.body.msg);
         } else if(res.status && res.statusText) {
           console.log(res.status + " " + res.statusText);
         } else {
           console.log(res);
         }
       });
-    },
+    }
+
   }
 }
 </script>
