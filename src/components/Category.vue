@@ -237,16 +237,7 @@ export default {
             this.showAlert('success', 'Your category was successfully updated!')
           }
         }).catch((res) => {
-          if(res.body && res.body.error) {
-            // Display the error message
-            this.showAlert('error', res.body.msg);
-          } else if(res.status && res.statusText) {
-            // Save to the server logs, once implemented
-            console.log(res.status + " " + res.statusText);
-          } else {
-            // Save to the server logs, once implemented
-            console.log(res);
-          }
+          this.handleApiError(res);
         });
       }
     },
@@ -288,27 +279,16 @@ export default {
     deleteCategory(trigger) {
       this.$http.put('http://localhost:3000/api/category/deactivate/'+trigger.catId, {}, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
+
       }).then((res) => {
         if(res.status == 200) {
           // If the updates were successfully persisted to the database, update the state to reflect the changes
           this.$store.commit('deleteCategory', trigger.catIndex);
+          this.showAlert('success', 'Your category was successfully deleted!');
+        }
 
-          const alert = {
-            isVisible: true,
-            type: 'success',
-            message: 'Your category was successfully deleted!'
-          }
-          bus.$emit('showAlert', alert); 
-        }
       }).catch((res) => {
-        if(res.body && res.body.error) {
-          // Display the error message
-          this.showAlert('error', res.body.msg);
-        } else if(res.status && res.statusText) {
-          console.log(res.status + " " + res.statusText);
-        } else {
-          console.log(res);
-        }
+        this.handleApiError(res);
       });
     },
 
@@ -324,22 +304,14 @@ export default {
         description: trigger.item.description
       }, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
+
       }).then((res) => {
-        // Update the item state
-        this.$store.commit('updateItem', trigger);
-        // Display the alert if successful
-        this.showAlert('success','Your item "' + trigger.itemStateName + '" was successfully updated!');
-        // We must emit an event to the item component in order to exit edit mode
-        bus.$emit('exitItemEditMode');
+        this.$store.commit('updateItem', trigger); // Update the item state
+        this.showAlert('success','Your item "' + trigger.itemStateName + '" was successfully updated!'); // Display the alert if successful
+        bus.$emit('exitItemEditMode'); // We must emit an event to the item component in order to exit edit mode
+      
       }).catch((res) => {
-        if(res.body && res.body.error) {
-          // Display the error message
-          this.showAlert('error', res.body.msg);
-        } else if(res.status && res.statusText) {
-          console.log(res.status + " " + res.statusText);
-        } else {
-          console.log(res);
-        }
+        this.handleApiError(res);
       });
     },
 
@@ -349,20 +321,28 @@ export default {
     deleteItem(trigger) {
       this.$http.put('http://localhost:3000/api/item/deactivate/'+trigger.itemId, {}, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
+
       }).then((res) => {
         this.$store.commit('deleteItem', trigger);
-        // Display the alert if successfu
+        // Display the alert if successful
         this.showAlert('success', 'Your item was successfully deleted!');
+
       }).catch((res) => {
-        if(res.body && res.body.error) {
-          // Display the error message
-          this.showAlert('error', res.body.msg);
-        } else if(res.status && res.statusText) {
-          console.log(res.status + " " + res.statusText);
-        } else {
-          console.log(res);
-        }
+        this.handleApiError(res);
       });
+    },
+
+    handleApiError(res) {
+      if(res.body && res.body.error) {
+        // Display the error message
+        this.showAlert('error', res.body.msg);
+      } else if(res.status && res.statusText) {
+        // Save to server logs (once implemented)
+        console.log(res.status + " " + res.statusText);
+      } else {
+        // Save to server logs (once implemented)
+        console.log(res);
+      }
     }
 
   }
