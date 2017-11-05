@@ -176,10 +176,6 @@ export default {
       this.exitEditMode();
     });
 
-    bus.$on('userConfirmedDeleteIntention', () => {
-      this.exitEditMode();
-    });
-
   },
 
   computed: {

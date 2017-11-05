@@ -25,7 +25,7 @@
             data-toggle="collapse" 
             data-parent="#accordion" 
             v-bind:href="'#' + category.categoryId"
-            >{{category.name}}
+            >{{category.name}} ({{category.items.length}})
           </a>
           <!-- Delete Icon (visible by default) -->
           <a 
@@ -124,6 +124,11 @@ export default {
     bus.$on('userConfirmedDiscardIntention_category', (index) => {
       // Reset the category that is currently being edited
       // Make the new category the editable one
+    });
+
+    // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
+    bus.$on('userConfirmedDeleteItemIntention', (trigger) => {
+      this.deleteItem(trigger);
     });
   },
 
@@ -280,7 +285,30 @@ export default {
         }
       })
       
-    }
+    },
+
+    deleteItem(trigger) {
+      this.$http.put('http://localhost:3000/api/item/deactivate/'+trigger.itemId, {}, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+      }).then((res) => {
+        console.log(res);
+      }).catch((res) => {
+        console.log(res);
+      });
+      /**
+      // Update the item state
+      this.$store.commit('deleteItem', trigger);
+
+      // Display the alert if successfu
+      const alert = {
+        isVisible: true,
+        type: 'success',
+        message: 'Your item was successfully deleted!'
+      }
+      bus.$emit('showAlert', alert);
+      bus.$emit('userConfirmedDeleteIntention');
+      **/
+    },
   }
 }
 </script>

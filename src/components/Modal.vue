@@ -98,27 +98,14 @@ export default {
   methods: {
     // When the user confirms they want to discard their item updates, we inform the menu component, triggering a reset of the view item
     emitDiscardConfirmation(trigger) {
-      // PROBLEM: We could do this by directly calling a setter in the store, which would reset the clone of the state
       bus.$emit('userConfirmedDiscardIntention', trigger);
-      
       // Hide the modal
       this.modal.isVisible = false;
     },
 
     // When the user confirms they want to delete the item, we inform the menu component, triggering item deletion
     emitDeleteConfirmation(trigger) {
-      // Update the item state
-      this.$store.commit('deleteItem', trigger);
-
-      // Display the alert if successfu
-      const alert = {
-        isVisible: true,
-        type: 'success',
-        message: 'Your item was successfully deleted!'
-      }
-      bus.$emit('showAlert', alert);
-      bus.$emit('userConfirmedDeleteIntention');
-
+      bus.$emit('userConfirmedDeleteItemIntention', trigger);
       // Hide the modal
       this.modal.isVisible = false;
     },
