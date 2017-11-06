@@ -12,7 +12,11 @@
 
         <div class="modal-footer">
 
-          <!-- Triggers Confirm Update Modal -->
+          <!-- 
+            A confirm_update event is emitted by a component to ask the user to confirm that he wants to save the updates he has made. The component name can be found in modal.trigger.component. 
+
+            The name of an event emitted by the Modal should have the name of the target component appended.
+           -->
           <button 
             class="btn btn-danger" 
             v-if="modal.name == 'confirm_update'"
@@ -20,24 +24,23 @@
             {{modal.buttons.warning}}
           </button>
 
-          <!-- Triggers Cancel Update (items) Modal-->
+          <!-- 
+            A discard_changes event is emitted by a component to ask the user to confirm that he wants to discard the updates he has made. The component name can be found in modal.trigger.component. 
+
+            The name of an event emitted by the Modal should have the name of the target component appended.
+           -->
           <button 
             class="btn btn-danger" 
-            v-if="modal.name == 'cancel_update'" 
-            v-on:click="emitDiscardConfirmation(modal.trigger)">
+            v-if="modal.name == 'discard_changes'" 
+            v-on:click="emitDiscardChangesConfirmation(modal.trigger)">
             {{modal.buttons.warning}}
           </button>
 
-          <!-- Triggers Cancel Update (categories) Modal-->
-          <!--
-          <button 
-            class="btn btn-danger" 
-            v-if="modal.name == 'cancel_category_update'" 
-            v-on:click="emitDiscardConfirmation_category(modal.trigger.catIndex)">
-            {{modal.buttons.warning}}
-          </button>
-        -->
-          <!-- Triggers Confirm Delete Modal -->
+          <!-- 
+            A confirm_delete event is emitted by a component to ask the user to confirm that he wants to delete the item/category etc. The component name can be found in modal.trigger.component. 
+
+            The name of an event emitted by the Modal should have the name of the target component appended.
+           -->
           <button 
             class="btn btn-danger"
             v-if="modal.name == 'confirm_delete'" 
@@ -65,6 +68,7 @@ import { bus } from '../main';
 
 export default {
   name: 'Modal',
+
   data () {
     return {
       modal: {
@@ -73,15 +77,19 @@ export default {
         trigger: {},
         title: null,
         buttons: {}
-      },
-      alert: {
-        isVisible: true,
-        type: null,
-        summary: null,
-        message: null,
       }
     }
   },
+  /**
+    The Modal component listens to the "showModal" event. Whenever we need to display a modal, we emit this event from
+    the relevant component. 
+
+    The event we emit will contain the modal data, including the button texts, the message, and the item and/or category that was clicked to trigger the modal.
+
+    We specify the name of the modal in the base component, and as you can see in the template above, we render certain buttons depending on which type of modal is to be displayed. 
+
+    We also specify the name of the base component in modal.trigger.component. If the Item component sends a event with modal.name 'confirm_delete', and the category component sends the same, we can handle this without repeating the methods below for each component, by affixing the component name to the event name, and listening for the events in the respective components. E.g. the Item component may listen for an event named "confirm_delete_item". This ensures events are sent to the correct component, which will then handle the resource modification (update, discard, delete).
+  **/
   created () {
     bus.$on('showModal', (modal) => {
       Object.assign(this.modal, modal);
@@ -89,33 +97,20 @@ export default {
   },
 
   methods: {
-    // When the user confirms they want to discard their item updates, we inform the menu component, triggering a reset of the view item
-    emitDiscardConfirmation(trigger) {
-      bus.$emit('userConfirmedDiscardIntention', trigger);
-      // Hide the modal
+
+    emitDiscardChangesConfirmation(trigger) {
+      bus.$emit('confirm_discard_changes', trigger);
       this.modal.isVisible = false;
     },
 
-    // When the user confirms they want to delete the item, we inform the menu component, triggering item deletion
-    emitDeleteConfirmation(trigger) {
-      bus.$emit('userConfirmedDeleteItemIntention', trigger);
-      // Hide the modal
-      this.modal.isVisible = false;
-    },
-
-    // When the user confirms they want to save the updates made to their item, we inform the menu component, triggering item update
+   
     emitUpdateConfirmation(trigger) {
-      // Notify the item component so edit mode is exited
-      bus.$emit('userConfirmedUpdateIntention', trigger);
-
-      // Hide the modal
+      bus.$emit('confirm_update', trigger);
       this.modal.isVisible = false;
     },
 
     emitDeleteConfirmation(trigger) {
-      // Emit an event back to the category component which will handle deletion
-      bus.$emit('delete', trigger);
-      // Hide the modal
+      bus.$emit('confirm_delete', trigger);
       this.modal.isVisible = false;
     }
 

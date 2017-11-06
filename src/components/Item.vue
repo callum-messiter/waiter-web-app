@@ -175,7 +175,7 @@ export default {
     /** 
       This event is emitted by the modal component, when the user clicks the "Discard Changes" button
     **/
-    bus.$on('userConfirmedDiscardIntention', (trigger) => {
+    bus.$on('confirm_discard_changes', (trigger) => {
       this.resetItem(trigger);
     });
 
@@ -334,7 +334,7 @@ export default {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal 
         const itemState = this.categoryItemsState[catIndex].items[itemIndex];
         this.showModal(
-          'cancel_update', 
+          'discard_changes', 
           'Are you sure you want to discard your changes to "' + itemState.name + '"?',
           'Continue Editing',
           'Discard',
