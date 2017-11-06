@@ -320,7 +320,7 @@ export default {
       him to confirm that he indeed wishes to discard the changes he has made to the item
     **/
     showConfirmDiscardModal(item, itemIndex, catIndex) {
-      // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then nclick cancel without making any changes)
+      // First we want to check if the view has actually been changed by the user (they can activate edit mode on a item and then n click cancel without making any changes)
       if(_.isEqual(this.categories, this.categoryItemsState)) {
         // If the item hasn't actually been changed, just set it back to readonly - no need to display a modal
         this.exitEditMode();

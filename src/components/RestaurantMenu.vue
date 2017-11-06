@@ -85,15 +85,11 @@ export default {
       const newCategory = this.newCategory;
       // Check that the user has provided a category name
       if(newCategory.name == null || newCategory.name == '') {
-        const modalData = {
-          name: 'empty_fields',
-          isVisible: true,
-          title: "Every category must have a name!",
-          buttons: {
-            primary: 'Back to the menu',
-          }
-        }
-        bus.$emit('showModal', modalData);
+        this.showModal(
+          'empty_fields', 
+          'Every category must have a name!',
+          'Back to the menu'
+        );
       } else {
         // If the user has filled in the categoryName field, post it to the API
         this.$http.post('http://localhost:3000/api/category/create', {
@@ -137,6 +133,24 @@ export default {
         message: msg
       }
       bus.$emit('showAlert', alert);
+    },
+
+    /**
+      OUr (mostly) warning messages which prompt the user to confirm their intentions. We send the data to the Modal
+      component, which renders the modal accordingly. When the user clicks a modal button, the Modal component emits an event, 
+      which is being listened to by this Item component (see the created() hook)
+    **/
+    showModal(name, title, btnPrimary, btnWarn, trigger) {
+      bus.$emit('showModal', {
+        name: name,
+        isVisible: true,
+        title: title,
+        trigger: trigger,
+        buttons: {
+          primary: btnPrimary,
+          warning: btnWarn
+        }
+      });
     },
 
     /**

@@ -189,18 +189,6 @@ export default {
     },
 
     /**
-      Our success and error flash messages (the event is listened for by the Alert component)
-    **/
-    showAlert(type, msg) {
-      const alert = {
-        isVisible: true,
-        type: type,
-        message: msg
-      }
-      bus.$emit('showAlert', alert);
-    },
-
-    /**
       "Edit Mode" simply means that a user has clicked the edit icon on the category panel. When a category is in 
       edit mode, the accordion freezes, and the category name is enclosed by a (seamless) form input, and is thus editable
     **/
@@ -256,21 +244,14 @@ export default {
         (numItems == 1) ? noun = 'item' : noun = 'items';
         msg = 'The category, and its ' + numItems  + ' ' + noun + ', will become invisible to your customers.';
       }
-      
-      const modalData = {
-        name: 'confirm_delete_category',
-        isVisible: true,
-        title: prefix + msg,
-        trigger: {
-          catIndex: catIndex,
-          catId: catId
-        },
-        buttons: {
-          primary: 'Cancel',
-          warning: 'Delete Category'
-        }
-      }
-      bus.$emit('showModal', modalData);
+
+      this.showModal(
+        'confirm_delete_category', 
+         prefix + msg,
+        'Cancel',
+        'Delete Category',
+        {catIndex, catId}
+      );
     },
 
     /**
@@ -329,6 +310,36 @@ export default {
 
       }).catch((res) => {
         this.handleApiError(res);
+      });
+    },
+
+    /**
+      Our success and error flash messages (the event is listened for by the Alert component)
+    **/
+    showAlert(type, msg) {
+      const alert = {
+        isVisible: true,
+        type: type,
+        message: msg
+      }
+      bus.$emit('showAlert', alert);
+    },
+
+    /**
+      OUr (mostly) warning messages which prompt the user to confirm their intentions. We send the data to the Modal
+      component, which renders the modal accordingly. When the user clicks a modal button, the Modal component emits an event, 
+      which is being listened to by this Item component (see the created() hook)
+    **/
+    showModal(name, title, btnPrimary, btnWarn, trigger) {
+      bus.$emit('showModal', {
+        name: name,
+        isVisible: true,
+        title: title,
+        trigger: trigger,
+        buttons: {
+          primary: btnPrimary,
+          warning: btnWarn
+        }
       });
     },
 
