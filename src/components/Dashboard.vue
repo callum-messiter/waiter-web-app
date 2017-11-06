@@ -5,73 +5,54 @@
 </template>
 
 <script>
-	import RestaurantMenu from './RestaurantMenu';
+// Components
+import RestaurantMenu from './RestaurantMenu';
 
-	// Events bus
-	import { bus } from '../main';
+// Mixins
+import functions from '../mixins/functions';
 
-	export default {
-		name: 'Dashboard',
-		components: {
-	    'restaurant-menu': RestaurantMenu
-	  },
-		data() {
-			return {
-				restaurant: {
-					name: 'Spices',
-					imageUrl: '',
-				},
-				menuName: 'Main Menu'
-			}
-		},
+// Events bus
+import { bus } from '../main';
 
-		// When the dashboard is created, add the menu object to the store.
-		// The grandchild component, Category, will get the categories data from this menu object in the store
-		created () {
-	    const menuId = JSON.parse(localStorage.menu).menuId;
-	    // Get the menu object and add it to the store
-	    this.$http.get('http://localhost:3000/api/menu/'+menuId, { 
-	      headers: {Authorization: JSON.parse(localStorage.user).token}
-	    }).then((res) => {
-	      this.$store.commit('setMenu', res.body.data);
+export default {
+	name: 'Dashboard',
+	components: {
+    'restaurant-menu': RestaurantMenu
+  },
+  mixins: [functions],
 
-	    }).catch((res) => {
-	      this.handleApiError(res);
-	    });
-	  },
+	data() {
+		return {
+			restaurant: {
+				name: 'Spices',
+				imageUrl: '',
+			},
+			menuName: 'Main Menu'
+		}
+	},
 
-	  methods: {
+	/**
+		When the Dashboard component is created, grab the user's entire menu object from the backend, 
+		and add it to the store. The child component Category, and its child component Item, will get this data
+		from the store and render it. 
 
-	  	/**
-	      Our success and error flash messages (the event is listened for by the Alert component)
-	    **/
-	    showAlert(type, msg) {
-	      const alert = {
-	        isVisible: true,
-	        type: type,
-	        message: msg
-	      }
-	      bus.$emit('showAlert', alert);
-	    },
+		The user will always have a menu in the backend; the create-user endpoint (called on signup) creates
+		the user, the user's restaurant, and the restaurant default menu, with five default categories.
+	**/
+	created () {
+    const menuId = JSON.parse(localStorage.menu).menuId;
+    // Get the menu object and add it to the store
+    this.$http.get('http://localhost:3000/api/menu/'+menuId, { 
+      headers: {Authorization: JSON.parse(localStorage.user).token}
+    }).then((res) => {
+      this.$store.commit('setMenu', res.body.data);
 
-	    /**
-	      We will handle every API error like this, in the catch block of our promise
-	    **/
-	    handleApiError(res) {
-	      if(res.body && res.body.error) {
-	        // Display the error message
-	        this.showAlert('error', res.body.msg);
-	      } else if(res.status && res.statusText) {
-	        // Save to server logs (once implemented)
-	        console.log(res.status + " " + res.statusText);
-	      } else {
-	        // Save to server logs (once implemented)
-	        console.log(res);
-	      }
-	    }
+    }).catch((res) => {
+      this.handleApiError(res);
+    });
+  }
 
-	  }
-	}
+}
 </script>
 
 <style scoped>
