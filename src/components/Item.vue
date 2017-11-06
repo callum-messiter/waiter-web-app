@@ -239,15 +239,11 @@ export default {
       // Check that none of the items are empty
       if(newItem.name == '' || newItem.price == '' || newItem.description == '') {
         // Prompt the user to fill in the fields
-        const modalData = {
-          name: 'empty_fields',
-          isVisible: true,
-          title: "You can't add a new item without filling in all the details!",
-          buttons: {
-            primary: 'Back to the menu',
-          }
-        }
-        bus.$emit('showModal', modalData);
+        this.showModal(
+          'empty_fields', 
+          "You can't add a new item without filling in all the details!",
+          'Back to the menu',
+        );
 
       } else {
         this.$http.post('http://localhost:3000/api/item/create', {
@@ -308,23 +304,14 @@ export default {
         this.exitEditMode();
       } else {
         // Emit the event to the modal component
-        const itemState = this.categoryItemsState[catIndex].items[itemIndex];
-        const modalData = {
-          name: 'confirm_update',
-          isVisible: true,
-          title: 'Are you sure you want to update "' + itemState.name + '"? This will take effect immediately in your live menu.',
-          trigger: {
-            item: item,
-            itemStateName: itemState.name,
-            itemIndex: itemIndex,
-            catIndex: catIndex,
-          },
-          buttons: {
-            primary: 'Continue Editing',
-            warning: 'Save Changes'
-          }
-        }
-        bus.$emit('showModal', modalData);
+        const itemStateName = this.categoryItemsState[catIndex].items[itemIndex].name;
+        this.showModal(
+          'confirm_update', 
+          'Are you sure you want to update "' + itemStateName + '"? This will take effect immediately in your live menu.',
+          'Continue Editing',
+          'Save Changes',
+          {item, itemStateName, itemIndex, catIndex},
+        );
       }
     },
 
@@ -340,21 +327,13 @@ export default {
       } else {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal 
         const itemState = this.categoryItemsState[catIndex].items[itemIndex];
-        const modalData = {
-          name: 'cancel_update',
-          isVisible: true,
-          title: 'Are you sure you want to discard your changes to "' + itemState.name + '"?',
-          trigger: {
-            item: item,
-            itemIndex: itemIndex,
-            catIndex: catIndex,
-          },
-          buttons: {
-            primary: 'Continue Editing',
-            warning: 'Discard'
-          }
-        }
-        bus.$emit('showModal', modalData);
+        this.showModal(
+          'cancel_update', 
+          'Are you sure you want to discard your changes to "' + itemState.name + '"?',
+          'Continue Editing',
+          'Discard',
+          {item, itemIndex, catIndex}
+        );
       }
     },
 
@@ -364,21 +343,13 @@ export default {
     showConfirmDeleteModal(itemId, itemIndex, catIndex) {
       const itemState = this.categoryItemsState[catIndex].items[itemIndex];
       // Build the confirm_delete modal
-      const modalData = {
-        name: 'confirm_delete_item',
-        isVisible: true,
-        title: 'Are you sure you want to delete "' + itemState.name + '"? It will become invisible to your customers.',
-        trigger: {
-          itemId: itemId,
-          itemIndex: itemIndex,
-          catIndex: catIndex
-        },
-        buttons: {
-          primary: 'Cancel',
-          warning: 'Delete Item'
-        }
-      }
-      bus.$emit('showModal', modalData);
+      this.showModal(
+        'confirm_delete_item', 
+        'Are you sure you want to delete "' + itemState.name + '"? It will become invisible to your customers.',
+        'Cancel',
+        'Delete Item',
+        {itemId, itemIndex, catIndex}
+      );
     },
 
     /**
@@ -424,7 +395,8 @@ export default {
     },
 
     /**
-      Our success and error flash messages (the event is listened for by the Alert component)
+      Our success and error flash messages (the event is listened for by the Alert component). We send the data to the
+      Alert component, which renders it before making it invisible after some number of seconds
     **/
     showAlert(type, msg) {
       const alert = {
@@ -433,6 +405,24 @@ export default {
         message: msg
       }
       bus.$emit('showAlert', alert);
+    },
+
+    /**
+      OUr (mostly) warning messages which prompt the user to confirm their intentions. We send the data to the Modal
+      component, which renders the modal accordingly. When the user clicks a modal button, the Modal component emits an event, 
+      which is being listened to by this Item component (see the created() hook)
+    **/
+    showModal(name, title, btnPrimary, btnWarn, trigger) {
+      bus.$emit('showModal', {
+        name: name,
+        isVisible: true,
+        title: title,
+        trigger: trigger,
+        buttons: {
+          primary: btnPrimary,
+          warning: btnWarn
+        }
+      });
     },
 
     /**
