@@ -29,26 +29,19 @@
           </button>
 
           <!-- Triggers Cancel Update (categories) Modal-->
+          <!--
           <button 
             class="btn btn-danger" 
             v-if="modal.name == 'cancel_category_update'" 
             v-on:click="emitDiscardConfirmation_category(modal.trigger.catIndex)">
             {{modal.buttons.warning}}
           </button>
-
+        -->
           <!-- Triggers Confirm Delete Modal -->
           <button 
             class="btn btn-danger"
-            v-if="modal.name == 'confirm_delete_item'" 
+            v-if="modal.name == 'confirm_delete'" 
             v-on:click="emitDeleteConfirmation(modal.trigger)">
-            {{modal.buttons.warning}}
-          </button>
-
-          <!-- Triggers Confirm Delete Modal -->
-          <button 
-            class="btn btn-danger"
-            v-if="modal.name == 'confirm_delete_category'" 
-            v-on:click="emitDeleteCategoryConfirmation(modal.trigger)">
             {{modal.buttons.warning}}
           </button>
 
@@ -119,20 +112,12 @@ export default {
       this.modal.isVisible = false;
     },
 
-    emitDeleteCategoryConfirmation(trigger) {
+    emitDeleteConfirmation(trigger) {
       // Emit an event back to the category component which will handle deletion
-      bus.$emit('deleteCategoryConfirmation', trigger);
+      bus.$emit('delete', trigger);
       // Hide the modal
       this.modal.isVisible = false;
-    },
-
-    emitDiscardConfirmation_category(index) {
-      // PROBLEM: We could do this by directly calling a setter in the store, which would reset the clone of the state
-      bus.$emit('userConfirmedDiscardIntention_category', index);
-      
-      // Hide the modal
-      this.modal.isVisible = false;
-    },
+    }
 
   }
 }

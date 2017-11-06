@@ -146,7 +146,7 @@ export default {
   name: 'Item',
   props: ['categoriesObj', 'categoryItems'],
   mixins: [functions],
-  
+
   data() {
     return {
       editMode: {
@@ -350,7 +350,7 @@ export default {
       const itemState = this.categoryItemsState[catIndex].items[itemIndex];
       // Build the confirm_delete modal
       this.showModal(
-        'confirm_delete_item', 
+        'confirm_delete', 
         'Are you sure you want to delete "' + itemState.name + '"? It will become invisible to your customers.',
         'Cancel',
         'Delete Item',
