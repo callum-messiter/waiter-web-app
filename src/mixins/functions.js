@@ -40,16 +40,21 @@ export default {
       We will handle every API error like this, in the catch block of our promise
     **/
     handleApiError(res) {
-      if(res.body && res.body.error) {
-        // Display the error message
-        this.showAlert('error', res.body.msg);
+      var msg;
+      if(res.body && res.body.errorKey) {
+        msg = res.body.userMsg; // The API returns a user-friendly error message
+
       } else if(res.status && res.statusText) {
+        msg = 'Oops! The waiter system experienced an error - please try again. If the issue persists, contact our support team.';
         // Save to server logs (once implemented)
         console.log(res.status + " " + res.statusText);
+
       } else {
+        msg = 'Oops! The waiter system experienced an error - please try again. If the issue persists, contact our support team.';
         // Save to server logs (once implemented)
         console.log(res);
       }
+      this.showAlert('error', msg);
     }
     
 	}
