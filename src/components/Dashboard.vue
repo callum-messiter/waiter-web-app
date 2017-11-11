@@ -40,17 +40,17 @@ export default {
 		the user, the user's restaurant, and the restaurant default menu, with five default categories.
 	**/
 	created () {
-    const menuId = JSON.parse(localStorage.menu).menuId;
-    // Get the menu object and add it to the store
-    this.$http.get('http://localhost:3000/api/menu/'+menuId, { 
-      headers: {Authorization: JSON.parse(localStorage.user).token}
-    }).then((res) => {
-      this.$store.commit('setMenu', res.body.data);
+	    const menuId = JSON.parse(localStorage.menu).menuId;
+	    // Get the menu object and add it to the store
+	    this.$http.get('http://localhost:3000/api/menu/'+menuId, { 
+	      headers: {Authorization: JSON.parse(localStorage.user).token}
+	    }).then((res) => {
+	      this.$store.commit('setMenu', res.body.data);
 
-    }).catch((res) => {
-      this.handleApiError(res);
-    });
-  }
+	    }).catch((res) => {
+	      this.handleApiError(res);
+	    });
+	  }
 
 }
 </script>
