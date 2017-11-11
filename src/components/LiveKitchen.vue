@@ -3,7 +3,7 @@
     <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
     <div class="received-container col-sm-4 col-sm-offset-2">
       <h3>Received Orders</h3>
-      <div class="panel panel-default" v-for="order in orders" v-if="order.status === statuses.receivedByKitchen">
+      <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.receivedByKitchen">
         <div class="panel-heading container-fluid">
           <div class="row">
             <h3 class="panel-title text-left col-sm-4">10 mins ago</h3>
@@ -26,7 +26,7 @@
     <!-- Orders accepted by the kitchen, and thus in progress. Ordered by recency (oldest at top)-->
     <div class="accepted-container col-sm-4">
       <h3>Accepted Orders</h3>
-      <div class="panel panel-default" v-for="order in orders" v-if="order.status === statuses.acceptedByKitchen">
+      <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.acceptedByKitchen">
         <div class="panel-heading container-fluid">
           <div class="row">
             <h3 class="panel-title text-left col-sm-4">0 mins ago</h3>
@@ -47,10 +47,14 @@
 </template>
 
 <script>
+// Mixins
+import functions from '../mixins/functions';
 
 export default {
   name: 'LiveKitchen',
   components: {},
+  mixins: [functions],
+
   data() {
     return {
       statuses: {
@@ -63,6 +67,7 @@ export default {
         // returnedByCustomer: 666,
         // eaten: 500 // May be set once the user has sent feedback
       },
+      /**
       orders: [
         {
           orderId: 1,
@@ -95,16 +100,44 @@ export default {
           ]
         }
       ]
+      **/ 
     }
   },
 
   created () {
-    // The server broadcasts order events to all connected sockets, but affixes the restaurantId to the order name.
-    // Here we listen for order events with the restaurantId affixed, so that restaurant will only receive their own orders
+    console.log(this.orders[0]);
+    /**
+      The server broadcasts order events to all connected sockets, but affixes the restaurantId to the order name.
+      Here we listen for order events with the restaurantId affixed, so that restaurant will only receive their own orders
+    **/
     this.$options.sockets[this.orderEventName] = (order) => {
       // Add the order to the store
       console.log(order);
-    }
+    };
+
+    /**
+      On refresh, get the up-to-date live order state for the restaurant, according to the backend
+    **/
+    const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
+    // Get the live-orders object and add it to the store
+    this.$http.get('http://localhost:3000/api/order/getAllLive/'+restaurantId, { 
+      headers: {Authorization: JSON.parse(localStorage.user).token}
+    }).then((res) => {
+      const orders = res.body.data;
+      // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
+      // We should maybe do this after setting the raw state
+      for(var i = 0; i < orders.length; i++) {
+        if(orders[i].status == 200) {
+          orders[i].status = this.statuses.receivedByKitchen;
+        }
+      }
+
+      this.$store.commit('setLiveOrders', orders);
+
+    }).catch((res) => {
+      this.handleApiError(res);
+    });
+
   },
   
   methods: {
@@ -153,6 +186,10 @@ export default {
 
     orderEventName() {
       return 'order_'+JSON.parse(localStorage.restaurant).restaurantId;
+    },
+
+    orders() {
+      return this.$store.getters.getLiveOrders;
     }
   }
 }

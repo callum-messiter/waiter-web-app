@@ -16,106 +16,7 @@ export default new Vuex.Store({
 			name: null,
 			categories: []
 		},
-		/**
-		categories: [
-			{
-				categoryId: 1,
-				name: 'Main Menu',
-				items: [
-					{
-						itemId: 1,
-						name: 'Lamb',
-						price: '15.00',
-						description: 'Roast lamb with vegetables',
-					},
-					{
-						itemId: 2,
-						name: 'Sausages',
-						price: '5.00',
-						description: '100% British beef sausages',
-					},
-					{
-						itemId: 3,
-						name: 'Potatoes',
-						price: '7.00',
-						description: 'Irish potatoes with a golden shine',
-					}
-				]
-			},
-			{
-				categoryId: 2,
-				name: 'Starters',
-				items: [
-					{
-						itemId: 4,
-						name: 'Ribs',
-						price: '10.00',
-						description: 'At vero eos et accusamus et iusto odio dignissimos ',
-					},
-					{
-						itemId: 5,
-						name: 'Nachos',
-						price: '7.00',
-						description: 'Nam libero tempore, cum soluta nobis est eligendi optio',
-					},
-					{
-						itemId: 6,
-						name: 'Soup',
-						price: '4.00',
-						description: 'Itaque earum rerum hic tenetur a sapiente',
-					}
-				]
-			},
-			{
-				categoryId: 3,
-				name: 'Desserts',
-				items: [
-					{
-						itemId: 7,
-						name: 'Apple Crumble',
-						price: '6.00',
-						description: 'Excepteur sint occaecat cupidatat non proident',
-					},
-					{
-						itemId: 8,
-						name: 'Cheesecake',
-						price: '5.00',
-						description: 'Quis autem vel eum iure reprehenderit qui in',
-					},
-					{
-						itemId: 9,
-						name: 'Sundae',
-						price: '5.00',
-						description: 'Ut enim ad minima veniam, quis nostrum',
-					}
-				]
-			},
-			{
-				categoryId: 4,
-				name: 'Drinks',
-				items: [
-					{
-						itemId: 10,
-						name: 'Heineken',
-						price: '3.80',
-						description: 'Sed ut perspiciatis unde omnis iste natus error sit ',
-					},
-					{
-						itemId: 11,
-						name: 'Milkshake',
-						price: '5.00',
-						description: 'Nemo enim ipsam voluptatem quia voluptas sit ',
-					},
-					{
-						itemId: 12,
-						name: 'Coca Cola',
-						price: '3.00',
-						description: 'Neque porro quisquam est, qui dolorem',
-					}
-				]
-			}
-		]
-		**/
+		orders: []
 	},
 	mutations: {
 		/**
@@ -165,6 +66,13 @@ export default new Vuex.Store({
 		**/
 		setMenu(state, menu) {
 			state.menu = menu;
+		},
+
+		/**
+			Orders
+		**/
+		setLiveOrders(state, orders) {
+			state.orders = orders;
 		}
 	},
 	actions: {},
@@ -184,6 +92,13 @@ export default new Vuex.Store({
 		**/
 		isUserAuthenticated(state) {
 			return state.auth.isUserAuthenticated;
+		},
+
+		/**
+			Orders
+		**/
+		getLiveOrders(state) {
+			return state.orders;
 		}
 	}
 });
