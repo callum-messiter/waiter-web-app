@@ -73,6 +73,18 @@ export default new Vuex.Store({
 		**/
 		setLiveOrders(state, orders) {
 			state.orders = orders;
+		},
+
+		addNewOrder(state, order) {
+			state.orders.push(order);
+		},
+
+		updateOrderStatus(state, order) {
+			// Find the order by its ID
+			const index = state.orders.findIndex(orderState => orderState.orderId == order.orderId);
+			console.log(JSON.stringify(state.orders));
+			state.orders[index].status = order.status; // and update its status
+			console.log(JSON.stringify(state.orders));
 		}
 	},
 	actions: {},

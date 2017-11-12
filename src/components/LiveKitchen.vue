@@ -105,14 +105,31 @@ export default {
   },
 
   created () {
-    console.log(this.orders[0]);
     /**
       The server broadcasts order events to all connected sockets, but affixes the restaurantId to the order name.
       Here we listen for order events with the restaurantId affixed, so that restaurant will only receive their own orders
     **/
     this.$options.sockets[this.orderEventName] = (order) => {
-      // Add the order to the store
-      console.log(order);
+      // Add the order to the state with status 200 (sentToKitchen)
+      this.$store.commit('addNewOrder', order);
+      // Whenever we receive a new orer, we should send an order-status update to the server "receivedByKitchen"
+      this.$socket.emit('orderStatusUpdate', {
+        orderId: order.orderId,
+        customerId: order.customerId,
+        restaurantId: order.restaurantId,
+        status: this.statuses.receivedByKitchen
+      });
+      console.log('order added, statusUpdate sent');
+    };
+
+    /**
+      Once we emit an order-status update to the server, the server will update the order's ststus in the database, before 
+      emitting a confirmation of update back to us.
+
+      Only then do we add the order to the frontend state
+    **/
+    this.$options.sockets['orderStatusUpdated'] = (order) => {
+      this.$store.commit('updateOrderStatus', order);
     };
 
     /**
@@ -125,7 +142,6 @@ export default {
     }).then((res) => {
       const orders = res.body.data;
       // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
-      // We should maybe do this after setting the raw state
       for(var i = 0; i < orders.length; i++) {
         if(orders[i].status == 200) {
           orders[i].status = this.statuses.receivedByKitchen;
