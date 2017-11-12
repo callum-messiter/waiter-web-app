@@ -108,7 +108,7 @@ export default new Vuex.Store({
 					break;
 				default:
 					console.log('Error updating order-status state. Order from server has status: ' +order.status);
-				
+					break;
 			}
 		},
 

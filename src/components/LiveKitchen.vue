@@ -66,13 +66,13 @@ export default {
       statuses: {
         receivedByServer: 100,
         sentToKitchen: 200,
-        receivedByKitchen: 300, // this would be a notification of reception
+        receivedByKitchen: 300, // this would be a notification of receipt
         acceptedByKitchen: 400,
         rejectedByKitchen: 999,
         enRouteToCustomer: 1000,
         // returnedByCustomer: 666,
         // eaten: 500 // May be set once the user has sent feedback
-      } 
+      }
     }
   },
 
@@ -86,16 +86,21 @@ export default {
       headers: {Authorization: JSON.parse(localStorage.user).token}
     }).then((res) => {
       const orders = res.body.data;
-      /**
       
       // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
-      // We would need to send an order-status update for each case
       for(var i = 0; i < orders.length; i++) {
-        if(orders[i].status == 200) {
-          orders[i].status = this.statuses.receivedByKitchen;
+        if(orders[i].status == this.statuses.sentToKitchen) {
+          // In each case, send an order-status update event to the server, and subsequently update the order's state
+          // once the server has confirmed the status has been updated in the database
+          this.updateOrderStatus(orders[i], this.statuses.receivedByKitchen);
+        }
+
+        // Only orders with status 200, 300, 400 should be sent to the restaurant
+        if(!this.statusesVisibleToKitchen.includes(orders[i].status)) {
+          console.log('Error: "api/order/getAllLive" returned an order with status: ' + orders[i].status);
         }
       }
-      **/
+
       this.$store.commit('setLiveOrders', orders);
 
     }).catch((res) => {
@@ -109,20 +114,15 @@ export default {
     this.$options.sockets[this.orderEventName] = (order) => {
       // Add the order to the state with status 200 (sentToKitchen)
       this.$store.commit('addNewOrder', order);
-      // Whenever we receive a new orer, we should send an order-status update to the server "receivedByKitchen"
-      this.$socket.emit('orderStatusUpdate', {
-        orderId: order.orderId,
-        customerId: order.customerId,
-        restaurantId: order.restaurantId,
-        status: this.statuses.receivedByKitchen
-      });
+      // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
+      this.updateOrderStatus(order, this.statuses.receivedByKitchen);
     };
 
     /**
       Once we emit an order-status update to the server, the server will update the order's ststus in the database, before 
       emitting a confirmation of update back to us.
 
-      Only then do we add the order to the frontend state
+      Only then do we update the order status in the state
     **/
     this.$options.sockets['orderStatusUpdated'] = (order) => {
       this.$store.commit('updateOrderStatus', order);
@@ -152,6 +152,14 @@ export default {
 
     orders() {
       return this.$store.getters.getLiveOrders;
+    },
+
+    statusesVisibleToKitchen() {
+      return [
+        this.statuses.sentToKitchen, 
+        this.statuses.receivedByKitchen,
+        this.statuses.acceptedByKitchen
+      ]
     }
   }
 }
