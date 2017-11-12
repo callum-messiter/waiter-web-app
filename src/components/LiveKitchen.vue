@@ -112,7 +112,7 @@ export default {
       Here we listen for order events with the restaurantId affixed, so that restaurant will only receive their own orders
     **/
     this.$options.sockets[this.orderEventName] = (order) => {
-      // Add the order to the state with status 200 (sentToKitchen)
+      // Add the order to the state with the status set by the server: 200 (sentToKitchen)
       this.$store.commit('addNewOrder', order);
       // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
       this.updateOrderStatus(order, this.statuses.receivedByKitchen);
