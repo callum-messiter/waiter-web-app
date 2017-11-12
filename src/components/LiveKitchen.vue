@@ -11,10 +11,12 @@
           <div class="row">
             <h3 class="panel-title text-left col-sm-4">10 mins ago</h3>
             <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
-            <a href="#" v-on:click="rejectOrder(orders.indexOf(order))">
+            <!-- Reject-Order Icon -->
+            <a href="#" v-on:click="updateOrderStatus(order, statuses.rejectedByKitchen)">
               <span class="glyphicon glyphicon-remove pull-right"></span>
             </a>
-            <a href="#" v-on:click="acceptOrder(orders.indexOf(order), order)">
+            <!-- Accept-Order Icon -->
+            <a href="#" v-on:click="updateOrderStatus(order, statuses.acceptedByKitchen)">
               <span class="glyphicon glyphicon-ok pull-right"></span>
             </a>
           </div>
@@ -34,7 +36,8 @@
           <div class="row">
             <h3 class="panel-title text-left col-sm-4">0 mins ago</h3>
             <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
-            <a href="#" v-on:click="markOrderAsDelivered(orders.indexOf(order))">
+            <!-- Send-Order-to-Custom Icon -->
+            <a href="#" v-on:click="updateOrderStatus(order, statuses.enRouteToCustomer)">
               <span class="glyphicon glyphicon-send pull-right"></span>
             </a>
           </div>
@@ -128,30 +131,13 @@ export default {
   },
   
   methods: {
-    acceptOrder(index, order) {
-      // show the warning modal
-
-      // emit event to server with new order status
+    updateOrderStatus(order, status) {
       this.$socket.emit('orderStatusUpdate', {
         orderId: order.orderId,
         customerId: order.customerId,
         restaurantId: this.restaurantId,
-        status: this.statuses.acceptedByKitchen
+        status: status
       });
-    },
-
-    rejectOrder(index) {
-      // show the warning modal
-      // emit event to server with new order status
-      // remove the order from the state
-      this.orders.splice(index, 1);
-    },
-
-    markOrderAsDelivered(index) {
-      // show the warning modal
-      // emit event to server with new order status
-      // remove the order from the state
-      this.orders.splice(index, 1);
     }
   },
 

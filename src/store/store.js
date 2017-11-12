@@ -5,6 +5,17 @@ import cloneDeep from 'clone-deep';
 
 Vue.use(Vuex);
 
+const statuses = {
+	receivedByServer: 100,
+	sentToKitchen: 200,
+	receivedByKitchen: 300,
+	acceptedByKitchen: 400,
+	rejectedByKitchen: 999,
+	enRouteToCustomer: 1000,
+	// returnedByCustomer: 666,
+	// eaten: 500 // May be set once the user has sent feedback
+};
+
 // We must define the default state, reflecting the entire object, in order for computed properties to be reactive
 export default new Vuex.Store({
 	state: {
@@ -82,10 +93,39 @@ export default new Vuex.Store({
 		updateOrderStatus(state, order) {
 			// Find the order by its ID
 			const index = state.orders.findIndex(orderState => orderState.orderId == order.orderId);
+			// Different statuses require different actions
+			switch(order.status) {
+				case statuses.receivedByKitchen:
+				case statuses.acceptedByKitchen:
+					// Set the status of the order to the updated status received from the server
+					state.orders[index].status = order.status;
+					break;
+
+				case statuses.rejectedByKitchen:
+				case statuses.enRouteToCustomer:
+					// Simply remove the order from the state, since it no longer has a status that makes it visible to the kitchen
+					state.orders.splice(index, 1);
+					break;
+				default:
+					console.log('Error updating order-status state. Order from server has status: ' +order.status);
+				
+			}
+		},
+
+		rejectOrder(state, order) {
+			const index = state.orders.findIndex(orderState => orderState.orderId == order.orderId);
 			console.log(JSON.stringify(state.orders));
-			state.orders[index].status = order.status; // and update its status
+			state.orders.splice(index, 1); // and update its status
+			console.log(JSON.stringify(state.orders));
+		},
+
+		markOrderAsDelivered(state, order) {
+			const index = state.orders.findIndex(orderState => orderState.orderId == order.orderId);
+			console.log(JSON.stringify(state.orders));
+			state.orders.splice(index, 1); // and update its status
 			console.log(JSON.stringify(state.orders));
 		}
+
 	},
 	actions: {},
 	getters: {
