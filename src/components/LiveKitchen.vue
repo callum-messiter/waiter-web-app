@@ -1,5 +1,8 @@
 <template>
   <div class="container-fluid">
+    <!-- If there are no live orders, inform the user -->
+    <p v-if="orders.length < 1">Your restaurant has no live orders right now!</p>
+
     <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
     <div class="received-container col-sm-4 col-sm-offset-2">
       <h3>Received Orders</h3>
@@ -66,45 +69,36 @@ export default {
         enRouteToCustomer: 1000,
         // returnedByCustomer: 666,
         // eaten: 500 // May be set once the user has sent feedback
-      },
-      /**
-      orders: [
-        {
-          orderId: 1,
-          tableNo: 12,
-          timePlaced: '10 mins ago',
-          status: 400,
-          customerId: '',
-          items: [
-            {
-              name: 'BBQ Spare Ribs'
-            },
-            {
-              name: 'Fish and Chips'
-            },
-          ]
-        },
-        {
-          orderId: 2,
-          tableNo: 4,
-          timePlaced: '0 mins ago',
-          status: 300,
-          customerId: '',
-          items: [
-            {
-              name: 'Sunday Roast'
-            },
-            {
-              name: 'Onion Rings'
-            },
-          ]
-        }
-      ]
-      **/ 
+      } 
     }
   },
 
-  created () {
+  created() {
+    /**
+      On refresh, get the up-to-date live order state for the restaurant, according to the backend
+    **/
+    const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
+    // Get the live-orders object and add it to the store
+    this.$http.get('http://localhost:3000/api/order/getAllLive/'+restaurantId, { 
+      headers: {Authorization: JSON.parse(localStorage.user).token}
+    }).then((res) => {
+      const orders = res.body.data;
+      /**
+      
+      // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
+      // We would need to send an order-status update for each case
+      for(var i = 0; i < orders.length; i++) {
+        if(orders[i].status == 200) {
+          orders[i].status = this.statuses.receivedByKitchen;
+        }
+      }
+      **/
+      this.$store.commit('setLiveOrders', orders);
+
+    }).catch((res) => {
+      this.handleApiError(res);
+    });
+
     /**
       The server broadcasts order events to all connected sockets, but affixes the restaurantId to the order name.
       Here we listen for order events with the restaurantId affixed, so that restaurant will only receive their own orders
@@ -119,7 +113,6 @@ export default {
         restaurantId: order.restaurantId,
         status: this.statuses.receivedByKitchen
       });
-      console.log('order added, statusUpdate sent');
     };
 
     /**
@@ -130,54 +123,21 @@ export default {
     **/
     this.$options.sockets['orderStatusUpdated'] = (order) => {
       this.$store.commit('updateOrderStatus', order);
+      // Show success alert
     };
-
-    /**
-      On refresh, get the up-to-date live order state for the restaurant, according to the backend
-    **/
-    const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-    // Get the live-orders object and add it to the store
-    this.$http.get('http://localhost:3000/api/order/getAllLive/'+restaurantId, { 
-      headers: {Authorization: JSON.parse(localStorage.user).token}
-    }).then((res) => {
-      const orders = res.body.data;
-      // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
-      for(var i = 0; i < orders.length; i++) {
-        if(orders[i].status == 200) {
-          orders[i].status = this.statuses.receivedByKitchen;
-        }
-      }
-
-      this.$store.commit('setLiveOrders', orders);
-
-    }).catch((res) => {
-      this.handleApiError(res);
-    });
-
   },
   
   methods: {
     acceptOrder(index, order) {
       // show the warning modal
-      const acceptedOrder = {
-        orderId: order.orderId,
-        customerId: order.customerId,
-        restaurantId: this.restaurantId,
-        status: this.statuses.acceptedByKitchen
-      };
-      
-      console.log(acceptedOrder);
 
+      // emit event to server with new order status
       this.$socket.emit('orderStatusUpdate', {
         orderId: order.orderId,
         customerId: order.customerId,
         restaurantId: this.restaurantId,
         status: this.statuses.acceptedByKitchen
-      }); 
-
-      this.orders[index].status = this.statuses.accepted;
-      // emit event to server with new order status
-      // update the status of the order in the store
+      });
     },
 
     rejectOrder(index) {
