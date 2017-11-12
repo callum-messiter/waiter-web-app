@@ -1,5 +1,6 @@
 <template>
   <div class="container-fluid">
+    <alert></alert>
     <!-- If there are no live orders, inform the user -->
     <p v-if="orders.length < 1">Your restaurant has no live orders right now!</p>
 
@@ -53,12 +54,17 @@
 </template>
 
 <script>
+// Components
+import Alert from './Alert';
+
 // Mixins
 import functions from '../mixins/functions';
 
 export default {
   name: 'LiveKitchen',
-  components: {},
+  components: {
+    'alert': Alert
+  },
   mixins: [functions],
 
   data() {
@@ -72,6 +78,11 @@ export default {
         enRouteToCustomer: 1000,
         // returnedByCustomer: 666,
         // eaten: 500 // May be set once the user has sent feedback
+      },
+      successMsg: {
+        400: 'Woohoo! You accepted an order - the customer was notified and accidentally screamed a bit.',
+        999: 'The order was rejected. The customer\'s hopes and dreams crumble before us.',
+        1000: 'Great job! Another customer is about to fall in love with ' + JSON.parse(localStorage.restaurant).name
       }
     }
   },
@@ -127,11 +138,13 @@ export default {
     this.$options.sockets['orderStatusUpdated'] = (order) => {
       this.$store.commit('updateOrderStatus', order);
       // Show success alert
+      this.showAlert('success', this.successMsg[order.status]);
     };
   },
   
   methods: {
     updateOrderStatus(order, status) {
+      // Show warning modal
       this.$socket.emit('orderStatusUpdate', {
         orderId: order.orderId,
         customerId: order.customerId,
