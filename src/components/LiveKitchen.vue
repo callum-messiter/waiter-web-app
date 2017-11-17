@@ -80,6 +80,7 @@ export default {
         // eaten: 500 // May be set once the user has sent feedback
       },
       successMsg: {
+        300: 'A new order just arrived!',
         400: 'Woohoo! You accepted an order - the customer was notified and accidentally screamed a bit.',
         999: 'The order was rejected. The customer\'s hopes and dreams crumble before us.',
         1000: 'Great job! Another customer is about to fall in love with ' + JSON.parse(localStorage.restaurant).name
@@ -136,15 +137,18 @@ export default {
       Only then do we update the order status in the state
     **/
     this.$options.sockets['orderStatusUpdated'] = (order) => {
+      console.log('RECEIVING: ' + JSON.stringify(order));
       this.$store.commit('updateOrderStatus', order);
       // Show success alert
       this.showAlert('success', this.successMsg[order.status]);
+      console.log('STATE: ' + JSON.stringify(this.orders));
     };
   },
   
   methods: {
     updateOrderStatus(order, status) {
       // Show warning modal
+      
       this.$socket.emit('orderStatusUpdate', {
         orderId: order.orderId,
         customerId: order.customerId,
