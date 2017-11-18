@@ -137,11 +137,9 @@ export default {
       Only then do we update the order status in the state
     **/
     this.$options.sockets['orderStatusUpdated'] = (order) => {
-      console.log('RECEIVING: ' + JSON.stringify(order));
       this.$store.commit('updateOrderStatus', order);
       // Show success alert
       this.showAlert('success', this.successMsg[order.status]);
-      console.log('STATE: ' + JSON.stringify(this.orders));
     };
   },
   
