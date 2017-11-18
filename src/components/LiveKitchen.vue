@@ -1,11 +1,11 @@
 <template>
   <div class="container-fluid">
     <alert></alert>
-    <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
+    <!-- If there are no live orders, inform the user -->
     <div class="row" v-if="orders.length < 1">
-      <!-- If there are no live orders, inform the user -->
       <h3 v-if="orders.length < 1">Your restaurant has no live orders right now!</h3>
     </div>
+    <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
     <div class="row" v-else>
       <div class="received-container col-sm-4 col-sm-offset-2">
         <h3>Received Orders</h3>
@@ -152,6 +152,11 @@ export default {
       // Show success alert
       this.showAlert('success', this.successMsg[order.status]);
     };
+
+    // Intermittently update each order's "time ago" property
+    window.setInterval(() => {
+      this.$store.commit('updateTimeSinceOrdersPlaced');
+    }, 30000);
   },
   
   methods: {
@@ -162,7 +167,8 @@ export default {
         orderId: order.orderId,
         customerId: order.customerId,
         restaurantId: this.restaurantId,
-        status: status
+        status: status,
+        time: order.time
       });
     }
   },

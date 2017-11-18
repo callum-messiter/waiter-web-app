@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 import cloneDeep from 'clone-deep';
+import moment from 'moment';
 
 Vue.use(Vuex);
 
@@ -124,6 +125,16 @@ export default new Vuex.Store({
 			console.log(JSON.stringify(state.orders));
 			state.orders.splice(index, 1); // and update its status
 			console.log(JSON.stringify(state.orders));
+		},
+
+		updateTimeSinceOrdersPlaced(state) {
+			const orders = state.orders;
+			if(orders.length > 0) {
+				for(var i = 0; i < orders.length; i++) {
+					orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
+					console.log(JSON.stringify(orders));
+				}
+			}
 		}
 
 	},
