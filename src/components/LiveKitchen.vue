@@ -1,52 +1,55 @@
 <template>
   <div class="container-fluid">
     <alert></alert>
-    <!-- If there are no live orders, inform the user -->
-    <p v-if="orders.length < 1">Your restaurant has no live orders right now!</p>
-
     <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
-    <div class="received-container col-sm-4 col-sm-offset-2">
-      <h3>Received Orders</h3>
-      <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.receivedByKitchen">
-        <div class="panel-heading container-fluid">
-          <div class="row">
-            <h3 class="panel-title text-left col-sm-4">10 mins ago</h3>
-            <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
-            <!-- Reject-Order Icon -->
-            <a href="#" v-on:click="updateOrderStatus(order, statuses.rejectedByKitchen)">
-              <span class="glyphicon glyphicon-remove pull-right"></span>
-            </a>
-            <!-- Accept-Order Icon -->
-            <a href="#" v-on:click="updateOrderStatus(order, statuses.acceptedByKitchen)">
-              <span class="glyphicon glyphicon-ok pull-right"></span>
-            </a>
+    <div class="row" v-if="orders.length < 1">
+      <!-- If there are no live orders, inform the user -->
+      <h3 v-if="orders.length < 1">Your restaurant has no live orders right now!</h3>
+    </div>
+    <div class="row" v-else>
+      <div class="received-container col-sm-4 col-sm-offset-2">
+        <h3>Received Orders</h3>
+        <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.receivedByKitchen">
+          <div class="panel-heading container-fluid">
+            <div class="row">
+              <h3 class="panel-title text-left col-sm-4">{{order.timeAgo}}</h3>
+              <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
+              <!-- Reject-Order Icon -->
+              <a href="#" v-on:click="updateOrderStatus(order, statuses.rejectedByKitchen)">
+                <span class="glyphicon glyphicon-remove pull-right"></span>
+              </a>
+              <!-- Accept-Order Icon -->
+              <a href="#" v-on:click="updateOrderStatus(order, statuses.acceptedByKitchen)">
+                <span class="glyphicon glyphicon-ok pull-right"></span>
+              </a>
+            </div>
           </div>
-        </div>
-        <div class="panel-body text-left">
-          <ul class="items">
-            <li class="item-name" v-for="item in order.items">{{item.name}}</li>
-          </ul>
+          <div class="panel-body text-left">
+            <ul class="items">
+              <li class="item-name" v-for="item in order.items">{{item.name}}</li>
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
-    <!-- Orders accepted by the kitchen, and thus in progress. Ordered by recency (oldest at top)-->
-    <div class="accepted-container col-sm-4">
-      <h3>Accepted Orders</h3>
-      <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.acceptedByKitchen">
-        <div class="panel-heading container-fluid">
-          <div class="row">
-            <h3 class="panel-title text-left col-sm-4">0 mins ago</h3>
-            <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
-            <!-- Send-Order-to-Custom Icon -->
-            <a href="#" v-on:click="updateOrderStatus(order, statuses.enRouteToCustomer)">
-              <span class="glyphicon glyphicon-send pull-right"></span>
-            </a>
+      <!-- Orders accepted by the kitchen, and thus in progress. Ordered by recency (oldest at top)-->
+      <div class="accepted-container col-sm-4">
+        <h3>Accepted Orders</h3>
+        <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.acceptedByKitchen">
+          <div class="panel-heading container-fluid">
+            <div class="row">
+              <h3 class="panel-title text-left col-sm-4">{{order.timeAgo}}</h3>
+              <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
+              <!-- Send-Order-to-Custom Icon -->
+              <a href="#" v-on:click="updateOrderStatus(order, statuses.enRouteToCustomer)">
+                <span class="glyphicon glyphicon-send pull-right"></span>
+              </a>
+            </div>
           </div>
-        </div>
-        <div class="panel-body text-left">
-          <ul class="items">
-            <li class="item-name" v-for="item in order.items">{{item.name}}</li>
-          </ul>
+          <div class="panel-body text-left">
+            <ul class="items">
+              <li class="item-name" v-for="item in order.items">{{item.name}}</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -59,6 +62,10 @@ import Alert from './Alert';
 
 // Mixins
 import functions from '../mixins/functions';
+
+// Dependencies
+import moment from 'moment';
+import underscore from 'underscore';
 
 export default {
   name: 'LiveKitchen',
@@ -111,6 +118,9 @@ export default {
         if(!this.statusesVisibleToKitchen.includes(orders[i].status)) {
           console.log('Error: "api/order/getAllLive" returned an order with status: ' + orders[i].status);
         }
+
+        // Set the time ago property
+        orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
       }
 
       this.$store.commit('setLiveOrders', orders);
@@ -124,6 +134,7 @@ export default {
       Here we listen for order events with the restaurantId affixed, so that restaurant will only receive their own orders
     **/
     this.$options.sockets[this.orderEventName] = (order) => {
+      order.timeAgo = moment(order.time).utc().fromNow();
       // Add the order to the state with the status set by the server: 200 (sentToKitchen)
       this.$store.commit('addNewOrder', order);
       // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
@@ -166,7 +177,7 @@ export default {
     },
 
     orders() {
-      return this.$store.getters.getLiveOrders;
+      return _.sortBy(this.$store.getters.getLiveOrders, 'time');
     },
 
     statusesVisibleToKitchen() {
