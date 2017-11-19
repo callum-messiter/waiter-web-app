@@ -130,8 +130,7 @@ export default {
     });
 
     /**
-      The server broadcasts order events to all connected sockets, but affixes the restaurantId to the order name.
-      Here we listen for order events with the restaurantId affixed, so that restaurant will only receive their own orders
+      The server broadcasts order events to all connected sockets, but affixes the restaurantId to the order name. Here we listen for order events with the restaurantId affixed, so the restaurant will only receive their own orders
     **/
     this.$options.sockets[this.orderEventName] = (order) => {
       order.timeAgo = moment(order.time).utc().fromNow();
@@ -149,7 +148,6 @@ export default {
     **/
     this.$options.sockets['orderStatusUpdated'] = (order) => {
       this.$store.commit('updateOrderStatus', order);
-      // Show success alert
       this.showAlert('success', this.successMsg[order.status]);
     };
 
@@ -161,14 +159,11 @@ export default {
   
   methods: {
     updateOrderStatus(order, status) {
-      // Show warning modal
-      
       this.$socket.emit('orderStatusUpdate', {
         orderId: order.orderId,
         customerId: order.customerId,
         restaurantId: this.restaurantId,
-        status: status,
-        time: order.time
+        status: status
       });
     }
   },
