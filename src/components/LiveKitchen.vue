@@ -160,10 +160,15 @@ export default {
   methods: {
     updateOrderStatus(order, status) {
       this.$socket.emit('orderStatusUpdate', {
-        orderId: order.orderId,
-        customerId: order.customerId,
-        restaurantId: this.restaurantId,
-        status: status
+        headers: {
+          token: JSON.parse(localStorage.user).token
+        },
+        metaData: {
+          orderId: order.orderId,
+          customerId: order.customerId,
+          restaurantId: this.restaurantId,
+          status: status
+        }
       });
     }
   },

@@ -32,11 +32,20 @@ export default new Vuex.Store({
 	},
 	mutations: {
 		/**
+			Auth
+		**/
+		authenticateUser(state) {
+			state.auth.isUserAuthenticated = true;
+		},
+		deauthenticateUser(state) {
+			state.auth.isUserAuthenticated = false;
+		},
+
+		/**
 			Items
 		**/
 		addItem(state, data) {
 			state.menu.categories[data.catIndex].items.unshift(data.item);
-			console.log(state.menu.categories[data.catIndex]);
 		},
 		updateItem(state, trigger) {
 			const itemState = state.menu.categories[trigger.catIndex].items[trigger.itemIndex];
@@ -50,7 +59,6 @@ export default new Vuex.Store({
 			Categories
 		**/
 		addCategory(state, category) {
-			console.log(category);
 			state.menu.categories.unshift(category);
 		},
 		deleteCategory(state, catIndex) {
@@ -61,16 +69,6 @@ export default new Vuex.Store({
 		},
 		resetCategory(state) {
 			state.menu = state.menu;
-		},
-
-		/**
-			Auth
-		**/
-		authenticateUser(state) {
-			state.auth.isUserAuthenticated = true;
-		},
-		deauthenticateUser(state) {
-			state.auth.isUserAuthenticated = false;
 		},
 
 		/**
@@ -113,26 +111,11 @@ export default new Vuex.Store({
 			}
 		},
 
-		rejectOrder(state, order) {
-			const index = state.orders.findIndex(orderState => orderState.orderId == order.orderId);
-			console.log(JSON.stringify(state.orders));
-			state.orders.splice(index, 1); // and update its status
-			console.log(JSON.stringify(state.orders));
-		},
-
-		markOrderAsDelivered(state, order) {
-			const index = state.orders.findIndex(orderState => orderState.orderId == order.orderId);
-			console.log(JSON.stringify(state.orders));
-			state.orders.splice(index, 1); // and update its status
-			console.log(JSON.stringify(state.orders));
-		},
-
 		updateTimeSinceOrdersPlaced(state) {
 			const orders = state.orders;
 			if(orders.length > 0) {
 				for(var i = 0; i < orders.length; i++) {
 					orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
-					console.log(JSON.stringify(orders));
 				}
 			}
 		}
@@ -140,6 +123,13 @@ export default new Vuex.Store({
 	},
 	actions: {},
 	getters: {
+		/**
+			Auth
+		**/
+		isUserAuthenticated(state) {
+			return state.auth.isUserAuthenticated;
+		},
+		
 		/** 
 			Categories and Items 
 		**/
@@ -148,13 +138,6 @@ export default new Vuex.Store({
 		},
 		getCategoriesAndItemsView(state) {
 			return cloneDeep(state.menu.categories);
-		},
-
-		/**
-			Auth
-		**/
-		isUserAuthenticated(state) {
-			return state.auth.isUserAuthenticated;
 		},
 
 		/**
