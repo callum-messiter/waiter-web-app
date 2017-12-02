@@ -11,7 +11,7 @@ import VueSocketio from 'vue-socket.io';
 
 Vue.use(vueResource);
 Vue.use(VeeValidate);
-Vue.use(VueSocketio, 'http://localhost:3000/');
+Vue.use(VueSocketio, 'http://localhost:3000?restaurantId='+JSON.parse(localStorage.restaurant).restaurantId);
 
 // Use Bootstrap across the application
 import jQuery from 'jquery';
