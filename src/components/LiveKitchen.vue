@@ -132,7 +132,7 @@ export default {
     /**
       The server broadcasts order events to all connected sockets, but affixes the restaurantId to the order name. Here we listen for order events with the restaurantId affixed, so the restaurant will only receive their own orders
     **/
-    this.$options.sockets[this.orderEventName] = (order) => {
+    this.$options.sockets['newOrder'] = (order) => {
       order.timeAgo = moment(order.time).utc().fromNow();
       // Add the order to the state with the status set by the server: 200 (sentToKitchen)
       this.$store.commit('addNewOrder', order);
