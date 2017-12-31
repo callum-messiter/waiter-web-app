@@ -5,6 +5,18 @@
 </template>
 
 <script>
+
+// LiveKitchen connection via WebSockets
+import Vue from 'vue';
+import VueSocketio from 'vue-socket.io';
+
+if(localStorage.getItem('restaurant') !== null) {
+  	const r = JSON.parse(localStorage.restaurant);
+  	if(r.hasOwnProperty('restaurantId')) {
+  		Vue.use(VueSocketio, 'http://localhost:3000?restaurantId='+r.restaurantId);
+  	}
+}
+
 // Components
 import RestaurantMenu from './RestaurantMenu';
 

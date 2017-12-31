@@ -6,12 +6,10 @@ import router from './router'
 import store from './store/store'
 import vueResource from 'vue-resource'
 import VeeValidate from 'vee-validate';
-import VueSocketio from 'vue-socket.io';
 
 
 Vue.use(vueResource);
 Vue.use(VeeValidate);
-Vue.use(VueSocketio, 'http://localhost:3000/');
 
 // Use Bootstrap across the application
 import jQuery from 'jquery';
