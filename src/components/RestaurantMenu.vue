@@ -90,7 +90,7 @@ export default {
       // Check that the user has provided a category name
       if(newCategory.name == null || newCategory.name == '') {
         this.showModal(
-          'empty_fields', 
+          'newCategory_fields_blank', 
           'Every category must have a name!',
           'Back to the menu'
         );

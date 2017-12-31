@@ -175,7 +175,7 @@ export default {
     /** 
       This event is emitted by the modal component, when the user clicks the "Discard Changes" button
     **/
-    bus.$on('confirm_discard_changes', (trigger) => {
+    bus.$on('userConfirmation_discardItemChanges', (trigger) => {
       this.resetItem(trigger);
     });
 
@@ -246,7 +246,7 @@ export default {
       if(newItem.name == '' || newItem.price == '' || newItem.description == '') {
         // Prompt the user to fill in the fields
         this.showModal(
-          'empty_fields', 
+          'newItem_fields_blank', 
           "You can't add a new item without filling in all the details!",
           'Back to the menu',
         );
@@ -312,7 +312,7 @@ export default {
         // Emit the event to the modal component
         const itemStateName = this.categoryItemsState[catIndex].items[itemIndex].name;
         this.showModal(
-          'confirm_update', 
+          'item_confirm_save_changes', 
           'Are you sure you want to update "' + itemStateName + '"? This will take effect immediately in your live menu.',
           'Continue Editing',
           'Save Changes',
@@ -334,7 +334,7 @@ export default {
         // If the item has actually been edited by the user, then we want to display the cancel-warning modal 
         const itemState = this.categoryItemsState[catIndex].items[itemIndex];
         this.showModal(
-          'discard_changes', 
+          'item_confirm_discard_changes', 
           'Are you sure you want to discard your changes to "' + itemState.name + '"?',
           'Continue Editing',
           'Discard',
@@ -350,7 +350,7 @@ export default {
       const itemState = this.categoryItemsState[catIndex].items[itemIndex];
       // Build the confirm_delete modal
       this.showModal(
-        'confirm_delete', 
+        'item_confirm_delete', 
         'Are you sure you want to delete "' + itemState.name + '"? It will become invisible to your customers.',
         'Cancel',
         'Delete Item',

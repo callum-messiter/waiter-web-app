@@ -23,7 +23,6 @@ export default {
       which is being listened to by this Item component (see the created() hook)
     **/
     showModal(name, title, btnPrimary, btnWarn, trigger) {
-      trigger.component = this.$options.name, // specifies the component which calls this function
       bus.$emit('showModal', {
         name: name,
         isVisible: true,

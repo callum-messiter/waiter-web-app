@@ -122,16 +122,18 @@ export default {
   created() {
 
     // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
-    bus.$on('confirm_delete', (trigger) => {
-      if(trigger.component == this.$options.name) {
+    bus.$on('userConfirmation_deleteCategory', (trigger) => {
         this.deleteCategory(trigger);
-      } else {
-        this.deleteItem(trigger);
-      }
     });
 
+    bus.$on('userConfirmation_deleteItem', (trigger) => {
+        this.deleteItem(trigger);
+    });
+
+
+
     // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
-    bus.$on('confirm_update', (trigger) => {
+    bus.$on('userConfirmation_saveItemChanges', (trigger) => {
       this.updateItem(trigger);
     });
   },
@@ -250,7 +252,7 @@ export default {
       }
 
       this.showModal(
-        'confirm_delete', 
+        'category_confirm_delete', 
          prefix + msg,
         'Cancel',
         'Delete Category',
