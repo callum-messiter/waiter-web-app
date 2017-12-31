@@ -130,7 +130,8 @@ export default {
     });
 
     /**
-      The server broadcasts order events to all connected sockets, but affixes the restaurantId to the order name. Here we listen for order events with the restaurantId affixed, so the restaurant will only receive their own orders
+      The server finds all sockets which represent the restaurant who is the intended recipient of the order. It then
+      emits the 'neworder' event to these sockets; here we handle this event
     **/
     this.$options.sockets['newOrder'] = (order) => {
       order.timeAgo = moment(order.time).utc().fromNow();
@@ -176,10 +177,6 @@ export default {
   computed: {
     restaurantId() {
       return JSON.parse(localStorage.restaurant).restaurantId;
-    },
-
-    orderEventName() {
-      return 'order_'+JSON.parse(localStorage.restaurant).restaurantId;
     },
 
     orders() {
