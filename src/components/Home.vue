@@ -190,11 +190,15 @@ import { bus } from '../main';
 // Components
 import Alert from './alert';
 
+// Mixins
+import functions from '../mixins/functions';
+
 export default {
   name: 'Home',
   components: {
     'alert': Alert
   },
+  mixins: [functions],
   data() {
     return {
       loginFormIsVisible: false,
@@ -246,9 +250,7 @@ export default {
     },
 
     logUserIn() {
-      // Validate the data
-      // Make an API call
-      this.$http.get("http://localhost:3000/api/auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
+      this.$http.get("http://callummessiter.work:3000/api/auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
           // Add data to local storage
@@ -262,31 +264,15 @@ export default {
           this.$router.push('/dashboard');
         }
       }).catch((res) => {
-        if(res.body && res.body.error) {
-          // Display the error message
-          const alert = {
-            isVisible: true,
-            type: 'error',
-            message: res.body.msg
-          }
-          bus.$emit('showAlert', alert);
-
-          // console.log(res.body.error);
-        } else if(res.status && res.statusText) {
-          console.log(res.status + " " + res.statusText);
-        } else {
-          console.log(res);
-        }
+        this.handleApiError(res);
       });
-      // If 200, authenticate the user in the store
-      // this.$router.push('/dashboard');
     },
 
     registerUser() {
       // Validate inputs (betters: if there are errors, set the button to red/unclickable using a computed property)
       if(!this.errors.any() && this.inputs.hasHadFocus.length > 0) {
         // Make the API call
-        this.$http.post('http://localhost:3000/api/user/create', {
+        this.$http.post('http://callummessiter.work:3000/api/user/create', {
           userType: 'restaurateur',
           firstName: this.form.signup.firstName,
           lastName: this.form.signup.lastName,
@@ -299,21 +285,7 @@ export default {
           this.form.login.password = this.form.signup.password;
           this.logUserIn();
         }).catch((res) => {
-          if(res.body && res.body.error) {
-            // Display the error message
-            const alert = {
-              isVisible: true,
-              type: 'error',
-              message: res.body.msg
-            }
-            bus.$emit('showAlert', alert);
-
-            // console.log(res.body.error);
-          } else if(res.status && res.statusText) {
-            console.log(res.status + " " + res.statusText);
-          } else {
-            console.log(res);
-          }
+          this.handleApiError(res);
         });
       }
     }
