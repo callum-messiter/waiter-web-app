@@ -250,7 +250,7 @@ export default {
     },
 
     logUserIn() {
-      this.$http.get("http://callummessiter.work:3000/api/auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
+      this.$http.get("auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
           // Add data to local storage
@@ -272,7 +272,7 @@ export default {
       // Validate inputs (betters: if there are errors, set the button to red/unclickable using a computed property)
       if(!this.errors.any() && this.inputs.hasHadFocus.length > 0) {
         // Make the API call
-        this.$http.post('http://callummessiter.work:3000/api/user/create', {
+        this.$http.post('user/create', {
           userType: 'restaurateur',
           firstName: this.form.signup.firstName,
           lastName: this.form.signup.lastName,

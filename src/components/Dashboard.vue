@@ -9,11 +9,13 @@
 // LiveKitchen connection via WebSockets
 import Vue from 'vue';
 import VueSocketio from 'vue-socket.io';
+import config from '../../config/config';
 
 if(localStorage.getItem('restaurant') !== null) {
   	const r = JSON.parse(localStorage.restaurant);
   	if(r.hasOwnProperty('restaurantId')) {
-  		Vue.use(VueSocketio, 'http://localhost:3000?restaurantId='+r.restaurantId);
+  		// http://host?restaurantId={restaurantId}
+  		Vue.use(VueSocketio, config.apiBaseUrl+'?restaurantId='+r.restaurantId);
   	}
 }
 
@@ -54,7 +56,7 @@ export default {
 	created () {
 	    const menuId = JSON.parse(localStorage.menu).menuId;
 	    // Get the menu object and add it to the store
-	    this.$http.get('http://localhost:3000/api/menu/'+menuId, { 
+	    this.$http.get('menu/'+menuId, { 
 	      headers: {Authorization: JSON.parse(localStorage.user).token}
 	    }).then((res) => {
 	      this.$store.commit('setMenu', res.body.data);

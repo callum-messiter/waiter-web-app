@@ -101,7 +101,7 @@ export default {
     **/
     const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
     // Get the live-orders object and add it to the store
-    this.$http.get('http://localhost:3000/api/order/getAllLive/'+restaurantId, { 
+    this.$http.get('order/getAllLive/'+restaurantId, { 
       headers: {Authorization: JSON.parse(localStorage.user).token}
     }).then((res) => {
       const orders = res.body.data;

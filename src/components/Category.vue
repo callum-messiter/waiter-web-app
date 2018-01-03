@@ -130,8 +130,6 @@ export default {
         this.deleteItem(trigger);
     });
 
-
-
     // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
     bus.$on('userConfirmation_saveItemChanges', (trigger) => {
       this.updateItem(trigger);
@@ -214,7 +212,7 @@ export default {
       if(_.isEqual(this.categories, this.categoriesState)) {
         this.exitEditMode();
       } else {
-        this.$http.put('http://localhost:3000/api/category/update/'+this.editMode.category.id, {
+        this.$http.put('category/update/'+this.editMode.category.id, {
           name: name,
           menuId: JSON.parse(localStorage.menu).menuId
         }, {
@@ -264,7 +262,7 @@ export default {
       Here we send a request to the API to deactivate the category (by setting categories.active = 0). If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the category panel disappears). It is important to keep the backend data and the front-end state syncronised
     **/
     deleteCategory(trigger) {
-      this.$http.put('http://localhost:3000/api/category/deactivate/'+trigger.catId, {}, {
+      this.$http.put('category/deactivate/'+trigger.catId, {}, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
 
       }).then((res) => {
@@ -285,7 +283,7 @@ export default {
       front-end state syncronised
     **/
     updateItem(trigger) {
-      this.$http.put('http://localhost:3000/api/item/update/'+trigger.item.itemId, {
+      this.$http.put('item/update/'+trigger.item.itemId, {
         name: trigger.item.name,
         price: trigger.item.price,
         description: trigger.item.description
@@ -306,7 +304,7 @@ export default {
       Here we send a request to the API to deactivate the item (by setting items.active = 0). If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the item disappears). It is important to keep the backend data and the front-end state syncronised
     **/
     deleteItem(trigger) {
-      this.$http.put('http://localhost:3000/api/item/deactivate/'+trigger.itemId, {}, {
+      this.$http.put('item/deactivate/'+trigger.itemId, {}, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
 
       }).then((res) => {

@@ -252,7 +252,7 @@ export default {
         );
 
       } else {
-        this.$http.post('http://localhost:3000/api/item/create', {
+        this.$http.post('item/create', {
           name: newItem.name,
           price: newItem.price,
           description: newItem.description,

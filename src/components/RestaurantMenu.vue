@@ -96,7 +96,7 @@ export default {
         );
       } else {
         // If the user has filled in the categoryName field, post it to the API
-        this.$http.post('http://localhost:3000/api/category/create', {
+        this.$http.post('category/create', {
           name: newCategory.name,
           menuId: JSON.parse(localStorage.menu).menuId
         }, {
