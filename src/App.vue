@@ -13,9 +13,9 @@
 <script>
 
 // Global components
-import Navbar from './components/navbar';
-import Alert from './components/alert';
-import Modal from './components/modal';
+import Navbar from './components/Navbar';
+import Alert from './components/Alert';
+import Modal from './components/Modal';
 
 export default {
   name: 'app',

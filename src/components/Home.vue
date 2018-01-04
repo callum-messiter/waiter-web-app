@@ -188,7 +188,7 @@
 import { bus } from '../main';
 
 // Components
-import Alert from './alert';
+import Alert from './Alert';
 
 // Mixins
 import functions from '../mixins/functions';
