@@ -15,7 +15,7 @@ if(localStorage.getItem('restaurant') !== null) {
   	const r = JSON.parse(localStorage.restaurant);
   	if(r.hasOwnProperty('restaurantId')) {
   		// http://host?restaurantId={restaurantId}
-  		Vue.use(VueSocketio, config.apiBaseUrl+'?restaurantId='+r.restaurantId);
+  		Vue.use(VueSocketio, 'http://localhost:3000?restaurantId='+r.restaurantId);
   	}
 }
 
