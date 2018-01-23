@@ -343,6 +343,7 @@ export default {
     margin-top: 15vh;
     background-color: rgba(0, 0, 0, 0.8);
     padding: 30px 20px 20px 20px;
+    color: #fff;
   }
 
   h1 {
