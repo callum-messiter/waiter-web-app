@@ -13,6 +13,8 @@
             prevents any disruptive simulatenous actions. We don't want the to be able to collapse a category panel whilst he's
             editing a category name. We don't want every category name to become editable when the user activates edit mode.
           -->
+
+          <!-- Category name -->
           <input 
             v-if="editMode.active" 
             class="categoryName"
@@ -49,6 +51,13 @@
             )">
             <span class="glyphicon glyphicon-pencil pull-right align-middle"></span>
           </a>
+          <!-- Add Item Icon (visible by default) -->
+          <a 
+            v-if="!editMode.active || editMode.category.id != category.categoryId"
+            href="#" 
+            >
+            <span class="glyphicon glyphicon-plus pull-right"></span>
+          </a>
           <!-- Discard Icon (visible only when a category name is being edited -->
           <a 
             v-if="editMode.active && editMode.category.id == category.categoryId"
@@ -63,6 +72,7 @@
             v-on:click="updateCategoryName(category.name)">
             <span class="glyphicon glyphicon-floppy-disk pull-right align-middle"></span>
           </a>
+
         </h4>
       </div>
       <div 
@@ -342,6 +352,7 @@ export default {
   .panel-heading {
     background-color: #8d8d8e !important;
     color: white !important;
+    padding-right: 3px;
   }
 
   .panel-title {
@@ -353,22 +364,14 @@ export default {
     margin-bottom: 0 !important;
   }
 
-  .glyphicon-trash {
-    left: 5px;
-  }
-
-  .glyphicon-repeat {
-    left: 5px;
-  }
-
-  .glyphicon-pencil .glyphicon-floppy-disk {
-    right: 5px;
+  .glyphicon {
+    padding-right: 5px;
   }
 
   .categoryName {
     background: none;
     border: none;
-    text-align: center
+    text-align: center;
   }
 
   .categoryName:focus {
