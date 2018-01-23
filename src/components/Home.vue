@@ -337,11 +337,12 @@ export default {
 
   #logbox {
     padding: 10px;
-    margin: 50px auto;
+    margin: 0 auto;
     width: 500px;
-    height: 460px;
+    height: 70vh;
+    margin-top: 15vh;
     background-color: rgba(0, 0, 0, 0.8);
-    padding: 20px;
+    padding: 30px 20px 20px 20px;
   }
 
   h1 {
@@ -451,8 +452,8 @@ export default {
   @media (min-width: 1500px) and (min-height: 1000px) {
     #logbox {
       width: 600px;
-      height: 550px;
-      margin-top: 200px;
+      height: 50vh;
+      margin-top: 25vh;
     }
     h1 {
       font-size: 50px !important;
@@ -473,7 +474,6 @@ export default {
   @media (min-width: 1800px) and (min-height: 1100px) {
     #logbox {
       width: 700px;
-      height: 650px;
     }
     h1 {
       margin-bottom: 30px;
@@ -494,7 +494,6 @@ export default {
   @media (min-width: 2300px) and (min-height: 1300px) {
     #logbox {
       width: 900px;
-      height: 750px;
       padding: 60px;
     }
     h1 {
@@ -512,7 +511,6 @@ export default {
 
   @media (max-width: 767px) {
     #logbox {
-      height: 500px;
       margin-top: 20px;
     }
     input {
@@ -550,6 +548,19 @@ export default {
   @media (max-width: 375px) {
     #logbox {
       width: 290px;
+    }
+  }
+
+  @media (max-height: 690px) {
+    .container {
+      height: auto;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+    #logbox {
+      height: 90vh;
+      min-height: 500px;
+      margin-top: 5vh;
     }
   }
 
