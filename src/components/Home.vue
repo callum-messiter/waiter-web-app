@@ -145,7 +145,7 @@
 
         <!-- Login form -->
         <form id="login" v-else>
-          <h1>Login</h1>
+          <h1>Login to waitr</h1>
           <input
             class="input pass"
             type="email"
