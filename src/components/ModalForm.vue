@@ -266,5 +266,6 @@ export default {
   span {
     padding-top: 5px;
     padding-right: 5px;
+    cursor: pointer;
   }
 </style>

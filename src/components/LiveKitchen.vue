@@ -15,13 +15,15 @@
               <h3 class="panel-title text-left col-sm-4">{{order.timeAgo}}</h3>
               <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
               <!-- Reject-Order Icon -->
-              <a href="#" v-on:click="updateOrderStatus(order, statuses.rejectedByKitchen)">
-                <span class="glyphicon glyphicon-remove pull-right"></span>
-              </a>
+              <span 
+                class="glyphicon glyphicon-remove pull-right"
+                v-on:click="updateOrderStatus(order, statuses.rejectedByKitchen)">
+              </span>
               <!-- Accept-Order Icon -->
-              <a href="#" v-on:click="updateOrderStatus(order, statuses.acceptedByKitchen)">
-                <span class="glyphicon glyphicon-ok pull-right"></span>
-              </a>
+              <span 
+                class="glyphicon glyphicon-ok pull-right"
+                v-on:click="updateOrderStatus(order, statuses.acceptedByKitchen)">
+              </span>
             </div>
           </div>
           <div class="panel-body text-left">
@@ -40,9 +42,10 @@
               <h3 class="panel-title text-left col-sm-4">{{order.timeAgo}}</h3>
               <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
               <!-- Send-Order-to-Custom Icon -->
-              <a href="#" v-on:click="updateOrderStatus(order, statuses.enRouteToCustomer)">
-                <span class="glyphicon glyphicon-send pull-right"></span>
-              </a>
+              <span 
+                class="glyphicon glyphicon-send pull-right"
+                v-on:click="updateOrderStatus(order, statuses.enRouteToCustomer)">
+              </span>
             </div>
           </div>
           <div class="panel-body text-left">
@@ -199,6 +202,7 @@ export default {
 
   .glyphicon {
     margin-right: 15px;
+    cursor: pointer;
   }
 
   .panel-title {

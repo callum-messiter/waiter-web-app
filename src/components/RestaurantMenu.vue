@@ -7,9 +7,7 @@
       </div>
       <!-- Category Settings Icon -->
       <div class="col-md-3 col-md-offset-3 align-middle">
-        <a>
-          <span class="glyphicon glyphicon-cog pull-right align-middle"></span>
-        </a>
+        <span class="glyphicon glyphicon-cog pull-right align-middle"></span>
       </div>
     </div>
     <div class="row">
@@ -140,4 +138,8 @@ export default {
     word-break: keep-all  
   }
   
+  .glyphicon {
+    cursor: pointer;
+  }
+
 </style>

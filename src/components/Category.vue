@@ -30,53 +30,48 @@
             >{{category.name}} ({{category.items.length}})
           </a>
           <!-- Delete Icon (visible by default) -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-trash pull-right align-middle"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
-            href="#" 
             v-on:click="showDeleteCategoryModal(
               category.categoryId,
               categories.indexOf(category), 
               category.name, 
               category.items.length
             )">
-            <span class="glyphicon glyphicon-trash pull-right align-middle"></span>
-          </a>
+          </span>
           <!-- Edit Icon (visible by default) -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-pencil pull-right align-middle"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
-            href="#" 
             v-on:click="activateEditMode(
               category.categoryId, 
               categories.indexOf(category)
             )">
-            <span class="glyphicon glyphicon-pencil pull-right align-middle"></span>
-          </a>
+          </span>
           <!-- Add Item Icon (visible by default) -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-plus pull-right"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
-            href="#" 
             v-on:click="showAddItemModal(
               category.categoryId, 
               categories.indexOf(category), 
               category.name
             )">
-            <span class="glyphicon glyphicon-plus pull-right"></span>
-          </a>
+          </span>
           <!-- Discard Icon (visible only when a category name is being edited -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-repeat pull-right align-middle"
             v-if="editMode.active && editMode.category.id == category.categoryId"
-            href="#" 
             v-on:click="discardChanges()">
-            <span class="glyphicon glyphicon-repeat pull-right align-middle"></span>
-          </a>
+          </span>
           <!-- Save Icon (visible only when a category name is being edited -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-floppy-disk pull-right align-middle"
             v-if="editMode.active && editMode.category.id == category.categoryId"
             href="#" 
             v-on:click="updateCategoryName(category.name)">
-            <span class="glyphicon glyphicon-floppy-disk pull-right align-middle"></span>
-          </a>
-
+          </span>
         </h4>
       </div>
       <div 
@@ -412,6 +407,7 @@ export default {
 
   .glyphicon {
     padding-right: 5px;
+    cursor: pointer;
   }
 
   .categoryName {
