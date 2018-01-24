@@ -24,13 +24,13 @@ export default {
     'alert': Alert,
     'modal': Modal
   },
-
+  
   created() {
     if(!this.userIsAuthenticated) {
       // If the user is not logged in, redirect them to the home page when they visit any other page
       if(this.$route.path != '/') {
         this.$router.push('/');
-      } 
+      }
     }
   },
 
