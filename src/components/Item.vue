@@ -80,52 +80,6 @@
         </td>
     </tr>
 
-    <!-- The template item, for adding a new item -->
-    <tr class="newItem-row" v-bind:class="{'newItemDefault': !newItem.isBeingEdited}">
-        <td class="item-name text-left col-md-3">
-          <input 
-            type="text" 
-            class="form-control newItem"
-            placeholder="E.g. Fish 'N' Chips"
-            v-model="newItem.data.name"
-            v-bind:readonly="!newItem.isBeingEdited"
-            v-on:click="activateNewItemEditMode"
-          > 
-        </td>
-        <td class="item-price text-left col-md-2">
-          <input 
-            type="text" 
-            class="form-control newItem"
-            placeholder="E.g. 10.00"
-            v-model="newItem.data.price"
-            v-bind:readonly="!newItem.isBeingEdited"
-            v-on:click="activateNewItemEditMode"
-          > 
-        </td>
-        <td class="item-description text-left col-md-7">
-          <input 
-            type="text" 
-            class="form-control newItem"
-            placeholder="E.g. The tastiest dish in town!"
-            v-model="newItem.data.description"
-            v-bind:readonly="!newItem.isBeingEdited"
-            v-on:click="activateNewItemEditMode"
-          > 
-        </td>
-        <td v-if="newItem.isBeingEdited" class="buttons">
-          <button 
-            class="btn btn-xs btn-primary pull-left align-middle"
-            v-on:click="createNewItem(category.categoryId, categories.indexOf(category))"
-            >Save New Item
-          </button>
-          <button 
-            class="btn btn-xs btn-danger pull-left align-middle cancelBtn"
-            v-on:click="resetNewItem"
-            >Discard
-          </button>
-        </td>
-    </tr>
-
   </tbody>
 </template>
 
@@ -172,6 +126,9 @@ export default {
 
   created() {
 
+    bus.$on('userConfirmation_addNewItem', (data, trigger) => {
+      console.log(data);
+    });
     /** 
       This event is emitted by the modal component, when the user clicks the "Discard Changes" button
     **/
@@ -242,16 +199,7 @@ export default {
     **/
     createNewItem(catId, catIndex) {
       const newItem = this.newItem.data;
-      // Check that none of the items are empty
-      if(newItem.name == '' || newItem.price == '' || newItem.description == '') {
-        // Prompt the user to fill in the fields
-        this.showModal(
-          'newItem_fields_blank', 
-          "You can't add a new item without filling in all the details!",
-          'Back to the menu',
-        );
-
-      } else {
+      
         this.$http.post('item/create', {
           name: newItem.name,
           price: newItem.price,
@@ -274,7 +222,6 @@ export default {
         }).catch((res) => {
           this.handleApiError(res);
         });
-      }
     },
 
     /** 

@@ -5,21 +5,11 @@
       <div class="col-md-6">
         <h2 class="pull-left restaurantName">{{restaurant.name}} | Menu</h2>
       </div>
-      <div class="input-group col-md-4 pull-right newCatInput">
-        <input 
-          class="form-control"
-          type="text" 
-          placeholder="E.g. Starters"
-          v-model="newCategory.name"
-        >
-        <span class="input-group-btn">
-          <button 
-            class="btn btn-primary" 
-            type="button"
-            v-on:click="addCategory"
-            >Add Category
-          </button>
-        </span>
+      <!-- Category Settings Icon -->
+      <div class="col-md-3 col-md-offset-3 align-middle">
+        <a>
+          <span class="glyphicon glyphicon-cog pull-right align-middle"></span>
+        </a>
       </div>
     </div>
     <div class="row">
@@ -148,10 +138,6 @@ export default {
   .restaurantName {
     margin-top: 42px;
     word-break: keep-all  
-  }
-
-  .newCatInput {
-    top: 40px;
   }
   
 </style>

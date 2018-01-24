@@ -18,7 +18,7 @@ export default {
     },
 
     /**
-      OUr (mostly) warning messages which prompt the user to confirm their intentions. We send the data to the Modal
+      Our (mostly) warning messages which prompt the user to confirm their intentions. We send the data to the Modal
       component, which renders the modal accordingly. When the user clicks a modal button, the Modal component emits an event, 
       which is being listened to by this Item component (see the created() hook)
     **/
@@ -31,6 +31,22 @@ export default {
         buttons: {
           primary: btnPrimary,
           warning: btnWarn
+        }
+      });
+    },
+
+    /**
+      This displays a special kind of modal, which contains a form. Used for adding a new item, addding a new category, 
+      editing item/category data.
+    **/
+    showModalForm(name, title, btnPrimary, trigger) {
+      bus.$emit('showModalForm', {
+        name: name,
+        isVisible: true,
+        title: title,
+        trigger: trigger,
+        buttons: {
+          primary: btnPrimary
         }
       });
     },

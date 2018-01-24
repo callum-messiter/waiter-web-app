@@ -55,7 +55,11 @@
           <a 
             v-if="!editMode.active || editMode.category.id != category.categoryId"
             href="#" 
-            >
+            v-on:click="showAddItemModal(
+              category.categoryId, 
+              categories.indexOf(category), 
+              category.name
+            )">
             <span class="glyphicon glyphicon-plus pull-right"></span>
           </a>
           <!-- Discard Icon (visible only when a category name is being edited -->
@@ -325,6 +329,15 @@ export default {
       }).catch((res) => {
         this.handleApiError(res);
       });
+    },
+
+    showAddItemModal(catId, catIndex, catName) {
+      this.showModalForm(
+        'item_add', 
+        'Add a new item to ' + catName,
+        'Save',
+        {catIndex, catId}
+      );
     }
 
   }
