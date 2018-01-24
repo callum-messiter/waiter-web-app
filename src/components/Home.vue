@@ -6,7 +6,7 @@
         <!-- Registration form -->
         <form id="signup" v-if="!loginFormIsVisible">
           <div class="row">
-            <h1>Sign up to waiter</h1>
+            <h1>Sign up to waitr</h1>
           </div>
           <!-- First name -->
           <div class="row">
@@ -145,7 +145,7 @@
 
         <!-- Login form -->
         <form id="login" v-else>
-          <h1>Login</h1>
+          <h1>Login to waitr</h1>
           <input
             class="input pass"
             type="email"
@@ -165,16 +165,19 @@
             Sign me in
           </button>
           <div class="text-center"">
+              Don't have an account?
               <a
                 class="formLink"
                 v-on:click="hideLoginForm">
                 Sign up
               </a>
+              <!--
               -
               <a
                 class="formLink">
                 Forgot password
               </a>
+              -->
           </div>
         </form>
       </div>
