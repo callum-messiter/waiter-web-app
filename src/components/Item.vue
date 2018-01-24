@@ -1,7 +1,7 @@
 <template>
   <tbody>
     <tr class="item-row" v-for="item in category.items">
-        <td class="item-name text-left col-md-2">
+        <td class="item-name text-left col-md-3">
           <input 
             type="text" 
             class="form-control" 
@@ -31,7 +31,7 @@
               )"
           >
         </td>
-        <td class="item-description text-left col-md-9">
+        <td class="item-description text-left col-md-8">
           <input 
             type="text" 
             class="form-control" 
@@ -126,9 +126,6 @@ export default {
 
   created() {
 
-    bus.$on('userConfirmation_addNewItem', (data, trigger) => {
-      console.log(data);
-    });
     /** 
       This event is emitted by the modal component, when the user clicks the "Discard Changes" button
     **/
@@ -192,36 +189,6 @@ export default {
     resetNewItem() {
       this.newItem.data = {itemId: '', name: '', price: '', description: ''}
       this.newItem.isBeingEdited = false;
-    },
-
-    /**
-      Here we send a request to the API to add the new item to the menu. If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the item appears at the top of its category's list). It is important to keep the backend data and the front-end state syncronised
-    **/
-    createNewItem(catId, catIndex) {
-      const newItem = this.newItem.data;
-      
-        this.$http.post('item/create', {
-          name: newItem.name,
-          price: newItem.price,
-          description: newItem.description,
-          categoryId: catId
-        }, 
-          {headers: {Authorization: JSON.parse(localStorage.user).token}
-
-        }).then((res) => {
-          // Set the itemId that was assigned by the server
-          newItem.itemId = res.body.data.createdItemId; 
-          this.$store.commit('addItem', {
-            item: newItem,
-            catIndex: catIndex
-          });
-
-          this.resetNewItem();
-          this.showAlert('success', 'Your new item was successfully added to your menu!');
-
-        }).catch((res) => {
-          this.handleApiError(res);
-        });
     },
 
     /** 

@@ -8,7 +8,7 @@
           <div class="row">
             <span 
               class="glyphicon glyphicon-remove pull-right"
-              v-on:click="modal.isVisible = false;"
+              v-on:click="cancel(modal.name)"
             ></span>
           </div>
           <!-- E.g. "Add a new item to {categoryName}" -->
@@ -28,7 +28,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
               name="itemName"
               type="text" 
-              placeholder="E.g. Chicken caesar salad" 
+              placeholder="Chicken caesar salad" 
               v-model="form.item.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="item name"
@@ -43,7 +43,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
               name="itemPrice"
               type="text" 
-              placeholder="E.g. 7.00" 
+              placeholder="7.00" 
               v-model="form.item.price"
               v-validate="{required: true, max: 4}"
               data-vv-as="item price"
@@ -58,7 +58,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
               name="itemDescription"
               type="text" 
-              placeholder="E.g. Tasty chicken breast chunks with caesar salad" 
+              placeholder="Tasty chicken breast chunks with caesar salad" 
               v-model="form.item.description"
               v-validate="{required: true, max: 40}"
               data-vv-as="item description"
@@ -74,7 +74,7 @@
             <button 
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewItem', form.item, modal.trigger)">
+              v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, form.item, modal.trigger)">
               {{modal.buttons.primary}}
             </button>
             </div>
@@ -89,7 +89,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
               name="categoryName"
               type="text" 
-              placeholder="E.g. Chicken caesar salad" 
+              placeholder="Chicken caesar salad" 
               v-model="form.category.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="category name"
@@ -103,7 +103,7 @@
             <button
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.trigger)">
+              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, modal.trigger)">
               {{modal.buttons.primary}}
             </button>
           </form>
@@ -117,7 +117,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
               name="itemName"
               type="text" 
-              placeholder="E.g. Chicken caesar salad" 
+              placeholder="Chicken caesar salad" 
               v-model="form.item.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="item name"
@@ -132,7 +132,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
               name="itemPrice"
               type="text" 
-              placeholder="E.g. 7.00" 
+              placeholder="7.00" 
               v-model="form.item.price"
               v-validate="{required: true, max: 4}"
               data-vv-as="item price"
@@ -147,7 +147,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
               name="itemDescription"
               type="text" 
-              placeholder="E.g. Tasty chicken breast chunks with caesar salad" 
+              placeholder="Tasty chicken breast chunks with caesar salad" 
               v-model="form.item.description"
               v-validate="{required: true, max: 40}"
               data-vv-as="item description"
@@ -161,7 +161,7 @@
             <button 
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.trigger)">
+              v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.name, form.item, modal.trigger)">
               {{modal.buttons.primary}}
             </button>
           </form>
@@ -216,9 +216,37 @@ export default {
 
       Then, when one of the actional modal buttons is clicked (e.g. Add new category), this modal, via the below method, emits and event back to the target component. The target component will be listening to the relevant event, and upon receiving it, will execute the necessary logic (e.g. by calling the addCategory method.)
     **/
-    emitUserConfirmation(eventName, data, trigger) {
+    emitUserConfirmation(eventName, modalName, data, trigger) {
       bus.$emit(eventName, data, trigger);
       this.modal.isVisible = false;
+      this.resetFormData(modalName);
+    },
+
+    cancel(modalName) {
+      this.modal.isVisible = false;
+      this.resetFormData(modalName);
+    },
+
+    resetFormData(modalName) {
+      // First check which form has been filled in
+      var form = '';
+      switch(modalName) {
+        case 'item_add':
+        case 'item_edit':
+          form = 'item';
+          break;
+        case 'category_add':
+          form = 'category';
+          break;
+        default:
+          console.log('Error [ModalForm component]: modal name ' + modalName + ' not handled!');
+          return false;
+      }
+      // Then set all properties of the form object to an empty string
+      var obj = this.form[form];
+      Object.keys(obj).forEach((key) => {
+        obj[key] = ''; 
+      });
     }
 
   }

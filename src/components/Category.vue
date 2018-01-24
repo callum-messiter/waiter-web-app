@@ -140,6 +140,10 @@ export default {
         this.deleteCategory(trigger);
     });
 
+    bus.$on('userConfirmation_addNewItem', (data, trigger) => {
+      this.createNewItem(data, trigger.catId, trigger.catIndex)
+    });
+
     bus.$on('userConfirmation_deleteItem', (trigger) => {
         this.deleteItem(trigger);
     });
@@ -285,6 +289,35 @@ export default {
           this.$store.commit('deleteCategory', trigger.catIndex);
           this.showAlert('success', 'Your category was successfully deleted!');
         }
+
+      }).catch((res) => {
+        this.handleApiError(res);
+      });
+    },
+
+    /**
+      Here we send a request to the API to add the new item to the menu. If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the item appears at the top of its category's list). It is important to keep the backend data and the front-end state syncronised
+    **/
+    createNewItem(data, catId, catIndex) {
+      const newItem = data;
+      
+      this.$http.post('item/create', {
+        name: newItem.name,
+        price: newItem.price,
+        description: newItem.description,
+        categoryId: catId
+      }, 
+        {headers: {Authorization: JSON.parse(localStorage.user).token}
+
+      }).then((res) => {
+        // Set the itemId that was assigned by the server
+        newItem.itemId = res.body.data.createdItemId; 
+        this.$store.commit('addItem', {
+          item: newItem,
+          catIndex: catIndex
+        });
+        
+        this.showAlert('success', 'Your new item was successfully added to your menu!');
 
       }).catch((res) => {
         this.handleApiError(res);
