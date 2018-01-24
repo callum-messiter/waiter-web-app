@@ -28,7 +28,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
               name="itemName"
               type="text" 
-              placeholder="Chicken caesar salad" 
+              placeholder="Item name" 
               v-model="form.item.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="item name"
@@ -43,7 +43,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
               name="itemPrice"
               type="text" 
-              placeholder="7.00" 
+              placeholder="Item price" 
               v-model="form.item.price"
               v-validate="{required: true, max: 4}"
               data-vv-as="item price"
@@ -58,7 +58,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
               name="itemDescription"
               type="text" 
-              placeholder="Tasty chicken breast chunks with caesar salad" 
+              placeholder="Item description" 
               v-model="form.item.description"
               v-validate="{required: true, max: 40}"
               data-vv-as="item description"
@@ -89,7 +89,7 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
               name="categoryName"
               type="text" 
-              placeholder="Chicken caesar salad" 
+              placeholder="Category name" 
               v-model="form.category.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="category name"
@@ -103,7 +103,7 @@
             <button
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, modal.trigger)">
+              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
               {{modal.buttons.primary}}
             </button>
           </form>
