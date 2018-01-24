@@ -346,6 +346,19 @@ export default {
     color: #fff;
   }
 
+@-webkit-keyframes autofill {
+  to {
+    background: none;
+    color: #fff;
+  }
+}
+
+input.input.pass:-webkit-autofill {
+  -webkit-animation-name: autofill !important;
+  -webkit-animation-fill-mode: both !important;
+  -webkit-box-shadow: none !important;
+}
+
   h1 {
     text-align: center;
     font-size: 2.5em;
