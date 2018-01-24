@@ -4,6 +4,7 @@
     <navbar></navbar>
     <div class="container-fluid">
       <modal></modal>
+      <modalForm></modalForm>
       <!-- Main page content -->
       <router-view/>
     </div>
@@ -16,13 +17,15 @@
 import Navbar from './components/Navbar';
 import Alert from './components/Alert';
 import Modal from './components/Modal';
+import ModalForm from './components/ModalForm';
 
 export default {
   name: 'app',
   components: {
     'navbar': Navbar,
     'alert': Alert,
-    'modal': Modal
+    'modal': Modal,
+    'modalForm': ModalForm
   },
   
   created() {
