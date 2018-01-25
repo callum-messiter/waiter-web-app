@@ -177,7 +177,7 @@
                 class="formLink">
                 Forgot password
               </a>
-              -->
+              -->>
           </div>
         </form>
       </div>

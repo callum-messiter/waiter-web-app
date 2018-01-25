@@ -24,7 +24,7 @@ export default {
     'alert': Alert,
     'modal': Modal
   },
-  
+
   created() {
     if(!this.userIsAuthenticated) {
       // If the user is not logged in, redirect them to the home page when they visit any other page
@@ -59,7 +59,15 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  /*color: #2c3e50;*/
+  margin-top: 50px;
+}
+
+body {
+  background-color: #0a0a0a;
+}
+
+.container-fluid {
+  padding: 0;
 }
 </style>
