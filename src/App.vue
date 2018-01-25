@@ -2,7 +2,7 @@
   <div id="app">
     <!-- Navbar -->
     <navbar></navbar>
-    <div class="container-fluid">
+    <div class="container">
       <modal></modal>
       <modalForm></modalForm>
       <!-- Main page content -->
@@ -66,11 +66,21 @@ body {
   margin-top: 50px;
 }
 
+/** 
+  Cheating a bit, but when building the app (npm run build), 
+  the two stylings below are not adhered to. There must be a conflict
+  somewhere in the CSS, which manifests following minification. 
+
+  But I can't be bothered to find it, and I was under the impression
+  that CSS properties set here would be respected globally (so long as 'scoped' was removed from
+  the style tag).
+**/
+
 body {
-  background-color: #0a0a0a;
+  background-color: #0a0a0a !important;
 }
 
 .container-fluid {
-  padding: 0;
+  padding: 0 !important;
 }
 </style>

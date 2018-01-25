@@ -209,24 +209,61 @@ export default {
     src: url("../fonts/grotesque.otf");
   }
 
+  .container-fluid {
+    font-family: 'grotesque';
+    margin: 0;
+    padding: 0;
+  }
+
   .glyphicon {
     margin-right: 15px;
     cursor: pointer;
+    color: #469ada;
   }
 
   .panel-title {
     font-size: 12px;
+    color: #469ada
   }
 
   .panel-body {
     padding-top: 10px;
     padding-bottom: 3px;
-    font-size: 12px
+    font-size: 12px;
+    background-color: #3a3a3a;
+    color: #fff;
   }
 
   .panel-heading {
-    padding-top: 5px;
-    padding-bottom: 5px;
+    background-color: #262626;
+    border: 1px solid #262626;
+    min-height: 35px;
+    padding: 10px !important;
+  }
+
+  .panel-body img {
+    float: left;
+    height: 60px;
+    width: 60px;
+  }
+
+  .panel-body ul {
+    /*float: right;*/
+    margin-left: 80px;
+    margin-top: 10px;
+  }
+
+  .panel {
+    /*max-width: 480px;*/
+    margin: 20px auto;
+  }
+
+  .panel-default {
+    border: none;
+  }
+
+  .inner {
+    padding: 20px;
   }
 
   .item-name {
@@ -249,12 +286,6 @@ export default {
       margin-left: -15px;
   }
 
-  .container-fluid {
-    font-family: 'grotesque';
-    margin: 0;
-    padding: 0;
-  }
-
   h3 {
     color: #fff;
   }
@@ -262,52 +293,6 @@ export default {
   img {
     width: 70px;
     height: 70px;
-  }
-
-  .inner {
-    padding: 20px;
-  }
-
-  .panel {
-    /*max-width: 480px;*/
-    margin: 20px auto;
-  }
-
-  .panel-heading {
-    background-color: #262626;
-    border: 1px solid #262626;
-    min-height: 35px;
-    padding: 10px;
-  }
-
-  .panel-title {
-    color: #469ada;
-  }
-
-  .panel-default {
-    border: none;
-  }
-
-  .panel-body {
-    background-color: #3a3a3a;
-    color: #fff;
-    padding: 10px;
-  }
-
-  .panel-body img {
-    float: left;
-    height: 60px;
-    width: 60px;
-  }
-
-  .panel-body ul {
-    /*float: right;*/
-    margin-left: 80px;
-    margin-top: 10px;
-  }
-
-  .glyphicon {
-    color: #469ada;
   }
 
 </style>
