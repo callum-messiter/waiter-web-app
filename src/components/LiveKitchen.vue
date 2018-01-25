@@ -235,7 +235,7 @@ export default {
   }
 
   .panel-heading {
-    background-color: #262626;
+    background-color: #262626 !important;
     border: 1px solid #262626;
     min-height: 35px;
     padding: 10px !important;
