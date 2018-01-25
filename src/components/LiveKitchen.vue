@@ -234,9 +234,14 @@ export default {
     color: #fff;
   }
 
+  /**
+    There is a panel-heading class in the Dashboard component, causing conflicts here. 
+    We should add two new distinct class name and reference them in the CSS, instead.
+  **/
+
   .panel-heading {
     background-color: #262626 !important;
-    border: 1px solid #262626;
+    border: 1px solid #262626 !important;
     min-height: 35px;
     padding: 10px !important;
   }
