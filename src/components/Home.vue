@@ -568,16 +568,30 @@ input.input.pass:-webkit-autofill {
     }
   }
 
-  @media (max-height: 690px) {
+  @media (max-height: 630px) {
     .container {
       height: auto;
       min-height: 100vh;
       padding-bottom: 40px;
     }
     #logbox {
-      height: 90vh;
-      min-height: 500px;
-      margin-top: 5vh;
+      height: 70vh;
+      min-height: 450px;
+      margin-top: 15vh;
+    }
+  }
+
+
+  @media (max-height: 590px) {
+    .container {
+      height: auto;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+    #logbox {
+      height: 80vh;
+      min-height: 450px;
+      margin-top: 10vh;
     }
   }
 
