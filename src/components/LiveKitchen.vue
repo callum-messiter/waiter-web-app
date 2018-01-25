@@ -1,5 +1,6 @@
 <template>
   <div class="container-fluid">
+    <div class="inner">
     <alert></alert>
     <!-- If there are no live orders, inform the user -->
     <div class="row" v-if="orders.length < 1">
@@ -7,13 +8,13 @@
     </div>
     <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
     <div class="row" v-else>
-      <div class="received-container col-sm-4 col-sm-offset-2">
-        <h3>Received Orders</h3>
+      <div class="received-container col-sm-5 col-sm-offset-1 col-md-4 col-md-offset-2">
+        <h3>Received Orders <img src="../assets/waiter-icon.png"/></h3>
         <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.receivedByKitchen">
           <div class="panel-heading container-fluid">
             <div class="row">
-              <h3 class="panel-title text-left col-sm-4">{{order.timeAgo}}</h3>
-              <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
+              <h3 class="panel-title text-left col-xs-4">{{order.timeAgo}}</h3>
+              <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
               <!-- Reject-Order Icon -->
               <span 
                 class="glyphicon glyphicon-remove pull-right"
@@ -27,6 +28,7 @@
             </div>
           </div>
           <div class="panel-body text-left">
+            <img src="../assets/menu-icon.png"/>
             <ul class="items">
               <li class="item-name" v-for="item in order.items">{{item.name}}</li>
             </ul>
@@ -34,13 +36,13 @@
         </div>
       </div>
       <!-- Orders accepted by the kitchen, and thus in progress. Ordered by recency (oldest at top)-->
-      <div class="accepted-container col-sm-4">
-        <h3>Accepted Orders</h3>
+      <div class="accepted-container col-sm-5 col-md-4">
+        <h3>Accepted Orders <img src="../assets/cutlery-icon.png"></h3>
         <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.acceptedByKitchen">
           <div class="panel-heading container-fluid">
             <div class="row">
-              <h3 class="panel-title text-left col-sm-4">{{order.timeAgo}}</h3>
-              <h3 class="panel-title text-center col-sm-4">Table {{order.tableNo}}</h3>
+              <h3 class="panel-title text-left col-xs-4">{{order.timeAgo}}</h3>
+              <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
               <!-- Send-Order-to-Custom Icon -->
               <span 
                 class="glyphicon glyphicon-send pull-right"
@@ -49,6 +51,7 @@
             </div>
           </div>
           <div class="panel-body text-left">
+            <img src="../assets/menu-icon.png"/>
             <ul class="items">
               <li class="item-name" v-for="item in order.items">{{item.name}}</li>
             </ul>
@@ -56,6 +59,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -104,11 +108,11 @@ export default {
     **/
     const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
     // Get the live-orders object and add it to the store
-    this.$http.get('order/getAllLive/'+restaurantId, { 
+    this.$http.get('order/getAllLive/'+restaurantId, {
       headers: {Authorization: JSON.parse(localStorage.user).token}
     }).then((res) => {
       const orders = res.body.data;
-      
+
       // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
       for(var i = 0; i < orders.length; i++) {
         if(orders[i].status == this.statuses.sentToKitchen) {
@@ -145,7 +149,7 @@ export default {
     };
 
     /**
-      Once we emit an order-status update to the server, the server will update the order's ststus in the database, before 
+      Once we emit an order-status update to the server, the server will update the order's ststus in the database, before
       emitting a confirmation of update back to us.
 
       Only then do we update the order status in the state
@@ -160,7 +164,7 @@ export default {
       this.$store.commit('updateTimeSinceOrdersPlaced');
     }, 30000);
   },
-  
+
   methods: {
     updateOrderStatus(order, status) {
       this.$socket.emit('orderStatusUpdate', {
@@ -188,7 +192,7 @@ export default {
 
     statusesVisibleToKitchen() {
       return [
-        this.statuses.sentToKitchen, 
+        this.statuses.sentToKitchen,
         this.statuses.receivedByKitchen,
         this.statuses.acceptedByKitchen
       ]
@@ -199,6 +203,11 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
+  @font-face {
+    font-family: 'grotesque';
+    src: url("../fonts/grotesque.otf");
+  }
 
   .glyphicon {
     margin-right: 15px;
@@ -231,13 +240,74 @@ export default {
   }
 
   ul.items > li {
-      margin-left: 15px;  
+      margin-left: 15px;
   }
 
   /* Prevent nested li's from getting messed up */
   ul.items > li::before {
       content: "- ";
       margin-left: -15px;
+  }
+
+  .container-fluid {
+    font-family: 'grotesque';
+    margin: 0;
+    padding: 0;
+  }
+
+  h3 {
+    color: #fff;
+  }
+
+  img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .inner {
+    padding: 20px;
+  }
+
+  .panel {
+    /*max-width: 480px;*/
+    margin: 20px auto;
+  }
+
+  .panel-heading {
+    background-color: #262626;
+    border: 1px solid #262626;
+    min-height: 35px;
+    padding: 10px;
+  }
+
+  .panel-title {
+    color: #469ada;
+  }
+
+  .panel-default {
+    border: none;
+  }
+
+  .panel-body {
+    background-color: #3a3a3a;
+    color: #fff;
+    padding: 10px;
+  }
+
+  .panel-body img {
+    float: left;
+    height: 60px;
+    width: 60px;
+  }
+
+  .panel-body ul {
+    /*float: right;*/
+    margin-left: 80px;
+    margin-top: 10px;
+  }
+
+  .glyphicon {
+    color: #469ada;
   }
 
 </style>
