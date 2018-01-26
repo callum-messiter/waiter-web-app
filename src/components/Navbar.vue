@@ -16,8 +16,8 @@
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li v-bind:class="{'active': $route.path == '/me'}">
-          <router-link to="/me">{{user.firstName}} {{user.lastName}}</router-link>
+        <li class="logout">
+            <a v-on:click="logUserOut">Log out</a>
         </li>
       </ul>
     </div><!--/.nav-collapse -->
@@ -41,7 +41,16 @@ export default {
 
   created () {},
 
-  methods: {},
+  methods: {
+    logUserOut() {
+      localStorage.removeItem('user');
+      localStorage.removeItem('restaurant');
+      localStorage.removeItem('menu');
+      this.$store.commit('deauthenticateUser');
+      localStorage.isAuth = false;
+      this.$router.push('/');
+    }
+  },
 
   computed: {
     userIsSignedIn () {
@@ -88,6 +97,11 @@ export default {
 
   .navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover {
     background-color: #262626;
+  }
+
+  a {
+    color: white;
+    cursor: pointer;
   }
 
 
