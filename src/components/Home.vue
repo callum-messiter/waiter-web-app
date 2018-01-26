@@ -18,7 +18,8 @@
                 v-bind:placeholder="form.signup.firstName.placeholder"
                 v-model="form.signup.firstName.value"
                 v-validate="{required: true, max: 100}"
-                v-on:blur="updateInputStatus('firstName')"
+                v-on:focus="hidePlaceholder('signup', 'firstName')"
+                v-on:blur="updateInputStatus('signup', 'firstName')"
                 data-vv-as="first name"
               />
               <span
@@ -37,7 +38,8 @@
                 v-bind:placeholder="form.signup.lastName.placeholder"
                 v-model="form.signup.lastName.value"
                 v-validate="{required: true, max: 100}"
-                v-on:blur="updateInputStatus('lastName')"
+                v-on:focus="hidePlaceholder('signup', 'lastName')"
+                v-on:blur="updateInputStatus('signup', 'lastName')"
                 data-vv-as="last name"
               />
               <span
@@ -58,7 +60,8 @@
                 v-bind:placeholder="form.signup.email.placeholder"
                 v-model="form.signup.email.value"
                 v-validate="{required: true, max: 150}"
-                v-on:blur="updateInputStatus('email')"
+                v-on:focus="hidePlaceholder('signup', 'email')"
+                v-on:blur="updateInputStatus('signup', 'email')"
               />
               <span
                 class="help is-danger"
@@ -75,7 +78,8 @@
                 v-bind:placeholder="form.signup.restaurantName.placeholder"
                 v-model="form.signup.restaurantName.value"
                 v-validate="{required: true, max: 150}"
-                v-on:blur="updateInputStatus('restaurantName')"
+                v-on:focus="hidePlaceholder('signup', 'restaurantName')"
+                v-on:blur="updateInputStatus('signup', 'restaurantName')"
                 data-vv-as="restaurant name"
               />
               <span
@@ -96,7 +100,8 @@
                 v-bind:placeholder="form.signup.password.placeholder"
                 v-model="form.signup.password.value"
                 v-validate="{required: true, min: 6, max: 30}"
-                v-on:blur="updateInputStatus('password')"
+                v-on:focus="hidePlaceholder('signup', 'password')"
+                v-on:blur="updateInputStatus('signup', 'password')"
               />
               <span
                 class="help is-danger"
@@ -113,7 +118,8 @@
                 v-bind:placeholder="form.signup.confirmPassword.placeholder"
                 v-model="form.signup.confirmPassword.value"
                 v-validate="'confirmed:password|required'"
-                v-on:blur="updateInputStatus('confirmPassword')"
+                v-on:focus="hidePlaceholder('signup', 'confirmPassword')"
+                v-on:blur="updateInputStatus('signup', 'confirmPassword')"
                 data-vv-as="confirm password"
               />
               <span
@@ -151,12 +157,16 @@
             type="email"
             v-bind:placeholder="form.login.email.placeholder"
             v-model="form.login.email.value"
+            v-on:focus="hidePlaceholder('login', 'email')"
+            v-on:blur="updateInputStatus('login', 'email')"
           />
           <input
             class="input pass"
             type="password"
             v-bind:placeholder="form.login.password.placeholder"
             v-model="form.login.password.value"
+            v-on:focus="hidePlaceholder('login', 'password')"
+            v-on:blur="updateInputStatus('login', 'password')"
           />
           <button
             type="button"
@@ -302,9 +312,23 @@ export default {
   },
 
   methods: {
-    updateInputStatus(input) {
-      this.inputs.hasFocus = input;
-      this.inputs.hasHadFocus.push(input);
+    hidePlaceholder(form, input) {
+      this.form[form][input].placeholder = '';
+    },
+    /**
+      Using V-Validate, we check beore signing a user in whether the form has any errors.
+      If no input has yet been clicked, and the user clicks the submit button, no errors
+      will be registered yet, and so they request will be sent to the API.
+      To avoid this, we also check if any inputs have had focus; hence, we track this here.
+    **/
+    updateInputStatus(form, input) {
+      // Whenever an input loses focus, reset the placehodler to its default (because on focus, we set it to '')
+      this.form[form][input].placeholder = this.formDefault[form][input].placeholder;
+      // Set "focus history" of form
+      if(form == 'signup') {
+        this.inputs.hasFocus = input;
+        this.inputs.hasHadFocus.push(input);
+      }
     },
     showLoginForm() {
       // Reset the signup form
