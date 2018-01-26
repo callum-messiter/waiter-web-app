@@ -8,7 +8,7 @@
     </div>
     <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
     <div class="row" v-else>
-      <div class="received-container col-sm-5 col-sm-offset-1 col-md-4 col-md-offset-2">
+      <div class="received-container col-sm-6">
         <h3>Received Orders <img src="../assets/waiter-icon.png"/></h3>
         <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.receivedByKitchen">
           <div class="panel-heading container-fluid">
@@ -36,7 +36,7 @@
         </div>
       </div>
       <!-- Orders accepted by the kitchen, and thus in progress. Ordered by recency (oldest at top)-->
-      <div class="accepted-container col-sm-5 col-md-4">
+      <div class="accepted-container col-sm-6">
         <h3>Accepted Orders <img src="../assets/cutlery-icon.png"></h3>
         <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.acceptedByKitchen">
           <div class="panel-heading container-fluid">
@@ -222,7 +222,7 @@ export default {
   }
 
   .panel-title {
-    font-size: 12px;
+    font-size: 14px;
     color: #469ada
   }
 
@@ -277,7 +277,7 @@ export default {
   }
 
   .timeAgo {
-    font-size: 10px !important;
+    font-size: 12px !important;
   }
 
   ul.items {
