@@ -343,26 +343,28 @@ export default {
     },
 
     logUserIn() {
-      this.$http.get("auth/login?email="+this.form.login.email.value+"&password="+this.form.login.password.value, {
-      }).then((res) => {
-        if(res.status == 200 || res.status == 201) {
-          // Add data to local storage
-          localStorage.setItem('user', JSON.stringify(res.body.data.user));
-          localStorage.setItem('isAuth', true);
-          localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
-          localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
+      if(this.form.login.email.value != '' && this.form.login.password.value != '') {
+        this.$http.get("auth/login?email="+this.form.login.email.value+"&password="+this.form.login.password.value, {
+        }).then((res) => {
+          if(res.status == 200 || res.status == 201) {
+            // Add data to local storage
+            localStorage.setItem('user', JSON.stringify(res.body.data.user));
+            localStorage.setItem('isAuth', true);
+            localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
+            localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
+            // Reset the login form 
+            this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
+            // Set auth state to true
+            this.$store.commit('authenticateUser');
+            // Redirect user to their dashboard
+            this.$router.push('/dashboard');
+          }
+        }).catch((res) => {
           // Reset the login form 
           this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
-          // Set auth state to true
-          this.$store.commit('authenticateUser');
-          // Redirect user to their dashboard
-          this.$router.push('/dashboard');
-        }
-      }).catch((res) => {
-        // Reset the login form 
-        this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
-        this.handleApiError(res);
-      });
+          this.handleApiError(res);
+        });
+      }
     },
 
     registerUser() {
