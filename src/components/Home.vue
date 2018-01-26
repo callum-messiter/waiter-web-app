@@ -15,8 +15,8 @@
                 :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('firstName') }"
                 name="firstName"
                 type="text"
-                placeholder="First name"
-                v-model="form.signup.firstName"
+                v-bind:placeholder="form.signup.firstName.placeholder"
+                v-model="form.signup.firstName.value"
                 v-validate="{required: true, max: 100}"
                 v-on:blur="updateInputStatus('firstName')"
                 data-vv-as="first name"
@@ -34,8 +34,8 @@
                 :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('lastName') }"
                 name="lastName"
                 type="text"
-                placeholder="Last name"
-                v-model="form.signup.lastName"
+                v-bind:placeholder="form.signup.lastName.placeholder"
+                v-model="form.signup.lastName.value"
                 v-validate="{required: true, max: 100}"
                 v-on:blur="updateInputStatus('lastName')"
                 data-vv-as="last name"
@@ -55,8 +55,8 @@
                 :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('email') }"
                 name="email"
                 type="email"
-                placeholder="Email address"
-                v-model="form.signup.email"
+                v-bind:placeholder="form.signup.email.placeholder"
+                v-model="form.signup.email.value"
                 v-validate="{required: true, max: 150}"
                 v-on:blur="updateInputStatus('email')"
               />
@@ -72,8 +72,8 @@
                 :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('restaurantName') }"
                 name="restaurantName"
                 type="restaurantName"
-                placeholder="Restaurant name"
-                v-model="form.signup.restaurantName"
+                v-bind:placeholder="form.signup.restaurantName.placeholder"
+                v-model="form.signup.restaurantName.value"
                 v-validate="{required: true, max: 150}"
                 v-on:blur="updateInputStatus('restaurantName')"
                 data-vv-as="restaurant name"
@@ -93,8 +93,8 @@
                 :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('password') }"
                 name="password"
                 type="password"
-                placeholder="Choose a password"
-                v-model="form.signup.password"
+                v-bind:placeholder="form.signup.password.placeholder"
+                v-model="form.signup.password.value"
                 v-validate="{required: true, min: 6, max: 30}"
                 v-on:blur="updateInputStatus('password')"
               />
@@ -110,8 +110,8 @@
                 :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1}"
                 name="confirmPassword"
                 type="password"
-                placeholder="Confirm password"
-                v-model="form.signup.confirmPassword"
+                v-bind:placeholder="form.signup.confirmPassword.placeholder"
+                v-model="form.signup.confirmPassword.value"
                 v-validate="'confirmed:password|required'"
                 v-on:blur="updateInputStatus('confirmPassword')"
                 data-vv-as="confirm password"
@@ -149,14 +149,14 @@
           <input
             class="input pass"
             type="email"
-            placeholder="Enter your email"
-            v-model="form.login.email"
+            v-bind:placeholder="form.login.email.placeholder"
+            v-model="form.login.email.value"
           />
           <input
             class="input pass"
             type="password"
-            placeholder="Enter your password"
-            v-model="form.login.password"
+            v-bind:placeholder="form.login.password.placeholder"
+            v-model="form.login.password.value"
           />
           <button
             type="button"
@@ -207,16 +207,78 @@ export default {
       loginFormIsVisible: false,
       form: {
         login: {
-          email: '',
-          password: '',
+          email: {
+            value: '',
+            placeholder: 'Email address'
+          },
+          password: {
+            value: '',
+            placeholder: 'Password'
+          },
         },
         signup: {
-          firstName: '',
-          lastName: '',
-          email: '',
-          restaurantName: '',
-          password: '',
-          confirmPassword: ''
+          firstName: {
+            value: '',
+            placeholder: 'First name'
+          },
+          lastName: {
+            value: '',
+            placeholder: 'Last name'
+          },
+          email: {
+            value: '',
+            placeholder: 'Enter a valid email address'
+          },
+          restaurantName: {
+            value: '',
+            placeholder: 'Restaurant name'
+          },
+          password: {
+            value: '',
+            placeholder: 'Choose a password'
+          },
+          confirmPassword: {
+            value: '',
+            placeholder: 'Re-enter password'
+          }
+        }
+      },
+      formDefault: {
+        login: {
+          email: {
+            value: '',
+            placeholder: 'Email address'
+          },
+          password: {
+            value: '',
+            placeholder: 'Password'
+          },
+        },
+        signup: {
+          firstName: {
+            value: '',
+            placeholder: 'First name'
+          },
+          lastName: {
+            value: '',
+            placeholder: 'Last name'
+          },
+          email: {
+            value: '',
+            placeholder: 'Enter a valid email address'
+          },
+          restaurantName: {
+            value: '',
+            placeholder: 'Restaurant name'
+          },
+          password: {
+            value: '',
+            placeholder: 'Choose a password'
+          },
+          confirmPassword: {
+            value: '',
+            placeholder: 'Re-enter password'
+          }
         }
       },
       inputs: {
@@ -245,15 +307,19 @@ export default {
       this.inputs.hasHadFocus.push(input);
     },
     showLoginForm() {
+      // Reset the signup form
+      this.form.signup = JSON.parse(JSON.stringify(this.formDefault.signup));
       this.loginFormIsVisible = true;
     },
 
     hideLoginForm() {
+      // Reset the login form
+      this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
       this.loginFormIsVisible = false;
     },
 
     logUserIn() {
-      this.$http.get("auth/login?email="+this.form.login.email+"&password="+this.form.login.password, {
+      this.$http.get("auth/login?email="+this.form.login.email.value+"&password="+this.form.login.password.value, {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
           // Add data to local storage
@@ -261,12 +327,16 @@ export default {
           localStorage.setItem('isAuth', true);
           localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
           localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
+          // Reset the login form 
+          this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
           // Set auth state to true
           this.$store.commit('authenticateUser');
           // Redirect user to their dashboard
           this.$router.push('/dashboard');
         }
       }).catch((res) => {
+        // Reset the login form 
+        this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
         this.handleApiError(res);
       });
     },
@@ -277,15 +347,18 @@ export default {
         // Make the API call
         this.$http.post('user/create', {
           userType: 'restaurateur',
-          firstName: this.form.signup.firstName,
-          lastName: this.form.signup.lastName,
-          restaurantName: this.form.signup.restaurantName,
-          email: this.form.signup.email,
-          password: this.form.signup.password
+          firstName: this.form.signup.firstName.value,
+          lastName: this.form.signup.lastName.value,
+          restaurantName: this.form.signup.restaurantName.value,
+          email: this.form.signup.email.value,
+          password: this.form.signup.password.value
         }).then((res) => {
           // For now just log the user in; later we will handle email verification
-          this.form.login.email = this.form.signup.email;
-          this.form.login.password = this.form.signup.password;
+          this.form.login.email.value = this.form.signup.email.value;
+          this.form.login.password.value = this.form.signup.password.value;
+          
+          // Reset the signup form 
+          this.form.signup = JSON.parse(JSON.stringify(this.formDefault.signup));
           this.logUserIn();
         }).catch((res) => {
           this.handleApiError(res);
