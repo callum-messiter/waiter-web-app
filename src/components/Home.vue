@@ -307,7 +307,7 @@ export default {
   created () {
     // If the user is logged in, redirect them to their dashboard when they visit the home page
     if(this.userIsAuthenticated) {
-      this.$router.push('/dashboard');
+      this.$router.push('/live-kitchen');
     }
   },
 
@@ -342,7 +342,7 @@ export default {
       this.loginFormIsVisible = false;
     },
 
-    logUserIn() {
+    logUserIn(isLoginAutomatic) {
       if(this.form.login.email.value != '' && this.form.login.password.value != '') {
         this.$http.get("auth/login?email="+this.form.login.email.value+"&password="+this.form.login.password.value, {
         }).then((res) => {
@@ -357,11 +357,14 @@ export default {
             // Set auth state to true
             this.$store.commit('authenticateUser');
             // Redirect user to their dashboard
-            this.$router.push('/dashboard');
+            if(isLoginAutomatic) {
+              this.$router.push('/dashboard');
+            } else {
+              this.$router.push('/live-kitchen');
+            }
+            this.form = JSON.parse(JSON.stringify(this.formDefault));
           }
         }).catch((res) => {
-          // Reset the login form 
-          this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
           this.handleApiError(res);
         });
       }
@@ -384,8 +387,7 @@ export default {
           this.form.login.password.value = this.form.signup.password.value;
           
           // Reset the signup form 
-          this.form.signup = JSON.parse(JSON.stringify(this.formDefault.signup));
-          this.logUserIn();
+          this.logUserIn(true);
         }).catch((res) => {
           this.handleApiError(res);
         });
