@@ -39,18 +39,15 @@
               {{ errors.first('itemName') }}
             </span>
             <!-- Item price -->
-            <input 
+            <money
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
               name="itemPrice"
-              type="number"
-              min="0.00" 
-              max="10000.00" 
-              step="0.50"
               placeholder="Item price" 
-              v-model="form.item.price"
-              v-validate="{required: true, max: 4}"
-              data-vv-as="item price"
-            />
+              v-model ="form.item.price"
+              v-bind="money"
+              v-validate="{required: true}"
+              data-vv-as="item price">
+            </money>
             <span
               class="help is-danger" 
               v-show="errors.has('itemPrice')">
@@ -77,7 +74,7 @@
             <button 
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, 'item', form.item, modal.trigger)">
+              v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, 'item', modal.trigger)">
               {{modal.buttons.primary}}
             </button>
             </div>
@@ -106,7 +103,7 @@
             <button
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, 'category', form.category, trigger={})">
+              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
               {{modal.buttons.primary}}
             </button>
           </form>
@@ -164,7 +161,7 @@
             <button 
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.name, 'item', form.item, modal.trigger)">
+              v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.name, 'item', modal.trigger)">
               {{modal.buttons.primary}}
             </button>
           </form>
@@ -178,10 +175,13 @@
 
 <script>
 
+import {Money} from 'v-money'
+
 import { bus } from '../main';
 
 export default {
   name: 'ModalForm',
+  components: {Money},
 
   data () {
     return {
@@ -227,16 +227,22 @@ export default {
 
       Then, when one of the actional modal buttons is clicked (e.g. Add new category), this modal, via the below method, emits and event back to the target component. The target component will be listening to the relevant event, and upon receiving it, will execute the necessary logic (e.g. by calling the addCategory method.)
     **/
-    emitUserConfirmation(eventName, modalName, form, data, trigger) {
+    emitUserConfirmation(eventName, modalName, form, trigger) {
       // Check if any of the fields are empty
       var fields = this.form[form];
       var allFieldsFilled = true;
       Object.keys(fields).forEach((key) => {
-        if(fields[key].trim() === "") { allFieldsFilled = false; }
+        if(fields[key].toString().trim() === "") { allFieldsFilled = false; }
       });
 
       // Only send the event if there are no form errors, and no empty fields
       if(!this.errors.any() && allFieldsFilled === true) {
+        // Check which form has been submitted
+        if(form == 'item') {
+          var data = this.form.item;
+        } else if(form == 'category') {
+          var data = this.form.item;
+        }
         bus.$emit(eventName, data, trigger);
         this.modal.isVisible = false;
         this.resetFormData(modalName);

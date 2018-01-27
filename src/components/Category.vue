@@ -293,26 +293,33 @@ export default {
       Here we send a request to the API to add the new item to the menu. If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the item appears at the top of its category's list). It is important to keep the backend data and the front-end state syncronised
     **/
     createNewItem(data, catId, catIndex) {
-      const newItem = data;
-      
+      // Something weird is happening: the values of the data object in the _then_ block are empty strings
+      var newItem = {
+        itemId: '',
+        name: data.name,
+        price: data.price,
+        description: data.description
+      }
+
       this.$http.post('item/create', {
-        name: newItem.name,
-        price: newItem.price,
-        description: newItem.description,
+        name: data.name,
+        price: data.price,
+        description: data.description,
         categoryId: catId
       }, 
         {headers: {Authorization: JSON.parse(localStorage.user).token}
 
       }).then((res) => {
-        // Set the itemId that was assigned by the server
-        newItem.itemId = res.body.data.createdItemId; 
-        this.$store.commit('addItem', {
-          item: newItem,
-          catIndex: catIndex
-        });
-        
-        this.showAlert('success', 'Your new item was successfully added to your menu!');
-
+        if(res.status == 200 || res.status == 201) {
+          // Set the itemId that was assigned by the server
+          newItem.itemId = res.body.data.createdItemId; 
+          this.$store.commit('addItem', {
+            item: newItem,
+            catIndex: catIndex
+          });
+          
+          this.showAlert('success', 'Your new item was successfully added to your menu!');
+        }
       }).catch((res) => {
         this.handleApiError(res);
       });
