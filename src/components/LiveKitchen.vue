@@ -3,8 +3,9 @@
     <div class="inner">
     <alert></alert>
     <!-- If there are no live orders, inform the user -->
-    <div class="row" v-if="orders.length < 1">
-      <h3 v-if="orders.length < 1">Your restaurant has no live orders right now!</h3>
+    <div class="row zeroOrders" v-if="orders.length < 1">
+      <img class="zeroOrdersIcon" src="../assets/safebox.png"/>
+      <h4 class="zeroOrdersMsg">{{restaurantName}} has no live orders right now...</h4>
     </div>
     <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
     <div class="row" v-else>
@@ -72,7 +73,6 @@ import functions from '../mixins/functions';
 
 // Dependencies
 import moment from 'moment';
-import underscore from 'underscore';
 
 export default {
   name: 'LiveKitchen',
@@ -186,8 +186,16 @@ export default {
       return JSON.parse(localStorage.restaurant).restaurantId;
     },
 
+    restaurantName() {
+      return JSON.parse(localStorage.restaurant).name;
+    },
+
     orders() {
-      return _.sortBy(this.$store.getters.getLiveOrders, 'time');
+      return this.$store.getters.getLiveOrders.orders;
+    },
+
+    numOrders() {
+      return this.$store.getters.getLiveOrders.numOrders
     },
 
     statusesVisibleToKitchen() {
@@ -302,6 +310,19 @@ export default {
   img {
     width: 70px;
     height: 70px;
+  }
+
+  /**
+    Icons display when there are zero orders
+  **/
+  .zeroOrdersIcon {
+    height: 150px;
+    width: auto;
+  }
+
+  .zeroOrders {
+    padding-top: 140px; /** In order to vertically center; is there a more robust way? **/
+    color: white;
   }
 
 </style>

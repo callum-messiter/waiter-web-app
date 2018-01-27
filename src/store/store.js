@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 
 import cloneDeep from 'clone-deep';
 import moment from 'moment';
+import underscore from 'underscore';
 
 Vue.use(Vuex);
 
@@ -144,7 +145,20 @@ export default new Vuex.Store({
 			Orders
 		**/
 		getLiveOrders(state) {
-			return state.orders;
+			var received = 0;
+			var accepted = 0;
+			for(var i = 0; i < state.orders.length; i++) {
+				if(state.orders[i].status == statuses.receivedByKitchen) {
+					received++;
+				}
+				if(state.orders[i].status == statuses.acceptedByKitchen) {
+					accepted++;
+				}
+			}
+			return {
+				orders: _.sortBy(state.orders, 'time'),
+				numOrders: {received: received, accepted: accepted}
+			}
 		}
 	}
 });
