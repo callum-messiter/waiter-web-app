@@ -42,7 +42,10 @@
             <input 
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
               name="itemPrice"
-              type="text" 
+              type="number"
+              min="0.00" 
+              max="10000.00" 
+              step="0.50"
               placeholder="Item price" 
               v-model="form.item.price"
               v-validate="{required: true, max: 4}"
@@ -74,7 +77,7 @@
             <button 
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, form.item, modal.trigger)">
+              v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, 'item', form.item, modal.trigger)">
               {{modal.buttons.primary}}
             </button>
             </div>
@@ -103,7 +106,7 @@
             <button
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
+              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, 'category', form.category, trigger={})">
               {{modal.buttons.primary}}
             </button>
           </form>
@@ -161,7 +164,7 @@
             <button 
               type="button"
               class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.name, form.item, modal.trigger)">
+              v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.name, 'item', form.item, modal.trigger)">
               {{modal.buttons.primary}}
             </button>
           </form>
@@ -198,6 +201,14 @@ export default {
         category: {
           name: ''
         }
+      },
+      money: {
+        decimal: '.',
+        thousands: ',',
+        prefix: '£',
+        suffix: '',
+        precision: 2,
+        masked: false
       }
     }
   },
@@ -216,10 +227,20 @@ export default {
 
       Then, when one of the actional modal buttons is clicked (e.g. Add new category), this modal, via the below method, emits and event back to the target component. The target component will be listening to the relevant event, and upon receiving it, will execute the necessary logic (e.g. by calling the addCategory method.)
     **/
-    emitUserConfirmation(eventName, modalName, data, trigger) {
-      bus.$emit(eventName, data, trigger);
-      this.modal.isVisible = false;
-      this.resetFormData(modalName);
+    emitUserConfirmation(eventName, modalName, form, data, trigger) {
+      // Check if any of the fields are empty
+      var fields = this.form[form];
+      var allFieldsFilled = true;
+      Object.keys(fields).forEach((key) => {
+        if(fields[key].trim() === "") { allFieldsFilled = false; }
+      });
+
+      // Only send the event if there are no form errors, and no empty fields
+      if(!this.errors.any() && allFieldsFilled === true) {
+        bus.$emit(eventName, data, trigger);
+        this.modal.isVisible = false;
+        this.resetFormData(modalName);
+      }
     },
 
     cancel(modalName) {
