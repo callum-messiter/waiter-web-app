@@ -42,7 +42,6 @@
             <money
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
               name="itemPrice"
-              placeholder="Item price" 
               v-model ="form.item.price"
               v-bind="money"
               v-validate="{required: true}"
@@ -128,15 +127,14 @@
               {{ errors.first('itemName') }}
             </span>
             <!-- Item price -->
-            <input 
+            <money 
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
-              name="itemPrice"
-              type="text" 
-              placeholder="7.00" 
+              name="itemPrice" 
               v-model="form.item.price"
+              v-bind="money"
               v-validate="{required: true, max: 4}"
-              data-vv-as="item price"
-            />
+              data-vv-as="item price">
+            </money>
             <span
               class="help is-danger" 
               v-show="errors.has('itemPrice')">
@@ -175,9 +173,11 @@
 
 <script>
 
-import {Money} from 'v-money'
+import {Money} from 'v-money';
 
 import { bus } from '../main';
+
+import config from '../../config/config';
 
 export default {
   name: 'ModalForm',
@@ -201,14 +201,6 @@ export default {
         category: {
           name: ''
         }
-      },
-      money: {
-        decimal: '.',
-        thousands: ',',
-        prefix: '£',
-        suffix: '',
-        precision: 2,
-        masked: false
       }
     }
   },
@@ -217,6 +209,12 @@ export default {
     bus.$on('showModalForm', (modal) => {
       Object.assign(this.modal, modal);
     });
+  },
+
+  computed: {
+    money() {
+      return config.money;
+    }
   },
 
   methods: {

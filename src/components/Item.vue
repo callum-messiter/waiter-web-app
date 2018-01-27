@@ -17,10 +17,11 @@
           > 
         </td>
         <td class="item-price text-left col-md-1">
-          <input 
+          <money 
             type="text" 
             class="form-control" 
             v-model="item.price" 
+            v-bind="money"
             v-bind:readonly="editMode.item.id != item.itemId" 
             v-on:dblclick="
               makeItemEditable(
@@ -29,7 +30,7 @@
                 category.categoryId,
                 categories.indexOf(category)
               )"
-          >
+          ></money>
         </td>
         <td class="item-description text-left col-md-8">
           <input 
@@ -92,12 +93,16 @@ import functions from '../mixins/functions';
 // Dependencies
 import cloneDeep from 'clone-deep';
 import lodash from 'lodash';
+import {Money} from 'v-money'
 
 // Events bus
 import { bus } from '../main';
 
+import config from '../../config/config';
+
 export default {
   name: 'Item',
+  components: {Money},
   props: ['categoriesObj', 'categoryItems'],
   mixins: [functions],
 
@@ -168,6 +173,10 @@ export default {
     **/
     categoryItemsState () {
       return this.$store.getters.getCategoriesAndItems;
+    },
+
+    money() {
+      return config.money;
     }
   },
 
