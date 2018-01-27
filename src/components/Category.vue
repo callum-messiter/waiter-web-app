@@ -13,6 +13,8 @@
             prevents any disruptive simulatenous actions. We don't want the to be able to collapse a category panel whilst he's
             editing a category name. We don't want every category name to become editable when the user activates edit mode.
           -->
+
+          <!-- Category name -->
           <input 
             v-if="editMode.active" 
             class="categoryName"
@@ -28,41 +30,48 @@
             >{{category.name}} ({{category.items.length}})
           </a>
           <!-- Delete Icon (visible by default) -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-trash pull-right align-middle"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
-            href="#" 
             v-on:click="showDeleteCategoryModal(
               category.categoryId,
               categories.indexOf(category), 
               category.name, 
               category.items.length
             )">
-            <span class="glyphicon glyphicon-trash pull-right align-middle"></span>
-          </a>
+          </span>
           <!-- Edit Icon (visible by default) -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-pencil pull-right align-middle"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
-            href="#" 
             v-on:click="activateEditMode(
               category.categoryId, 
               categories.indexOf(category)
             )">
-            <span class="glyphicon glyphicon-pencil pull-right align-middle"></span>
-          </a>
+          </span>
+          <!-- Add Item Icon (visible by default) -->
+          <span 
+            class="glyphicon glyphicon-plus pull-right"
+            v-if="!editMode.active || editMode.category.id != category.categoryId"
+            v-on:click="showAddItemModal(
+              category.categoryId, 
+              categories.indexOf(category), 
+              category.name
+            )">
+          </span>
           <!-- Discard Icon (visible only when a category name is being edited -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-repeat pull-right align-middle"
             v-if="editMode.active && editMode.category.id == category.categoryId"
-            href="#" 
             v-on:click="discardChanges()">
-            <span class="glyphicon glyphicon-repeat pull-right align-middle"></span>
-          </a>
+          </span>
           <!-- Save Icon (visible only when a category name is being edited -->
-          <a 
+          <span 
+            class="glyphicon glyphicon-floppy-disk pull-right align-middle"
             v-if="editMode.active && editMode.category.id == category.categoryId"
             href="#" 
             v-on:click="updateCategoryName(category.name)">
-            <span class="glyphicon glyphicon-floppy-disk pull-right align-middle"></span>
-          </a>
+          </span>
         </h4>
       </div>
       <div 
@@ -121,9 +130,12 @@ export default {
 
   created() {
 
-    // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
     bus.$on('userConfirmation_deleteCategory', (trigger) => {
         this.deleteCategory(trigger);
+    });
+
+    bus.$on('userConfirmation_addNewItem', (data, trigger) => {
+      this.createNewItem(data, trigger.catId, trigger.catIndex)
     });
 
     bus.$on('userConfirmation_deleteItem', (trigger) => {
@@ -278,6 +290,35 @@ export default {
     },
 
     /**
+      Here we send a request to the API to add the new item to the menu. If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the item appears at the top of its category's list). It is important to keep the backend data and the front-end state syncronised
+    **/
+    createNewItem(data, catId, catIndex) {
+      const newItem = data;
+      
+      this.$http.post('item/create', {
+        name: newItem.name,
+        price: newItem.price,
+        description: newItem.description,
+        categoryId: catId
+      }, 
+        {headers: {Authorization: JSON.parse(localStorage.user).token}
+
+      }).then((res) => {
+        // Set the itemId that was assigned by the server
+        newItem.itemId = res.body.data.createdItemId; 
+        this.$store.commit('addItem', {
+          item: newItem,
+          catIndex: catIndex
+        });
+        
+        this.showAlert('success', 'Your new item was successfully added to your menu!');
+
+      }).catch((res) => {
+        this.handleApiError(res);
+      });
+    },
+
+    /**
       Here we send the updated item data to the API, and if it is successfully persisted to the database,
       we also update the state, which is then reflected in the view. It is important to keep the backend data and the 
       front-end state syncronised
@@ -315,6 +356,15 @@ export default {
       }).catch((res) => {
         this.handleApiError(res);
       });
+    },
+
+    showAddItemModal(catId, catIndex, catName) {
+      this.showModalForm(
+        'item_add', 
+        'Add a new item to ' + catName,
+        'Save',
+        {catIndex, catId}
+      );
     }
 
   }
@@ -342,6 +392,7 @@ export default {
   .panel-heading {
     background-color: #8d8d8e !important;
     color: white !important;
+    padding-right: 3px;
   }
 
   .panel-title {
@@ -353,22 +404,15 @@ export default {
     margin-bottom: 0 !important;
   }
 
-  .glyphicon-trash {
-    left: 5px;
-  }
-
-  .glyphicon-repeat {
-    left: 5px;
-  }
-
-  .glyphicon-pencil .glyphicon-floppy-disk {
-    right: 5px;
+  .glyphicon {
+    padding-right: 5px;
+    cursor: pointer;
   }
 
   .categoryName {
     background: none;
     border: none;
-    text-align: center
+    text-align: center;
   }
 
   .categoryName:focus {

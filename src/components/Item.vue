@@ -1,7 +1,7 @@
 <template>
   <tbody>
     <tr class="item-row" v-for="item in category.items">
-        <td class="item-name text-left col-md-2">
+        <td class="item-name text-left col-md-3">
           <input 
             type="text" 
             class="form-control" 
@@ -31,7 +31,7 @@
               )"
           >
         </td>
-        <td class="item-description text-left col-md-9">
+        <td class="item-description text-left col-md-8">
           <input 
             type="text" 
             class="form-control" 
@@ -76,52 +76,6 @@
                 categories.indexOf(category)
               )"
             >Delete
-          </button>
-        </td>
-    </tr>
-
-    <!-- The template item, for adding a new item -->
-    <tr class="newItem-row" v-bind:class="{'newItemDefault': !newItem.isBeingEdited}">
-        <td class="item-name text-left col-md-3">
-          <input 
-            type="text" 
-            class="form-control newItem"
-            placeholder="E.g. Fish 'N' Chips"
-            v-model="newItem.data.name"
-            v-bind:readonly="!newItem.isBeingEdited"
-            v-on:click="activateNewItemEditMode"
-          > 
-        </td>
-        <td class="item-price text-left col-md-2">
-          <input 
-            type="text" 
-            class="form-control newItem"
-            placeholder="E.g. 10.00"
-            v-model="newItem.data.price"
-            v-bind:readonly="!newItem.isBeingEdited"
-            v-on:click="activateNewItemEditMode"
-          > 
-        </td>
-        <td class="item-description text-left col-md-7">
-          <input 
-            type="text" 
-            class="form-control newItem"
-            placeholder="E.g. The tastiest dish in town!"
-            v-model="newItem.data.description"
-            v-bind:readonly="!newItem.isBeingEdited"
-            v-on:click="activateNewItemEditMode"
-          > 
-        </td>
-        <td v-if="newItem.isBeingEdited" class="buttons">
-          <button 
-            class="btn btn-xs btn-primary pull-left align-middle"
-            v-on:click="createNewItem(category.categoryId, categories.indexOf(category))"
-            >Save New Item
-          </button>
-          <button 
-            class="btn btn-xs btn-danger pull-left align-middle cancelBtn"
-            v-on:click="resetNewItem"
-            >Discard
           </button>
         </td>
     </tr>
@@ -235,46 +189,6 @@ export default {
     resetNewItem() {
       this.newItem.data = {itemId: '', name: '', price: '', description: ''}
       this.newItem.isBeingEdited = false;
-    },
-
-    /**
-      Here we send a request to the API to add the new item to the menu. If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the item appears at the top of its category's list). It is important to keep the backend data and the front-end state syncronised
-    **/
-    createNewItem(catId, catIndex) {
-      const newItem = this.newItem.data;
-      // Check that none of the items are empty
-      if(newItem.name == '' || newItem.price == '' || newItem.description == '') {
-        // Prompt the user to fill in the fields
-        this.showModal(
-          'newItem_fields_blank', 
-          "You can't add a new item without filling in all the details!",
-          'Back to the menu',
-        );
-
-      } else {
-        this.$http.post('item/create', {
-          name: newItem.name,
-          price: newItem.price,
-          description: newItem.description,
-          categoryId: catId
-        }, 
-          {headers: {Authorization: JSON.parse(localStorage.user).token}
-
-        }).then((res) => {
-          // Set the itemId that was assigned by the server
-          newItem.itemId = res.body.data.createdItemId; 
-          this.$store.commit('addItem', {
-            item: newItem,
-            catIndex: catIndex
-          });
-
-          this.resetNewItem();
-          this.showAlert('success', 'Your new item was successfully added to your menu!');
-
-        }).catch((res) => {
-          this.handleApiError(res);
-        });
-      }
     },
 
     /** 

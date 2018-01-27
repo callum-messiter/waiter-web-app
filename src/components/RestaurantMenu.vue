@@ -5,20 +5,11 @@
       <div class="col-md-6">
         <h2 class="pull-left restaurantName">{{restaurant.name}} | Menu</h2>
       </div>
-      <div class="input-group col-md-4 pull-right newCatInput">
-        <input 
-          class="form-control"
-          type="text" 
-          placeholder="E.g. Starters"
-          v-model="newCategory.name"
-        >
-        <span class="input-group-btn">
-          <button 
-            class="btn btn-primary" 
-            type="button"
-            v-on:click="addCategory"
-            >Add Category
-          </button>
+      <!-- Category Settings Icon -->
+      <div class="col-md-3 col-md-offset-3 align-middle">
+        <span 
+          class="glyphicon glyphicon-cog pull-right align-middle"
+          v-on:click="showAddCategoryModal()">
         </span>
       </div>
     </div>
@@ -53,12 +44,13 @@ export default {
 
   data() {
     return {
-      newCategory: {
-        categoryId: null,
-        name: null,
-        items: []
-      }
     }
+  },
+
+  created() {
+    bus.$on('userConfirmation_addNewCategory', (data, trigger) => {
+        this.addCategory(data.name);
+    });
   },
 
   computed: {
@@ -82,37 +74,50 @@ export default {
   
   methods: {
 
+    showAddCategoryModal() {
+      var menuName = 'your menu';
+      // The menu name should always be set in local storage
+      if(localStorage.getItem('menu') !== null) {
+        const m = JSON.parse(localStorage.menu);
+        if(m.hasOwnProperty('name')) {
+          menuName = m.name;
+        }
+      }
+
+      this.showModalForm(
+        'category_add', 
+        'Add a new category to your ' + menuName,
+        'Save'
+      );
+    },
+
     /**
       Here we send a request to the API to add the new category to the menu. If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the category panel  appears at the top of its accordion). It is important to keep the backend data and the front-end state syncronised
     **/
-    addCategory() {
-      const newCategory = this.newCategory;
-      // Check that the user has provided a category name
-      if(newCategory.name == null || newCategory.name == '') {
-        this.showModal(
-          'newCategory_fields_blank', 
-          'Every category must have a name!',
-          'Back to the menu'
-        );
-      } else {
-        // If the user has filled in the categoryName field, post it to the API
-        this.$http.post('category/create', {
-          name: newCategory.name,
-          menuId: JSON.parse(localStorage.menu).menuId
-        }, {
-          headers: {Authorization: JSON.parse(localStorage.user).token}
-        }).then((res) => {
-          if(res.status == 200) {
-            newCategory.categoryId = res.body.data.createdCategoryId;
-            this.$store.commit('addCategory', newCategory);
-            this.resetNewCategory();
-            this.showAlert('success', 'New category "' + newCategory.name + '" was successfully added to your menu!');
-          }
-
-        }).catch((res) => {
-          this.handleApiError(res);
-        });
+    addCategory(categoryName) {
+      // This category will be added to the store; the object must take on the correct form, as below
+      var newCategory = {
+        categoryId: '',
+        name: categoryName,
+        items: []
       }
+      // Post it to the API
+      this.$http.post('category/create', {
+        name: categoryName,
+        menuId: JSON.parse(localStorage.menu).menuId
+      }, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+      }).then((res) => {
+        if(res.status == 200) {
+          newCategory.categoryId = res.body.data.createdCategoryId;
+          this.$store.commit('addCategory', newCategory);
+          this.resetNewCategory();
+          this.showAlert('success', 'New category "' + categoryName + '" was successfully added to your menu!');
+        }
+
+      }).catch((res) => {
+        this.handleApiError(res);
+      });
     },
 
     /**
@@ -149,9 +154,9 @@ export default {
     margin-top: 42px;
     word-break: keep-all  
   }
-
-  .newCatInput {
-    top: 40px;
-  }
   
+  .glyphicon {
+    cursor: pointer;
+  }
+
 </style>
