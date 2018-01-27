@@ -342,7 +342,7 @@ export default {
       this.loginFormIsVisible = false;
     },
 
-    logUserIn(isLoginAutomatic) {
+    logUserIn(isLoginAutomatic=false) {
       if(this.form.login.email.value != '' && this.form.login.password.value != '') {
         this.$http.get("auth/login?email="+this.form.login.email.value+"&password="+this.form.login.password.value, {
         }).then((res) => {
@@ -357,7 +357,7 @@ export default {
             // Set auth state to true
             this.$store.commit('authenticateUser');
             // Redirect user to their dashboard
-            if(isLoginAutomatic) {
+            if(isLoginAutomatic === true) {
               this.$router.push('/dashboard');
             } else {
               this.$router.push('/live-kitchen');
