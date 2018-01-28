@@ -2,16 +2,19 @@
   <div class="menu-wrapper col-md-10 col-md-offset-1">
     <!-- Menu name/title, other information -->
     <div class="row">
-      <div class="col-md-6">
-        <h2 class="pull-left restaurantName">{{restaurant.name}} | Menu</h2>
-      </div>
-      <!-- Category Settings Icon -->
-      <div class="col-md-3 col-md-offset-3 align-middle">
-        <span 
-          class="glyphicon glyphicon-cog pull-right align-middle"
+      <div class="col-md-12">
+        <!-- Category Settings Icon -->
+        <span
+          class="glyphicon glyphicon-cog pull-right"
           v-on:click="showAddCategoryModal()">
         </span>
+        <h2 class="text-center restaurantName">
+          {{restaurant.name}} | Menu
+        </h2>
       </div>
+      <!-- <div class="col-md-3 col-md-offset-3 align-middle">
+
+      </div> -->
     </div>
     <div class="row">
       <!-- The menu content -->
@@ -62,16 +65,16 @@ export default {
       return JSON.parse(localStorage.restaurant);
     },
 
-    /** 
+    /**
       This is the actual state. We use this only to check if the view has departed from the state, which
-      allows us to check, for example, if the user has actually changed a category name. 
+      allows us to check, for example, if the user has actually changed a category name.
       Based on this information, we may or not may display a "Sure you want to discard your changes" warning, for example
     **/
     categoriesState () {
       return this.$store.getters.getCategoriesAndItems;
     }
   },
-  
+
   methods: {
 
     showAddCategoryModal() {
@@ -85,7 +88,7 @@ export default {
       }
 
       this.showModalForm(
-        'category_add', 
+        'category_add',
         'Add a new category to your ' + menuName,
         'Save'
       );
@@ -139,6 +142,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  @font-face {
+    font-family: 'grotesque';
+    src: url("../fonts/grotesque.otf");
+  }
 
   .categories-accordion {
     margin-top: 20px;
@@ -152,11 +159,19 @@ export default {
 
   .restaurantName {
     margin-top: 42px;
-    word-break: keep-all  
+    word-break: keep-all
   }
-  
+
   .glyphicon {
     cursor: pointer;
+    color: #469ada;
+    font-size: 26px;
   }
+
+  h2 {
+    font-family: 'grotesque';
+    color: #fff;
+  }
+
 
 </style>

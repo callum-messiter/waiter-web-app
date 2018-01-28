@@ -6,7 +6,7 @@
 
         <div class="modal-header">
           <div class="row">
-            <span 
+            <span
               class="glyphicon glyphicon-remove pull-right"
               v-on:click="cancel(modal.name)"
             ></span>
@@ -18,23 +18,24 @@
         </div>
 
         <div class="modal-body">
-          <!-- 
-            Add-Item form 
+          <!--
+            Add-Item form
           -->
           <form id="addItem" v-if="modal.name == 'item_add'">
             <!-- Item name -->
             <div class="row">
-            <input 
+            <input
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
               name="itemName"
-              type="text" 
-              placeholder="Item name" 
+              type="text"
+              placeholder="Item name"
               v-model="form.item.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="item name"
             />
+            <br>
             <span
-              class="help is-danger" 
+              class="help is-danger"
               v-show="errors.has('itemName')">
               {{ errors.first('itemName') }}
             </span>
@@ -48,29 +49,30 @@
               data-vv-as="item price">
             </money>
             <span
-              class="help is-danger" 
+              class="help is-danger"
               v-show="errors.has('itemPrice')">
               {{ errors.first('itemPrice') }}
             </span>
             <!-- Item Description -->
-            <input 
+            <input
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
               name="itemDescription"
-              type="text" 
-              placeholder="Item description" 
+              type="text"
+              placeholder="Item description"
               v-model="form.item.description"
               v-validate="{required: true, max: 40}"
               data-vv-as="item description"
             />
+            <br>
             <span
-              class="help is-danger" 
+              class="help is-danger"
               v-show="errors.has('itemDescription')">
               {{ errors.first('itemDescription') }}
             </span>
             </div>
             <!-- Save Item Button -->
             <div class="row">
-            <button 
+            <button
               type="button"
               class="btn btn-primary"
               v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, 'item', modal.trigger)">
@@ -79,26 +81,28 @@
             </div>
           </form>
 
-          <!-- 
-            Add-Category form 
+          <!--
+            Add-Category form
           -->
           <form id="addCategory" v-if="modal.name == 'category_add'">
           <!-- Category name -->
-            <input 
+            <input
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
               name="categoryName"
-              type="text" 
-              placeholder="Category name" 
+              type="text"
+              placeholder="Category name"
               v-model="form.category.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="category name"
             />
+            <br>
             <span
-              class="help is-danger" 
+              class="help is-danger"
               v-show="errors.has('categoryName')">
               {{ errors.first('categoryName') }}
             </span>
             <!-- Save Category Button -->
+            <br>
             <button
               type="button"
               class="btn btn-primary"
@@ -107,22 +111,22 @@
             </button>
           </form>
 
-          <!-- 
-            Edit-Item form 
+          <!--
+            Edit-Item form
           -->
           <form id="editItem" v-if="modal.name == 'item_edit'">
             <!-- Item name -->
-            <input 
+            <input
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
               name="itemName"
-              type="text" 
-              placeholder="Chicken caesar salad" 
+              type="text"
+              placeholder="Chicken caesar salad"
               v-model="form.item.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="item name"
             />
             <span
-              class="help is-danger" 
+              class="help is-danger"
               v-show="errors.has('itemName')">
               {{ errors.first('itemName') }}
             </span>
@@ -136,27 +140,27 @@
               data-vv-as="item price">
             </money>
             <span
-              class="help is-danger" 
+              class="help is-danger"
               v-show="errors.has('itemPrice')">
               {{ errors.first('itemPrice') }}
             </span>
             <!-- Item Description -->
-            <input 
+            <input
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
               name="itemDescription"
-              type="text" 
-              placeholder="Tasty chicken breast chunks with caesar salad" 
+              type="text"
+              placeholder="Tasty chicken breast chunks with caesar salad"
               v-model="form.item.description"
               v-validate="{required: true, max: 40}"
               data-vv-as="item description"
             />
             <span
-              class="help is-danger" 
+              class="help is-danger"
               v-show="errors.has('itemDescription')">
               {{ errors.first('itemDescription') }}
             </span>
             <!-- Save Item Button -->
-            <button 
+            <button
               type="button"
               class="btn btn-primary"
               v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.name, 'item', modal.trigger)">
@@ -270,7 +274,7 @@ export default {
       // Then set all properties of the form object to an empty string
       var obj = this.form[form];
       Object.keys(obj).forEach((key) => {
-        obj[key] = ''; 
+        obj[key] = '';
       });
     }
 
@@ -280,17 +284,102 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  @font-face {
+    font-family: 'grotesque';
+    src: url("../fonts/grotesque.otf");
+  }
+
   .modal-dialog {
     padding-top: 10%;
+    font-family: 'grotesque';
+  }
+
+  .modal-content {
+    border: 3px solid #469ada;
+    border-radius: 3px;
+    background-color: #151515;
+    color: #fff;
+    padding: 10px;
+  }
+
+  .modal-title {
+    font-size: 1.6em;
+    margin-top: 15px;
   }
 
   .modal-header {
     padding-top: 0;
+    border-bottom: none;
+  }
+
+  input {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid #fff;
+    height: 40px;
+    margin-bottom: 8px;
+  }
+
+  input:focus {
+    outline: none;
+    border-bottom: 3px solid #469ada;
+    color: #469ada;
+  }
+
+  ::-webkit-input-placeholder {
+    color: #fff;
+    text-align: left;
+  }
+  ::-moz-placeholder {
+    color: #fff;
+  }
+  :-ms-input-placeholder {
+    color: #fff;
+  }
+  :-moz-placeholder {
+    color: #fff;
+  }
+
+  .input:focus::-webkit-input-placeholder{
+    color: #469ada;
+  }
+
+  .input:focus::-moz-placeholder{
+    color: #469ada;
+  }
+
+  .input:focus:-ms-input-placeholder{
+    color: #469ada;
+  }
+
+  .input:focus:-moz-placeholder{
+    color: #469ada;
   }
 
   span {
     padding-top: 5px;
     padding-right: 5px;
     cursor: pointer;
+  }
+
+  button {
+    margin-top: 20px;
+    color: #fff;
+    background-color: #469ada;
+    border: 1px solid #469ada;
+    border-radius: 3px;
+  }
+
+  @-webkit-keyframes autofill {
+    to {
+      background: none;
+      color: #fff;
+    }
+  }
+
+  input.input.pass:-webkit-autofill {
+    -webkit-animation-name: autofill !important;
+    -webkit-animation-fill-mode: both !important;
+    -webkit-box-shadow: none !important;
   }
 </style>
