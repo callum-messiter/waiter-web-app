@@ -294,6 +294,10 @@ export default {
     font-family: 'grotesque';
   }
 
+  .modal-body {
+    padding-top: 5px;
+  }
+
   .modal-content {
     border: 3px solid #469ada;
     border-radius: 3px;
@@ -317,7 +321,7 @@ export default {
     border: none;
     border-bottom: 3px solid #fff;
     height: 40px;
-    margin-bottom: 8px;
+    margin-top: 8px;
   }
 
   input:focus {
@@ -381,5 +385,10 @@ export default {
     -webkit-animation-name: autofill !important;
     -webkit-animation-fill-mode: both !important;
     -webkit-box-shadow: none !important;
+  }
+
+  .help {
+    color: #dd0d0d !important;
+    font-size: 10px;
   }
 </style>
