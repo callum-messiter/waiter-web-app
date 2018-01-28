@@ -1,8 +1,15 @@
 <template>
 	<transition name="fade" v-if="alert.isVisible">
-		<div class="alert"
-		v-bind:class="{'alert-success': alert.type == 'success', 'alert-danger': alert.type == 'error'}">
-		{{alert.message}}
+		<div class="alert">
+			<div class="col-sm-2">
+				<span class="glyphicon glyphicon-remove" v-if="alert.type == 'error'"></span>
+				<span class="glyphicon glyphicon-ok" v-if="alert.type == 'success'"></span>
+			</div>
+			<div class="col-sm-10">
+				<h4 v-if="alert.type == 'error'">Something went wrong...</h4>
+				<h4 v-if="alert.type == 'success'">Success!</h4>
+				<p>{{alert.message}}</p>
+			</div>
 		</div>
 	</transition>
 </template>
@@ -32,7 +39,7 @@ export default {
 			Object.assign(this.alert, alert);
       setTimeout(() => {
         this.alert.isVisible = false;
-      }, 3000);
+      }, 5000);
 		}
 	}
 }
@@ -53,7 +60,7 @@ export default {
 	}
 
 	.alert {
-		width: 300px;
+		width: 450px;
 		background-color: #3a3a3a;
 		border: 3px solid #469ada;
 		font-family: 'grotesque';
@@ -63,5 +70,22 @@ export default {
 		bottom: 20px;
 		right: 20px;
 		z-index: 1000;
+	}
+
+	p {
+		text-align: left;
+		font-size: 13px;
+	}
+
+	h4 {
+		font-weight: bold;
+		text-align: left;
+		margin-top: 5px;
+	}
+
+	.glyphicon {
+		font-size: 40px;
+		margin-top: 22px; /** For centering vertically: is there a better way? **/
+		margin-right: 10px;
 	}
 </style>
