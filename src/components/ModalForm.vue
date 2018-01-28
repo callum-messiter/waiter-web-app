@@ -8,7 +8,7 @@
           <div class="row">
             <span
               class="glyphicon glyphicon-remove pull-right"
-              v-on:click="cancel(modal.name)"
+              v-on:click="closeModal(modal.name)"
             ></span>
           </div>
           <!-- E.g. "Add a new item to {categoryName}" -->
@@ -120,7 +120,6 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
               name="itemName"
               type="text"
-              placeholder="Chicken caesar salad"
               v-model="form.item.name"
               v-validate="{required: true, max: 30}"
               data-vv-as="item name"
@@ -149,7 +148,6 @@
               :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
               name="itemDescription"
               type="text"
-              placeholder="Tasty chicken breast chunks with caesar salad"
               v-model="form.item.description"
               v-validate="{required: true, max: 40}"
               data-vv-as="item description"
@@ -160,12 +158,20 @@
               {{ errors.first('itemDescription') }}
             </span>
             <!-- Save Item Button -->
-            <button
-              type="button"
-              class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.name, 'item', modal.trigger)">
-              {{modal.buttons.primary}}
-            </button>
+            <div class="row">
+              <button
+                type="button"
+                class="btn btn-primary"
+                v-on:click="emitSaveItemChanges()">
+                {{modal.buttons.primary}}
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                v-on:click="emitUserConfirmation(modal.trigger)">
+                {{modal.buttons.warning}}
+              </button>
+            </div>
           </form>
 
         </div>
@@ -178,6 +184,7 @@
 <script>
 
 import {Money} from 'v-money';
+import lodash from 'lodash';
 
 import { bus } from '../main';
 
@@ -194,7 +201,8 @@ export default {
         isVisible: false,
         title: null,
         trigger: {},
-        buttons: {}
+        buttons: {},
+        data: {}
       },
       form: {
         item: {
@@ -212,6 +220,11 @@ export default {
   created () {
     bus.$on('showModalForm', (modal) => {
       Object.assign(this.modal, modal);
+
+      // If we are editing an item, we should pre-fill the item form with the current item data
+      if(this.modal.name == 'item_edit') {
+        Object.assign(this.form.item, modal.data);
+      }
     });
   },
 
@@ -251,7 +264,19 @@ export default {
       }
     },
 
-    cancel(modalName) {
+    emitSaveItemChanges() {
+      // First check if the user has actually made any changes to the item
+      if(!_.isEqual(this.form.item, this.modal.data)) {
+        // Only emit the event (which will trigger the API call) if the user has made changes
+        this.form.item.itemId = this.modal.trigger.itemId;
+        console.log('ModalForm: ' + this.modal.trigger);
+        bus.$emit('userConfirmation_saveItemChanges', this.form.item, this.modal.trigger);
+      }
+      // In any case, hide the modal and reset the form
+      this.closeModal('item_edit');
+    },
+
+    closeModal(modalName) {
       this.modal.isVisible = false;
       this.resetFormData(modalName);
     },

@@ -29,7 +29,7 @@
             v-bind:href="'#' + category.categoryId"
             >{{category.name}} ({{category.items.length}})
           </a>
-          <!-- Delete Icon (visible by default) -->
+          <!-- Delete Icon (visible by default) 
           <span
             class="glyphicon glyphicon-trash pull-right align-middle"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
@@ -40,6 +40,7 @@
               category.items.length
             )">
           </span>
+          -->
           <!-- Edit Icon (visible by default) -->
           <span
             class="glyphicon glyphicon-pencil pull-right align-middle"
@@ -131,7 +132,7 @@ export default {
   created() {
 
     bus.$on('userConfirmation_deleteCategory', (trigger) => {
-        this.deleteCategory(trigger);
+      this.deleteCategory(trigger);
     });
 
     bus.$on('userConfirmation_addNewItem', (data, trigger) => {
@@ -139,12 +140,12 @@ export default {
     });
 
     bus.$on('userConfirmation_deleteItem', (trigger) => {
-        this.deleteItem(trigger);
+      this.deleteItem(trigger);
     });
 
     // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
-    bus.$on('userConfirmation_saveItemChanges', (trigger) => {
-      this.updateItem(trigger);
+    bus.$on('userConfirmation_saveItemChanges', (data, trigger) => {
+      this.updateItem(data, trigger);
     });
   },
 
@@ -330,17 +331,26 @@ export default {
       we also update the state, which is then reflected in the view. It is important to keep the backend data and the
       front-end state syncronised
     **/
-    updateItem(trigger) {
-      this.$http.put('item/update/'+trigger.item.itemId, {
-        name: trigger.item.name,
-        price: trigger.item.price,
-        description: trigger.item.description
+    updateItem(data, trigger) {
+      // Something weird is happening: the values of the data object in the _then_ block are empty strings
+      const updatedItem = {
+        itemId: data.itemId,
+        name: data.name,
+        price: data.price,
+        description: data.description
+      }
+
+      this.$http.put('item/update/'+data.itemId, {
+        name: data.name,
+        price: data.price,
+        description: data.description
       }, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
 
       }).then((res) => {
-        this.$store.commit('updateItem', trigger); // Update the item state
-        this.showAlert('success','Your item "' + trigger.itemStateName + '" was successfully updated!'); // Display the alert if successful
+        const payload = {updatedItem, trigger};
+        this.$store.commit('updateItem', payload); // Update the item state
+        this.showAlert('success','Your item was successfully updated!'); // Display the alert if successful
         bus.$emit('exitItemEditMode'); // We must emit an event to the item component in order to exit edit mode
 
       }).catch((res) => {
@@ -439,6 +449,7 @@ export default {
   .glyphicon {
     padding-right: 10px;
     cursor: pointer;
+    font-size: 10px;
   }
 
   .categoryName {
@@ -458,6 +469,10 @@ export default {
     border-bottom: solid 2px white !important;
     display: inline;
     padding-bottom: 4px;
+  }
+
+  a {
+    margin-left: 15px;
   }
 
 </style>

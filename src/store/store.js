@@ -48,9 +48,12 @@ export default new Vuex.Store({
 		addItem(state, data) {
 			state.menu.categories[data.catIndex].items.unshift(data.item);
 		},
-		updateItem(state, trigger) {
+		updateItem(state, payload) {
+			console.log(JSON.stringify(payload));
+			const trigger = payload.trigger;
+			const data = payload.data;
 			const itemState = state.menu.categories[trigger.catIndex].items[trigger.itemIndex];
-			Object.assign(itemState, trigger.item);
+			Object.assign(itemState, data);
 		},
 		deleteItem(state, trigger) {
 			state.menu.categories[trigger.catIndex].items.splice(trigger.itemIndex, 1);

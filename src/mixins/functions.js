@@ -39,15 +39,17 @@ export default {
       This displays a special kind of modal, which contains a form. Used for adding a new item, addding a new category, 
       editing item/category data.
     **/
-    showModalForm(name, title, btnPrimary, trigger) {
+    showModalForm(name, title, btnPrimary, trigger, data={}, btnWarn='') {
       bus.$emit('showModalForm', {
         name: name,
         isVisible: true,
         title: title,
         trigger: trigger,
         buttons: {
-          primary: btnPrimary
-        }
+          primary: btnPrimary,
+          warning: btnWarn
+        },
+        data: data
       });
     },
 

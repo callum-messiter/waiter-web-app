@@ -8,10 +8,8 @@
             v-model="item.name"
             v-bind:readonly="editMode.item.id != item.itemId"
             v-on:dblclick="
-              makeItemEditable(
-                item.itemId,
+              showEditItemModal(
                 category.items.indexOf(item),
-                category.categoryId,
                 categories.indexOf(category)
               )"
           >
@@ -24,10 +22,8 @@
             v-bind="money"
             v-bind:readonly="editMode.item.id != item.itemId" 
             v-on:dblclick="
-              makeItemEditable(
-                item.itemId,
+              showEditItemModal(
                 category.items.indexOf(item),
-                category.categoryId,
                 categories.indexOf(category)
               )"
           ></money>
@@ -39,10 +35,8 @@
             v-model="item.description"
             v-bind:readonly="editMode.item.id != item.itemId"
             v-on:dblclick="
-              makeItemEditable(
-                item.itemId,
+              showEditItemModal(
                 category.items.indexOf(item),
-                category.categoryId,
                 categories.indexOf(category)
               )"
           >
@@ -181,6 +175,25 @@ export default {
   },
 
   methods: {
+
+    showEditItemModal(itemIndex, catIndex) {
+      // Get the current state of the selected item. We will use this data to check if the
+      // form data inputted by the user has departed from the state. If the user opens the modal
+      // but makes no changes to the item data, we shouldn't send the API request
+      const data = this.categoryItemsState[catIndex].items[itemIndex];
+      const itemId = data.itemId;
+      delete data.itemId;
+      // Show the form
+      this.showModalForm(
+        'item_edit',
+        'Update your item ' + data.name,
+        'Save',
+        {itemId, itemIndex, catIndex},
+        data,
+        'Delete Item'
+      );
+    },
+
     /**
       "Edit Mode" simply means that a user has double clicked the item so that he can edit it.
     **/
