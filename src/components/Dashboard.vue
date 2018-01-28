@@ -46,9 +46,9 @@ export default {
 	},
 
 	/**
-		When the Dashboard component is created, grab the user's entire menu object from the backend, 
+		When the Dashboard component is created, grab the user's entire menu object from the backend,
 		and add it to the store. The child component Category, and its child component Item, will get this data
-		from the store and render it. 
+		from the store and render it.
 
 		The user will always have a menu in the backend; the create-user endpoint (called on signup) creates
 		the user, the user's restaurant, and the restaurant default menu, with five default categories.
@@ -56,7 +56,7 @@ export default {
 	created () {
 	    const menuId = JSON.parse(localStorage.menu).menuId;
 	    // Get the menu object and add it to the store
-	    this.$http.get('menu/'+menuId, { 
+	    this.$http.get('menu/'+menuId, {
 	      headers: {Authorization: JSON.parse(localStorage.user).token}
 	    }).then((res) => {
 	      this.$store.commit('setMenu', res.body.data);
@@ -78,6 +78,6 @@ export default {
 		padding-bottom: 20px;
 		margin-top: 10px;
 		margin-bottom: 40px;
-		background-color: #e7e7e7;
+		background-color: #0a0a0a;
 	}
 </style>

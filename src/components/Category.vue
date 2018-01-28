@@ -3,103 +3,103 @@
     <div v-for="category in categories" class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
-          <!-- 
+          <!--
             WHAT's HAPPENING HERE?
             **********************
 
             When the user clicks the edit (pencil) icon on a category panel, we activate edit mode. This, for each of the category panels, replaces the collapsable link element with an input containing the category's name. This means that the accordion freezes whilst edit mode is activated (nothing collapses).
 
-            All the inputs are set to readonly except for the one which is being edited. This means that category(name) edit mode 
+            All the inputs are set to readonly except for the one which is being edited. This means that category(name) edit mode
             prevents any disruptive simulatenous actions. We don't want the to be able to collapse a category panel whilst he's
             editing a category name. We don't want every category name to become editable when the user activates edit mode.
           -->
 
           <!-- Category name -->
-          <input 
-            v-if="editMode.active" 
+          <input
+            v-if="editMode.active"
             class="categoryName"
             :class="{editMode: editMode.active && editMode.category.id == category.categoryId}"
             :readonly="editMode.category.id != category.categoryId"
             v-model="category.name">
           </input>
-          <a 
+          <a
             v-if="!editMode.active"
-            data-toggle="collapse" 
-            data-parent="#accordion" 
+            data-toggle="collapse"
+            data-parent="#accordion"
             v-bind:href="'#' + category.categoryId"
             >{{category.name}} ({{category.items.length}})
           </a>
           <!-- Delete Icon (visible by default) -->
-          <span 
+          <span
             class="glyphicon glyphicon-trash pull-right align-middle"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
             v-on:click="showDeleteCategoryModal(
               category.categoryId,
-              categories.indexOf(category), 
-              category.name, 
+              categories.indexOf(category),
+              category.name,
               category.items.length
             )">
           </span>
           <!-- Edit Icon (visible by default) -->
-          <span 
+          <span
             class="glyphicon glyphicon-pencil pull-right align-middle"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
             v-on:click="activateEditMode(
-              category.categoryId, 
+              category.categoryId,
               categories.indexOf(category)
             )">
           </span>
           <!-- Add Item Icon (visible by default) -->
-          <span 
+          <span
             class="glyphicon glyphicon-plus pull-right"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
             v-on:click="showAddItemModal(
-              category.categoryId, 
-              categories.indexOf(category), 
+              category.categoryId,
+              categories.indexOf(category),
               category.name
             )">
           </span>
           <!-- Discard Icon (visible only when a category name is being edited -->
-          <span 
+          <span
             class="glyphicon glyphicon-repeat pull-right align-middle"
             v-if="editMode.active && editMode.category.id == category.categoryId"
             v-on:click="discardChanges()">
           </span>
           <!-- Save Icon (visible only when a category name is being edited -->
-          <span 
+          <span
             class="glyphicon glyphicon-floppy-disk pull-right align-middle"
             v-if="editMode.active && editMode.category.id == category.categoryId"
-            href="#" 
+            href="#"
             v-on:click="updateCategoryName(category.name)">
           </span>
         </h4>
       </div>
-      <div 
+      <div
         class="panel-collapse collapse"
         v-bind:class="{'in': categories.indexOf(category) == 0}"
-        v-bind:id="category.categoryId"  
+        v-bind:id="category.categoryId"
       >
         <!-- Each category is a collapsable panel, containing a table of the category's items -->
         <div class="panel-body">
-          <table class="table table-bordered">
+          <table class="table">
             <thead class="thead-default">
               <tr>
-                <th class="text-center">Name</th>
-                <th class="text-center">Price</th>
-                <th class="text-center">Description</th>
+                <th class="text-center name">Name</th>
+                <th class="text-center price">Price</th>
+                <th class="text-center description">Description</th>
               </tr>
             </thead>
             <!-- Each item is a row (<tr>) in the table body (<tbody>). We have to pass the categories object in too, because we need the category index, which we get by using "categories.indexOf(category)" in the item component" -->
             <item :categoriesObj="categories" :categoryItems="category"></item>
           </table>
-        </div>  
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-// Components 
+// Components
 import Item from './Item';
 
 // Mixins
@@ -149,7 +149,7 @@ export default {
   },
 
   computed: {
-    /** 
+    /**
       This is the clone of the state of the menu (the categories and the items)
       We render each category in this component, and the items in the child Item component
       Anytime we change the state, by committing to it, the clone is updated, and thus the
@@ -159,9 +159,9 @@ export default {
       return this.$store.getters.getCategoriesAndItemsView;
     },
 
-    /** 
+    /**
       This is the actual state. We use this only to check if the view has departed from the state, which
-      allows us to check, for example, if the user has actually changed a category name. 
+      allows us to check, for example, if the user has actually changed a category name.
       Based on this information, we may or not may display a "Sure you want to discard your changes" warning, for example
     **/
     categoriesState () {
@@ -172,7 +172,7 @@ export default {
   methods: {
 
     /**
-      "Edit Mode" simply means that a user has clicked the edit icon on the category panel. When a category is in 
+      "Edit Mode" simply means that a user has clicked the edit icon on the category panel. When a category is in
       edit mode, the accordion freezes, and the category name is enclosed by a (seamless) form input, and is thus editable
     **/
     activateEditMode(categoryId, index) {
@@ -192,7 +192,7 @@ export default {
 
     /**
       The user may begin editing a category name, and then decide against the edit. At this point
-      he can click the "reset/discard" icon, which will set the name back to its pre-edit state 
+      he can click the "reset/discard" icon, which will set the name back to its pre-edit state
     **/
     discardChanges() {
       // Check first if the category has departed from its state
@@ -205,7 +205,7 @@ export default {
     },
 
     /**
-      "Edit Mode" simply means that a user has clicked the edit icon on the category panel. When a category is in 
+      "Edit Mode" simply means that a user has clicked the edit icon on the category panel. When a category is in
       edit mode, the accordion freezes, and the category name is enclosed by a (seamless) form input, and is thus editable
     **/
     exitEditMode() {
@@ -216,7 +216,7 @@ export default {
 
     /**
       Here we send the updated category name to the API, and if the data is successfully persisted to the database,
-      we also update the state, which is then reflected in the view. It is important to keep the backend data and the 
+      we also update the state, which is then reflected in the view. It is important to keep the backend data and the
       front-end state syncronised
     **/
     updateCategoryName(name) {
@@ -233,7 +233,7 @@ export default {
           if(res.status == 200) {
             // If the updates were successfully persisted to the database, update the state to reflect the changes
             this.$store.commit('updateCategoryName', {
-              name: this.categories[this.editMode.category.index].name, 
+              name: this.categories[this.editMode.category.index].name,
               index: this.editMode.category.index
             });
             // Exist edit mode and show success alert
@@ -262,7 +262,7 @@ export default {
       }
 
       this.showModal(
-        'category_confirm_delete', 
+        'category_confirm_delete',
          prefix + msg,
         'Cancel',
         'Delete Category',
@@ -294,23 +294,23 @@ export default {
     **/
     createNewItem(data, catId, catIndex) {
       const newItem = data;
-      
+
       this.$http.post('item/create', {
         name: newItem.name,
         price: newItem.price,
         description: newItem.description,
         categoryId: catId
-      }, 
+      },
         {headers: {Authorization: JSON.parse(localStorage.user).token}
 
       }).then((res) => {
         // Set the itemId that was assigned by the server
-        newItem.itemId = res.body.data.createdItemId; 
+        newItem.itemId = res.body.data.createdItemId;
         this.$store.commit('addItem', {
           item: newItem,
           catIndex: catIndex
         });
-        
+
         this.showAlert('success', 'Your new item was successfully added to your menu!');
 
       }).catch((res) => {
@@ -320,7 +320,7 @@ export default {
 
     /**
       Here we send the updated item data to the API, and if it is successfully persisted to the database,
-      we also update the state, which is then reflected in the view. It is important to keep the backend data and the 
+      we also update the state, which is then reflected in the view. It is important to keep the backend data and the
       front-end state syncronised
     **/
     updateItem(trigger) {
@@ -335,7 +335,7 @@ export default {
         this.$store.commit('updateItem', trigger); // Update the item state
         this.showAlert('success','Your item "' + trigger.itemStateName + '" was successfully updated!'); // Display the alert if successful
         bus.$emit('exitItemEditMode'); // We must emit an event to the item component in order to exit edit mode
-      
+
       }).catch((res) => {
         this.handleApiError(res);
       });
@@ -360,7 +360,7 @@ export default {
 
     showAddItemModal(catId, catIndex, catName) {
       this.showModalForm(
-        'item_add', 
+        'item_add',
         'Add a new item to ' + catName,
         'Save',
         {catIndex, catId}
@@ -372,6 +372,12 @@ export default {
 </script>
 
 <style scoped>
+
+  @font-face {
+    font-family: 'grotesque';
+    src: url("../fonts/grotesque.otf");
+  }
+
   .accordion {
     border: 0 !important;
     padding: 0 !important;
@@ -390,8 +396,8 @@ export default {
   }
 
   .panel-heading {
-    background-color: #8d8d8e !important;
-    color: white !important;
+    background-color: #151515;
+    color: #469ada !important;
     padding-right: 3px;
   }
 
@@ -400,12 +406,34 @@ export default {
   }
 
   table {
-    border: 0 !important;
+    border: none !important;
     margin-bottom: 0 !important;
+    font-family: 'grotesque';
+    color: #fff;
   }
 
+  thead {
+    background-color: #262626;
+  }
+
+.table>thead>tr>th {
+  border: none;
+}
+
+.table>thead>tr {
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+
+.name, .price {
+  border-right: 1px solid #fff !important;
+}
+
+
+
+
   .glyphicon {
-    padding-right: 5px;
+    padding-right: 10px;
     cursor: pointer;
   }
 

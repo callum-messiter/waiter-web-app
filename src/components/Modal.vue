@@ -10,10 +10,10 @@
 
         <div class="modal-body">{{modal.title}}</div>
 
-        <!-- 
+        <!--
 
           The modal will contain different buttons depending on the context in which it has been called. Here are a list of actions which trigger the modal:
-          
+
           (x) name of button which triggers modal | component->method | component where we listen to the event sent back by the modal
 
           (1) Add Category (empty fields) | RestaurantMenu->addCategory | N/A (v-on:click="modal.isVisible = false;")
@@ -24,12 +24,12 @@
           (6) Discard Item Changes | Item->showConfirmDiscardModal | Item (userConfirmation_discardItemChanges)
 
           *****************************************************************************************************************************
-          
+
           To add a new modal dynamically, simply follow these steps:
 
           (1) From within another component, call the showModal method from the function.js file, and pass to it the modal data. Choose a descriptive "modal name" which will be passed to the method as an argument
 
-          (2) Decide which buttons your modal should include, and add their HTML inside the modal-footer div, below. 
+          (2) Decide which buttons your modal should include, and add their HTML inside the modal-footer div, below.
             (a) On click, you should call the emitUserConfirmation method, and make sure you pass in the event name as an argument.
             (b) The line `v-if="modal.name == '{modal_name}'"` is required; the modal_name must be equal to the modal_name parameter you pass to the showModal method in Step 1
 
@@ -38,16 +38,16 @@
             bus.$on({eventName}, (trigger) => {
               // execute logic
             });
-          
+
           Ensure that the first argument of the above callback function matches the first argument you pass to the emitUserConfirmation method in this component. The event names must be the same; the target component will be listening for it.
         -->
         <div class="modal-footer">
 
-          <!-- 
-            (1) User clicks "Add new category" but has left the category-name field blank 
+          <!--
+            (1) User clicks "Add new category" but has left the category-name field blank
             (2) User clicks "Save new item" but at least one of the fields is blank
           -->
-          <button 
+          <button
             class="btn btn-primary"
             v-if="modal.name == 'newCategory_fields_blank' || modal.name == 'newItem_fields_blank'"
             v-on:click="modal.isVisible = false;">
@@ -57,16 +57,16 @@
           <!--
             (3) User clicks the "Delete Category" icon; we show a modal asking the user to confirm that they really want to delete it
           -->
-          <button 
+          <button
             class="btn btn-primary"
             v-if="modal.name == 'category_confirm_delete'"
             v-on:click="modal.isVisible = false;">
             {{modal.buttons.primary}}
           </button>
 
-          <button 
+          <button
             class="btn btn-danger"
-            v-if="modal.name == 'category_confirm_delete'" 
+            v-if="modal.name == 'category_confirm_delete'"
             v-on:click="emitUserConfirmation('userConfirmation_deleteCategory', modal.trigger)">
             {{modal.buttons.warning}}
           </button>
@@ -74,32 +74,32 @@
           <!--
             (4) User clicks the "Delete Item" button; we show a modal asking the user to confirm that they really want to delete it
           -->
-          <button 
+          <button
             class="btn btn-primary"
             v-if="modal.name == 'item_confirm_delete'"
             v-on:click="modal.isVisible = false;">
             {{modal.buttons.primary}}
           </button>
 
-          <button 
+          <button
             class="btn btn-danger"
-            v-if="modal.name == 'item_confirm_delete'" 
+            v-if="modal.name == 'item_confirm_delete'"
             v-on:click="emitUserConfirmation('userConfirmation_deleteItem', modal.trigger)">
             {{modal.buttons.warning}}
           </button>
 
-          <!-- 
+          <!--
             (5) User clicks the "Save Item Changes" button; we show a modal asking the user to confirm that they really want to save the changes
           -->
-          <button 
+          <button
             class="btn btn-primary"
             v-if="modal.name == 'item_confirm_save_changes'"
             v-on:click="modal.isVisible = false;">
             {{modal.buttons.primary}}
           </button>
 
-          <button 
-            class="btn btn-danger" 
+          <button
+            class="btn btn-danger"
             v-if="modal.name == 'item_confirm_save_changes'"
             v-on:click="emitUserConfirmation('userConfirmation_saveItemChanges', modal.trigger)">
             {{modal.buttons.warning}}
@@ -108,15 +108,15 @@
           <!--
             (6) User clicks the "Discard Item Changes" button; we show a modal asking the user to confirm that they really want to discard the changes they have made
           -->
-          <button 
+          <button
             class="btn btn-primary"
             v-if="modal.name == 'item_confirm_discard_changes'"
             v-on:click="modal.isVisible = false;">
             {{modal.buttons.primary}}
           </button>
 
-          <button 
-            class="btn btn-danger" 
+          <button
+            class="btn btn-danger"
             v-if="modal.name == 'item_confirm_discard_changes'"
             v-on:click="emitUserConfirmation('userConfirmation_discardItemChanges', modal.trigger)">
             {{modal.buttons.warning}}
@@ -173,7 +173,45 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  @font-face {
+    font-family: 'grotesque';
+    src: url("../fonts/grotesque.otf");
+  }
+
   .modal-dialog {
     padding-top: 10%;
+  }
+
+  .modal-content {
+    background-color: #151515;
+    font-family: 'grotesque';
+    color: #fff;
+    border: 3px solid #469ada;
+    border-radius: 3px;
+    padding: 10px;
+    width: 320px;
+  }
+
+  .modal-header {
+    border: none;
+  }
+
+  .modal-body {
+    font-size: 16px;
+  }
+
+  .modal-footer {
+    border: none;
+    text-align: center;
+    padding: 15px;
+  }
+
+  .btn {
+    font-size: 14px;
+    padding: 5px 10px;
+    background-color: #469ada;
+    border: 1px solid #469ada;
+    border-radius: 3px;
+    font-weight: bold;
   }
 </style>
