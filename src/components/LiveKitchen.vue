@@ -29,10 +29,16 @@
             </div>
           </div>
           <div class="panel-body text-left">
-            <img src="../assets/menu-icon.png"/>
-            <ul class="items">
-              <li class="item-name" v-for="item in order.items">{{item.name}}</li>
-            </ul>
+            <div class="row">
+              <div class="col-md-2">
+                <img src="../assets/menu-icon.png"/>
+              </div>
+              <div class="col-md-5 pairWrapper" v-for="pair in order.itemPairs">
+                <ul class="items">
+                  <li class="item-name" v-for="item in pair">{{item.name}}</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -52,10 +58,16 @@
             </div>
           </div>
           <div class="panel-body text-left">
-            <img src="../assets/menu-icon.png"/>
-            <ul class="items">
-              <li class="item-name" v-for="item in order.items">{{item.name}}</li>
-            </ul>
+            <div class="row">
+              <div class="col-md-2">
+                <img src="../assets/menu-icon.png"/>
+              </div>
+              <div class="col-md-5 pairWrapper" v-for="pair in order.itemPairs">
+                <ul class="items">
+                  <li class="item-name" v-for="item in pair">{{item.name}}</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -190,8 +202,43 @@ export default {
       return JSON.parse(localStorage.restaurant).name;
     },
 
+    /**
+      Each order comes with an array of the items it contains (each item is represented by an object).
+
+      In order to render the order's items in a horizontal list of pairs, we need to create a new array 
+      containining item-pair arrays, each containing two or fewer item objects.
+
+      We add this array of pairs, itemPairs, to each the order object *as a new, distinct property*.
+      This means that each order object will contain both the original items array, and the new itemPairs
+      array. We render to the DOM items from the itemPairs array.
+
+      If we need want to revert back, we can just set the computed property orders to return the orders state,
+      and update the HTML accordingly.
+    **/
     orders() {
-      return this.$store.getters.getLiveOrders.orders;
+      var orders = this.$store.getters.getLiveOrders.orders;
+      for(var i = 0; i < orders.length; i++) {
+        const items = orders[i].items;
+        // Loop through the items and
+        if(items.length < 1) {
+          console.log('Error: order has no items!'); // should never happen (checked in customer app and API)
+        } else {
+          var itemPairs = [];
+          for(var j = 0 ; j < items.length; j+=2) {
+            // If: There is only one item and this is the first iteration, or
+            // there is an odd number of items and this is the final iteration,
+            // then we will add only the current item, items[j], to the array of pairs
+            if(items[j+1] !== undefined) {
+                itemPairs.push([items[j], items[j+1]]);
+            } else {
+                itemPairs.push([items[j]]);
+            }
+            // Set the order.items to the itemPairs object
+            orders[i].itemPairs = itemPairs;
+          }
+        }
+      }
+      return orders;
     },
 
     numOrders() {
@@ -235,8 +282,9 @@ export default {
   }
 
   .panel-body {
-    padding-top: 10px;
-    padding-bottom: 3px;
+    padding-top: 10px !important;
+    padding-bottom: 3px !important;
+    padding-left: 15px !important;
     font-size: 12px;
     background-color: #3a3a3a;
     color: #fff;
@@ -262,7 +310,7 @@ export default {
 
   .panel-body ul {
     /*float: right;*/
-    margin-left: 80px;
+    margin-left: 0px;
     margin-top: 10px;
   }
 

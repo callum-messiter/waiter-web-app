@@ -49,7 +49,6 @@ export default new Vuex.Store({
 			state.menu.categories[data.catIndex].items.unshift(data.item);
 		},
 		updateItem(state, payload) {
-			console.log(JSON.stringify(payload));
 			const trigger = payload.trigger;
 			const data = payload.updatedItem;
 			var itemState = state.menu.categories[trigger.catIndex].items[trigger.itemIndex];
@@ -139,9 +138,6 @@ export default new Vuex.Store({
 		**/
 		getCategoriesAndItems(state) {
 			return state.menu.categories;
-		},
-		getCategoriesAndItemsView(state) {
-			return cloneDeep(state.menu.categories);
 		},
 
 		/**
