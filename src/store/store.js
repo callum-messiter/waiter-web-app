@@ -51,8 +51,8 @@ export default new Vuex.Store({
 		updateItem(state, payload) {
 			console.log(JSON.stringify(payload));
 			const trigger = payload.trigger;
-			const data = payload.data;
-			const itemState = state.menu.categories[trigger.catIndex].items[trigger.itemIndex];
+			const data = payload.updatedItem;
+			var itemState = state.menu.categories[trigger.catIndex].items[trigger.itemIndex];
 			Object.assign(itemState, data);
 		},
 		deleteItem(state, trigger) {

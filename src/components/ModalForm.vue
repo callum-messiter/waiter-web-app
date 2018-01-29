@@ -268,8 +268,9 @@ export default {
       // First check if the user has actually made any changes to the item
       if(!_.isEqual(this.form.item, this.modal.data)) {
         // Only emit the event (which will trigger the API call) if the user has made changes
+        console.log('Modal trigger' + JSON.stringify(this.modal.trigger));
         this.form.item.itemId = this.modal.trigger.itemId;
-        console.log('ModalForm: ' + this.modal.trigger);
+        console.log('Modal form' + JSON.stringify(this.form.item));
         bus.$emit('userConfirmation_saveItemChanges', this.form.item, this.modal.trigger);
       }
       // In any case, hide the modal and reset the form
