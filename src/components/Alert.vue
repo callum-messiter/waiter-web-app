@@ -1,11 +1,11 @@
 <template>
 	<transition name="fade" v-if="alert.isVisible">
 		<div class="alert">
-			<div class="col-sm-2">
+			<div class="col-xs-2">
 				<span class="glyphicon glyphicon-remove" v-if="alert.type == 'error'"></span>
 				<span class="glyphicon glyphicon-ok" v-if="alert.type == 'success'"></span>
 			</div>
-			<div class="col-sm-10">
+			<div class="col-xs-10">
 				<h4 v-if="alert.type == 'error'">Something went wrong...</h4>
 				<h4 v-if="alert.type == 'success'">Success!</h4>
 				<p>{{alert.message}}</p>
@@ -67,6 +67,8 @@ export default {
 		font-weight: bold;
 		color: #fff;
 		position: absolute;
+		/*top: 70vh;
+		left: 50vw;*/
 		bottom: 20px;
 		right: 20px;
 		z-index: 1000;
@@ -88,4 +90,69 @@ export default {
 		margin-top: 22px; /** For centering vertically: is there a better way? **/
 		margin-right: 10px;
 	}
+/*
+	@media (max-width: 1235px) {
+		.alert {
+			top: 65vh;
+		}
+	}
+
+	@media (max-width: 995px) {
+		.alert {
+			left: 35vw;
+		}
+	}
+
+	@media (max-width: 767px) {
+		.alert {
+			left: 30vw;
+		}
+		.glyphicon {
+			font-size: 20px;
+		}
+	}
+
+	@media (max-width: 697px) {
+		.alert {
+			left: 25vw;
+		}
+	}
+
+	@media (max-width: 653px) {
+		.alert {
+			left: 20vw;
+		}
+	}
+
+	@media (max-width: 614px) {
+		.alert {
+			left: 15vw;
+		}
+	}
+
+	@media (max-width: 574px) {
+		.alert {
+			left: 10vw;
+		}
+	}
+
+	@media (max-width: 544px) {
+		.alert {
+			left: 5vw;
+		}
+	}
+
+	@media (max-width: 515px) {
+		.alert {
+			width: 290px;
+			left: 30vw;
+		}
+	}
+
+	@media (max-width: 515px) {
+		.alert {
+			width: 290px;
+			left: 30vw;
+		}
+	}*/
 </style>

@@ -17,12 +17,12 @@
               <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
               <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
               <!-- Reject-Order Icon -->
-              <span 
+              <span
                 class="glyphicon glyphicon-remove pull-right"
                 v-on:click="updateOrderStatus(order, statuses.rejectedByKitchen)">
               </span>
               <!-- Accept-Order Icon -->
-              <span 
+              <span
                 class="glyphicon glyphicon-ok pull-right"
                 v-on:click="updateOrderStatus(order, statuses.acceptedByKitchen)">
               </span>
@@ -51,7 +51,7 @@
               <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
               <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
               <!-- Send-Order-to-Custom Icon -->
-              <span 
+              <span
                 class="glyphicon glyphicon-send pull-right"
                 v-on:click="updateOrderStatus(order, statuses.enRouteToCustomer)">
               </span>
@@ -291,7 +291,7 @@ export default {
   }
 
   /**
-    There is a panel-heading class in the Dashboard component, causing conflicts here. 
+    There is a panel-heading class in the Dashboard component, causing conflicts here.
     We should add two new distinct class name and reference them in the CSS, instead.
   **/
 

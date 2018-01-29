@@ -10,7 +10,7 @@
             v-bind:href="'#' + category.categoryId"
             >{{category.name}} ({{category.items.length}})
           </a>
-          <!-- Delete Icon (visible by default) 
+          <!-- Delete Icon (visible by default)
           <span
             class="glyphicon glyphicon-trash pull-right align-middle"
             v-if="!editMode.active || editMode.category.id != category.categoryId"
@@ -213,12 +213,12 @@ export default {
       }).then((res) => {
         if(res.status == 200 || res.status == 201) {
           // Set the itemId that was assigned by the server
-          newItem.itemId = res.body.data.createdItemId; 
+          newItem.itemId = res.body.data.createdItemId;
           this.$store.commit('addItem', {
             item: newItem,
             catIndex: catIndex
           });
-          
+
           this.showAlert('success', 'Your new item was successfully added to your menu!');
         }
       }).catch((res) => {
@@ -336,12 +336,12 @@ export default {
   }
 
   .table>thead>tr {
-    border-top: 1px solid #fff;
-    border-bottom: 1px solid #fff;
+    border-top: 1px solid #151515;
+    border-bottom: 1px solid #151515;
   }
 
   .name, .price {
-    border-right: 1px solid #fff !important;
+    border-right: 1px solid #151515 !important;
   }
 
   .glyphicon {
