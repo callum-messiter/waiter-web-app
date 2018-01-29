@@ -4,12 +4,12 @@
     <div class="row">
       <div class="col-md-12">
         <!-- Category Settings Icon -->
-        <span
-          class="glyphicon glyphicon-cog pull-right"
-          v-on:click="showAddCategoryModal()">
-        </span>
         <h2 class="text-center restaurantName">
           {{restaurant.name}} | Menu
+          <span
+            class="glyphicon glyphicon-cog pull-right"
+            v-on:click="showAddCategoryModal()">
+          </span>
         </h2>
       </div>
       <!-- <div class="col-md-3 col-md-offset-3 align-middle">
@@ -165,13 +165,14 @@ export default {
   .glyphicon {
     cursor: pointer;
     color: #469ada;
-    font-size: 26px;
   }
 
   h2 {
     font-family: 'grotesque';
     color: #fff;
   }
+
+
 
 
 </style>
