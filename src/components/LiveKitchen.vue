@@ -237,9 +237,9 @@ export default {
             } else {
                 itemPairs.push([items[j]]);
             }
-            // Set the order.items to the itemPairs object
-            orders[i].itemPairs = itemPairs;
           }
+          // Set the order.items to the itemPairs object
+          orders[i].itemPairs = itemPairs;
         }
       }
       return orders;
