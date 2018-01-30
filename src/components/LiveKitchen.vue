@@ -33,11 +33,13 @@
               <div class="col-md-2">
                 <img src="../assets/menu-icon.png"/>
               </div>
-              <div class="col-md-5 pairWrapper" v-for="pair in order.itemPairs">
-                <ul class="items">
-                  <li class="item-name" v-for="item in pair">{{item.name}}</li>
-                </ul>
-              </div>
+                <div class="item-container">
+                  <div class="pairWrapper" v-for="pair in order.itemPairs">
+                    <ul class="items">
+                      <li class="item-name" v-for="item in pair">{{item.name}}</li>
+                    </ul>
+                  </div>
+                </div>
             </div>
           </div>
         </div>
@@ -62,10 +64,12 @@
               <div class="col-md-2">
                 <img src="../assets/menu-icon.png"/>
               </div>
-              <div class="col-md-5 pairWrapper" v-for="pair in order.itemPairs">
-                <ul class="items">
-                  <li class="item-name" v-for="item in pair">{{item.name}}</li>
-                </ul>
+              <div class="item-container">
+                <div class="pairWrapper" v-for="pair in order.itemPairs">
+                  <ul class="items">
+                    <li class="item-name" v-for="item in pair">{{item.name}}</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -205,7 +209,7 @@ export default {
     /**
       Each order comes with an array of the items it contains (each item is represented by an object).
 
-      In order to render the order's items in a horizontal list of pairs, we need to create a new array 
+      In order to render the order's items in a horizontal list of pairs, we need to create a new array
       containining item-pair arrays, each containing two or fewer item objects.
 
       We add this array of pairs, itemPairs, to each the order object *as a new, distinct property*.
@@ -306,16 +310,15 @@ export default {
     float: left;
     height: 60px;
     width: 60px;
+    margin-top: 10px;
   }
 
   .panel-body ul {
-    /*float: right;*/
     margin-left: 0px;
     margin-top: 10px;
   }
 
   .panel {
-    /*max-width: 480px;*/
     margin: 20px auto;
   }
 
@@ -339,10 +342,12 @@ export default {
   ul.items {
     list-style: none;
     padding-left: 0;
+    float: right;
   }
 
   ul.items > li {
       margin-left: 15px;
+      font-size: 14px;
   }
 
   /* Prevent nested li's from getting messed up */
@@ -372,5 +377,34 @@ export default {
     padding-top: 140px; /** In order to vertically center; is there a more robust way? **/
     color: white;
   }
+
+  .pairWrapper {
+    display: table-cell;
+    padding: 10px 7px;
+  }
+
+  .item-container {
+  	width: 75%;
+  	overflow-x: scroll;
+  	white-space: nowrap;
+    margin: 0 auto;
+  }
+
+  ::-webkit-scrollbar {
+  -webkit-appearance: none;
+  /*width: 0px;*/
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #262626;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 1);
+  -webkit-box-shadow: none;
+}
 
 </style>

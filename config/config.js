@@ -17,7 +17,7 @@ module.exports.apiBaseUrl = baseUrl;
 	      return config.money;
 	    }
 	  }
-	  
+
 	***************************
 **/
 module.exports.money = {
