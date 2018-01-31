@@ -69,7 +69,7 @@ export default {
 		position: absolute;
 		/*top: 70vh;
 		left: 50vw;*/
-		bottom: 20px;
+		bottom: 0px;
 		right: 20px;
 		z-index: 1000;
 	}

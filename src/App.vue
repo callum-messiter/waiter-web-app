@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <alert></alert>
     <!-- Navbar -->
     <navbar></navbar>
     <div class="container">
@@ -25,7 +26,7 @@ export default {
     'navbar': Navbar,
     'alert': Alert,
     'modal': Modal,
-    'modalForm': ModalForm
+    'modalForm': ModalForm,
   },
 
   created() {

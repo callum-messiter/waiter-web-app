@@ -2,7 +2,6 @@
   <div class="container">
     <div class="col-xs-12">
       <div id="logbox" v-bind:class="{'raised': !loginFormIsVisible}">
-        <alert></alert>
         <!-- Registration form -->
         <form id="signup" v-if="!loginFormIsVisible">
           <div class="row">

@@ -19,7 +19,6 @@
     <div class="row">
       <!-- The menu content -->
       <div class="categories-accordion">
-        <alert></alert>
         <category></category>
       </div>
     </div>

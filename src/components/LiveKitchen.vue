@@ -1,7 +1,6 @@
 <template>
   <div class="container-fluid">
     <div class="inner">
-    <alert></alert>
     <!-- If there are no live orders, inform the user -->
     <div class="row zeroOrders" v-if="orders.length < 1">
       <img class="zeroOrdersIcon" src="../assets/safebox.png"/>
