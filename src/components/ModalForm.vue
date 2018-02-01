@@ -191,7 +191,7 @@
               <button
                 type="button"
                 class="btn btn-primary delete-button"
-                v-on:click="emitUserConfirmation(modal.trigger)">
+                v-on:click="emitDeleteItemConfirmation()">
                 {{modal.buttons.warning}}
               </button>
             </div>
@@ -323,6 +323,12 @@ export default {
       Object.keys(obj).forEach((key) => {
         obj[key] = '';
       });
+    },
+
+    emitDeleteItemConfirmation() {
+      bus.$emit('userConfirmation_deleteItem', this.modal.trigger);
+      this.modal.isVisible = false;
+      this.resetFormData(this.modal.name);
     }
 
   }
