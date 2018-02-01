@@ -1,17 +1,18 @@
 <template>
   <tbody>
-    <tr class="item-row" v-for="item in category.items">
-      <td class="item-name text-left col-md-3">
+    <tr class="item-row" v-for="item in category.items" v-on:dblclick="
+          showEditItemModal(
+            category.items.indexOf(item),
+            categories.indexOf(category)
+          )">
+      <td 
+        class="item-name text-left col-md-3"
+      >
         <input
           type="text"
           readonly
           class="form-control"
           v-model="item.name"
-          v-on:dblclick="
-            showEditItemModal(
-              category.items.indexOf(item),
-              categories.indexOf(category)
-            )"
         >
       </td>
       <td class="item-price text-left col-md-1">
@@ -21,11 +22,6 @@
           class="form-control" 
           v-model="item.price" 
           v-bind="money"
-          v-on:dblclick="
-            showEditItemModal(
-              category.items.indexOf(item),
-              categories.indexOf(category)
-            )"
         ></money>
       </td>
       <td class="item-description text-left col-md-8">
@@ -34,11 +30,6 @@
           readonly
           class="form-control"
           v-model="item.description"
-          v-on:dblclick="
-            showEditItemModal(
-              category.items.indexOf(item),
-              categories.indexOf(category)
-            )"
         >
       </td>
     </tr>
@@ -150,13 +141,33 @@ export default {
     src: url("../fonts/grotesque.otf");
   }
 
+  tbody {
+    background-color: #3a3a3a;
+  }
+
+  tr {
+    cursor: pointer;
+  }
+
   td {
     padding: 0 !important;
     border: none !important;
+    cursor: pointer;
+  }
+
+  .item-name {
+    background-color: #3a3a3a !important;
   }
 
   input {
     border: 0 !important;
+    cursor: pointer;
+  }
+
+  input.form-control {
+    background-color: #3a3a3a !important;
+    color: #fff;
+    font-family: 'grotesque';
   }
 
   input[readonly] input[readonly]:focus {
@@ -169,47 +180,17 @@ export default {
     box-shadow: none !important;
   }
 
-  button {
-    margin-left: 3px;
-    margin-top: 6px;
-  }
+  /** Prevent text highlighting when double clicking an input, in order to edit an item **/
+  ::selection { background: transparent; }
+  ::-moz-selection { background: transparent; }
 
-  .buttons {
-    width: 200px;
-    position: absolute;
-    right: -30px;
+  /** Prevent blue input glow upon click **/
+  input {
+    outline: none;
     border: none !important;
-  }
-
-  .cancelBtn {
-    background-color: #404040;
-    border-color: #404040;
-  }
-
-  .cancelBtn:hover {
-    background-color: #1a1a1a;
-  }
-
-  .cancelBtn:active {
-    background-color: #000000
-  }
-
-  .newItemDefault {
-    opacity: 0.4;
-  }
-
-  tbody {
-    background-color: #3a3a3a;
-  }
-
-  .item-name {
-    background-color: #3a3a3a !important;
-  }
-
-  input.form-control {
-    background-color: #3a3a3a !important;
-    color: #fff;
-    font-family: 'grotesque';
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
   }
 
 </style>
