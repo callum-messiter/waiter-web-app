@@ -166,9 +166,16 @@ export default {
     color: #469ada;
   }
 
+  .glyphicon-cog {
+    font-size: 20px;
+    line-height: 36px;
+  }
+
   h2 {
     font-family: 'grotesque';
     color: #fff;
+    font-size: 36px;
+    line-height: 36px;
   }
 
 

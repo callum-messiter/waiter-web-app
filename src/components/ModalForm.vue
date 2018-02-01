@@ -1,7 +1,7 @@
 <template>
   <transition name="modalForm" v-if="modal.isVisible">
    <div class="modal" style="display: block">
-    <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-dialog" role="document">
       <div class="modal-content">
 
         <div class="modal-header">
@@ -24,51 +24,58 @@
           <form id="addItem" v-if="modal.name == 'item_add'">
             <!-- Item name -->
             <div class="row">
-            <input
-              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
-              name="itemName"
-              type="text"
-              placeholder="Item name"
-              v-model="form.item.name"
-              v-validate="{required: true, max: 30}"
-              data-vv-as="item name"
-            />
-            <br>
-            <span
-              class="help is-danger"
-              v-show="errors.has('itemName')">
-              {{ errors.first('itemName') }}
-            </span>
-            <!-- Item price -->
-            <money
-              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
-              name="itemPrice"
-              v-model ="form.item.price"
-              v-bind="money"
-              v-validate="{required: true}"
-              data-vv-as="item price">
-            </money>
-            <span
-              class="help is-danger"
-              v-show="errors.has('itemPrice')">
-              {{ errors.first('itemPrice') }}
-            </span>
+              <div class="col-xs-6">
+                <input
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
+                  name="itemName"
+                  type="text"
+                  placeholder="Item name"
+                  v-model="form.item.name"
+                  v-validate="{required: true, max: 30}"
+                  data-vv-as="item name"
+                />
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('itemName')">
+                  <br>
+                  {{ errors.first('itemName') }}
+                </span>
+              </div>
+              <div class="col-xs-6">
+                <!-- Item price -->
+                <money
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
+                  name="itemPrice"
+                  v-model ="form.item.price"
+                  v-bind="money"
+                  v-validate="{required: true}"
+                  data-vv-as="item price">
+                </money>
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('itemPrice')">
+                  {{ errors.first('itemPrice') }}
+                </span>
+              </div>
+              <div class="col-xs-12">
+                <input
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
+                  name="itemDescription"
+                  type="text"
+                  placeholder="Item description"
+                  v-model="form.item.description"
+                  v-validate="{required: true, max: 40}"
+                  data-vv-as="item description"
+                />
+                <br>
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('itemDescription')">
+                  {{ errors.first('itemDescription') }}
+                </span>
+              </div>
             <!-- Item Description -->
-            <input
-              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
-              name="itemDescription"
-              type="text"
-              placeholder="Item description"
-              v-model="form.item.description"
-              v-validate="{required: true, max: 40}"
-              data-vv-as="item description"
-            />
-            <br>
-            <span
-              class="help is-danger"
-              v-show="errors.has('itemDescription')">
-              {{ errors.first('itemDescription') }}
-            </span>
+
             </div>
             <!-- Save Item Button -->
             <div class="row">
@@ -86,77 +93,93 @@
           -->
           <form id="addCategory" v-if="modal.name == 'category_add'">
           <!-- Category name -->
-            <input
-              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
-              name="categoryName"
-              type="text"
-              placeholder="Category name"
-              v-model="form.category.name"
-              v-validate="{required: true, max: 30}"
-              data-vv-as="category name"
-            />
-            <br>
-            <span
-              class="help is-danger"
-              v-show="errors.has('categoryName')">
-              {{ errors.first('categoryName') }}
-            </span>
-            <!-- Save Category Button -->
-            <br>
-            <button
-              type="button"
-              class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
-              {{modal.buttons.primary}}
-            </button>
+            <div class="row">
+              <div class="col-xs-9">
+                <input
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
+                  name="categoryName"
+                  type="text"
+                  placeholder="Category name"
+                  v-model="form.category.name"
+                  v-validate="{required: true, max: 30}"
+                  data-vv-as="category name"
+                />
+              </div>
+              <div class="col-xs-3">
+                <!-- Save Category Button -->
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
+                  {{modal.buttons.primary}}
+                </button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-9">
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('categoryName')">
+                  {{ errors.first('categoryName') }}
+                </span>
+              </div>
+            </div>
           </form>
 
           <!--
             Edit-Item form
           -->
           <form id="editItem" v-if="modal.name == 'item_edit'">
-            <!-- Item name -->
-            <input
-              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
-              name="itemName"
-              type="text"
-              v-model="form.item.name"
-              v-validate="{required: true, max: 30}"
-              data-vv-as="item name"
-            />
-            <span
-              class="help is-danger"
-              v-show="errors.has('itemName')">
-              {{ errors.first('itemName') }}
-            </span>
-            <!-- Item price -->
-            <money 
-              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
-              name="itemPrice" 
-              v-model="form.item.price"
-              v-bind="money"
-              v-validate="{required: true, max: 4}"
-              data-vv-as="item price">
-            </money>
-            <span
-              class="help is-danger"
-              v-show="errors.has('itemPrice')">
-              {{ errors.first('itemPrice') }}
-            </span>
-            <!-- Item Description -->
-            <input
-              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
-              name="itemDescription"
-              type="text"
-              v-model="form.item.description"
-              v-validate="{required: true, max: 40}"
-              data-vv-as="item description"
-            />
-            <span
-              class="help is-danger"
-              v-show="errors.has('itemDescription')">
-              {{ errors.first('itemDescription') }}
-            </span>
+            <div class="row">
+              <div class="col-xs-6">
+                <!-- Item name -->
+                <input
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
+                  name="itemName"
+                  type="text"
+                  v-model="form.item.name"
+                  v-validate="{required: true, max: 30}"
+                  data-vv-as="item name"
+                />
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('itemName')">
+                  {{ errors.first('itemName') }}
+                </span>
+              </div>
+              <div class="col-xs-6">
+                <!-- Item price -->
+                <money
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
+                  name="itemPrice"
+                  v-model="form.item.price"
+                  v-bind="money"
+                  v-validate="{required: true, max: 4}"
+                  data-vv-as="item price">
+                </money>
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('itemPrice')">
+                  {{ errors.first('itemPrice') }}
+                </span>
+              </div>
+              <div class="col-xs-12">
+                <!-- Item Description -->
+                <input
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
+                  name="itemDescription"
+                  type="text"
+                  v-model="form.item.description"
+                  v-validate="{required: true, max: 40}"
+                  data-vv-as="item description"
+                />
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('itemDescription')">
+                  {{ errors.first('itemDescription') }}
+                </span>
+              </div>
+            </div>
             <!-- Save Item Button -->
             <div class="row">
               <button
@@ -167,7 +190,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-primary"
+                class="btn btn-primary delete-button"
                 v-on:click="emitUserConfirmation(modal.trigger)">
                 {{modal.buttons.warning}}
               </button>
@@ -340,12 +363,18 @@ export default {
     border-bottom: none;
   }
 
+  .glyphicon {
+    color: #9e9e9e;
+  }
+
   input {
+    width: 100%;
     background: transparent;
     border: none;
     border-bottom: 3px solid #fff;
     height: 40px;
     margin-top: 8px;
+    color: #656565;
   }
 
   input:focus {
@@ -355,17 +384,25 @@ export default {
   }
 
   ::-webkit-input-placeholder {
-    color: #fff;
+    color: #656565;
     text-align: left;
   }
   ::-moz-placeholder {
-    color: #fff;
+    color: #656565;
   }
   :-ms-input-placeholder {
-    color: #fff;
+    color: #656565;
   }
   :-moz-placeholder {
-    color: #fff;
+    color: #656565;
+  }
+
+  .v-money.input.pass {
+    color: #656565;
+  }
+
+  .v-money.input.pass:focus {
+    color: #469ada;
   }
 
   .input:focus::-webkit-input-placeholder{
@@ -394,8 +431,13 @@ export default {
     margin-top: 20px;
     color: #fff;
     background-color: #469ada;
-    border: 1px solid #469ada;
+    border: 2px solid #469ada;
     border-radius: 3px;
+  }
+
+  .delete-button {
+    background-color: #0a0a0a;
+    border: 2px solid #469ada;
   }
 
   @-webkit-keyframes autofill {
@@ -414,5 +456,11 @@ export default {
   .help {
     color: #dd0d0d !important;
     font-size: 10px;
+  }
+
+  @media (min-width: 768px) {
+    .modal-dialog {
+      width: 400px !important;
+    }
   }
 </style>

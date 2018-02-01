@@ -351,7 +351,7 @@ export default {
             localStorage.setItem('isAuth', true);
             localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
             localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
-            // Reset the login form 
+            // Reset the login form
             this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
             // Set auth state to true
             this.$store.commit('authenticateUser');
@@ -384,8 +384,8 @@ export default {
           // For now just log the user in; later we will handle email verification
           this.form.login.email.value = this.form.signup.email.value;
           this.form.login.password.value = this.form.signup.password.value;
-          
-          // Reset the signup form 
+
+          // Reset the signup form
           this.logUserIn(true);
         }).catch((res) => {
           this.handleApiError(res);
@@ -441,7 +441,7 @@ export default {
   #logbox {
     padding: 10px;
     margin: 0 auto;
-    width: 500px;
+    width: 400px;
     height: 70vh;
     margin-top: 15vh;
     background-color: rgba(0, 0, 0, 0.8);
@@ -482,21 +482,25 @@ input.input.pass:-webkit-autofill {
     background: transparent;
     border-bottom: 2px solid #fff;
     text-align: left;
-    font-size: 14px;
+    font-size: 13px;
+  }
+
+  #login input {
+    width: 60%;
   }
 
   ::-webkit-input-placeholder {
-    color: #fff;
+    color: #656565;
     text-align: left;
   }
   ::-moz-placeholder {
-    color: #fff;
+    color: #656565;
   }
   :-ms-input-placeholder {
-    color: #fff;
+    color: #656565;
   }
   :-moz-placeholder {
-    color: #fff;
+    color: #656565;
   }
 
   .input:focus {
@@ -649,7 +653,7 @@ input.input.pass:-webkit-autofill {
 
   @media (max-width: 540px) {
     #logbox {
-      width: 390px;
+      width: 380px;
     }
   }
 

@@ -1,7 +1,7 @@
 <template>
   <transition name="modal" v-if="modal.isVisible">
    <div class="modal" style="display: block">
-    <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title">
@@ -180,6 +180,7 @@ export default {
 
   .modal-dialog {
     padding-top: 10%;
+    width: 400px !important;
   }
 
   .modal-content {
@@ -189,7 +190,6 @@ export default {
     border: 3px solid #469ada;
     border-radius: 3px;
     padding: 10px;
-    width: 320px;
   }
 
   .modal-header {
@@ -214,4 +214,11 @@ export default {
     border-radius: 3px;
     font-weight: bold;
   }
+
+  @media (min-width: 768px) {
+    .modal-dialog {
+      width: 400px !important;
+    }
+  }
+
 </style>
