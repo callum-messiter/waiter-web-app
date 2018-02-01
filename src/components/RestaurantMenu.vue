@@ -5,7 +5,7 @@
       <div class="col-md-12">
         <!-- Category Settings Icon -->
         <h2 class="text-center restaurantName">
-          {{restaurant.name}} | Menu
+          {{restaurant.name}}
           <span
             class="glyphicon glyphicon-cog pull-right"
             v-on:click="showAddCategoryModal()">
@@ -53,6 +53,14 @@ export default {
     bus.$on('userConfirmation_addNewCategory', (data, trigger) => {
         this.addCategory(data.name);
     });
+
+    bus.$on('userConfirmation_saveCategoryChanges', (data, trigger) => {
+      this.updateCategoryName(data, trigger);
+    });
+
+    bus.$on('userConfirmation_deleteCategory', (trigger) => {
+      this.deleteCategory(trigger);
+    });
   },
 
   computed: {
@@ -64,12 +72,7 @@ export default {
       return JSON.parse(localStorage.restaurant);
     },
 
-    /**
-      This is the actual state. We use this only to check if the view has departed from the state, which
-      allows us to check, for example, if the user has actually changed a category name.
-      Based on this information, we may or not may display a "Sure you want to discard your changes" warning, for example
-    **/
-    categoriesState () {
+    categories () {
       return this.$store.getters.getCategoriesAndItems;
     }
   },
@@ -120,7 +123,35 @@ export default {
       }).catch((res) => {
         this.handleApiError(res);
       });
-    }
+    },
+
+    /**
+      Here we send the updated category name to the API, and if the data is successfully persisted to the database,
+      we also update the state, which is then reflected in the view. It is important to keep the backend data and the
+      front-end state syncronised
+    **/
+    updateCategoryName(data, trigger) {
+      const catName = data.name;
+
+      this.$http.put('category/update/'+trigger.catId, {
+        name: data.name,
+        menuId: JSON.parse(localStorage.menu).menuId
+      }, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+      }).then((res) => {
+        if(res.status == 200) {
+          // If the updates were successfully persisted to the database, update the state to reflect the changes
+          this.$store.commit('updateCategoryName', {
+            name: catName,
+            index: trigger.catIndex
+          });
+
+          this.showAlert('success', 'Your category was successfully updated!')
+        }
+      }).catch((res) => {
+        this.handleApiError(res);
+      });
+    },
 
   }
 

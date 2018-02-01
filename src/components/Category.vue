@@ -89,15 +89,6 @@ export default {
   },
 
   created() {
-
-    bus.$on('userConfirmation_saveCategoryChanges', (data, trigger) => {
-      this.updateCategoryName(data, trigger);
-    });
-
-    bus.$on('userConfirmation_deleteCategory', (trigger) => {
-      this.deleteCategory(trigger);
-    });
-
     /**
       If we listen for these event in the Item component, the action function fires n times, where n = num of items (all of which are deleted). This seems to be caused by there being, effectivey, n "copies" of the item template. Why doesn't the same thing happen with deleting categories?
     **/
@@ -121,34 +112,6 @@ export default {
   },
 
   methods: {
-
-    /**
-      Here we send the updated category name to the API, and if the data is successfully persisted to the database,
-      we also update the state, which is then reflected in the view. It is important to keep the backend data and the
-      front-end state syncronised
-    **/
-    updateCategoryName(data, trigger) {
-      const catName = data.name;
-
-      this.$http.put('category/update/'+trigger.catId, {
-        name: data.name,
-        menuId: JSON.parse(localStorage.menu).menuId
-      }, {
-        headers: {Authorization: JSON.parse(localStorage.user).token}
-      }).then((res) => {
-        if(res.status == 200) {
-          // If the updates were successfully persisted to the database, update the state to reflect the changes
-          this.$store.commit('updateCategoryName', {
-            name: catName,
-            index: trigger.catIndex
-          });
-
-          this.showAlert('success', 'Your category was successfully updated!')
-        }
-      }).catch((res) => {
-        this.handleApiError(res);
-      });
-    },
 
     showEditCategoryModal(catId, catIndex) {
       const catName = this.categories[catIndex].name;
