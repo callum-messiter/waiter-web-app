@@ -1,195 +1,196 @@
 <template>
   <div class="container">
-    <div class="col-xs-12">
-      <div id="logbox" v-bind:class="{'raised': !loginFormIsVisible}">
-        <!-- Registration form -->
-        <form id="signup" v-if="!loginFormIsVisible">
-          <div class="row">
-            <h1>Sign up to waitr</h1>
-          </div>
-          <!-- First name -->
-          <div class="row">
-            <div class="col-sm-6">
-              <input
-                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('firstName') }"
-                name="firstName"
-                type="text"
-                v-bind:placeholder="form.signup.firstName.placeholder"
-                v-model="form.signup.firstName.value"
-                v-validate="{required: true, max: 100}"
-                v-on:focus="hidePlaceholder('signup', 'firstName')"
-                v-on:blur="updateInputStatus('signup', 'firstName')"
-                data-vv-as="first name"
-              />
-              <span
-                class="help is-danger"
-                v-show="errors.has('firstName')">
-                {{ errors.first('firstName') }}
-              </span>
-            </div>
 
-            <!-- Last name -->
-            <div class="col-sm-6">
-              <input
-                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('lastName') }"
-                name="lastName"
-                type="text"
-                v-bind:placeholder="form.signup.lastName.placeholder"
-                v-model="form.signup.lastName.value"
-                v-validate="{required: true, max: 100}"
-                v-on:focus="hidePlaceholder('signup', 'lastName')"
-                v-on:blur="updateInputStatus('signup', 'lastName')"
-                data-vv-as="last name"
-              />
-              <span
-                class="help is-danger"
-                v-show="errors.has('lastName')">
-                {{ errors.first('lastName') }}
-              </span>
-            </div>
-          </div>
+    <!-- Login form -->
+    <div id="loginFormBox" class="formBox" v-if="loginFormIsVisible">
+      <form id="loginForm">
+        <h1>Login to waitr</h1>
+        <input
+          class="input pass"
+          type="email"
+          v-bind:placeholder="form.login.email.placeholder"
+          v-model="form.login.email.value"
+          v-on:focus="hidePlaceholder('login', 'email')"
+          v-on:blur="updateInputStatus('login', 'email')"
+        />
+        <input
+          class="input pass"
+          type="password"
+          v-bind:placeholder="form.login.password.placeholder"
+          v-model="form.login.password.value"
+          v-on:focus="hidePlaceholder('login', 'password')"
+          v-on:blur="updateInputStatus('login', 'password')"
+        />
+        <button
+          type="button"
+          class="inputButton"
+          v-on:click="logUserIn()">
+          Sign me in
+        </button>
+        <div class="text-center"">
+            Don't have an account?
+            <a
+              class="formLink"
+              v-on:click="hideLoginForm">
+              Sign up
+            </a>
+            <!--
+            -
+            <a
+              class="formLink">
+              Forgot password
+            </a>
+            -->
+        </div>
+      </form>
+    </div>
 
-          <div class="row">
-            <div class="col-sm-6">
-              <!-- Email address -->
-              <input
-                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('email') }"
-                name="email"
-                type="email"
-                v-bind:placeholder="form.signup.email.placeholder"
-                v-model="form.signup.email.value"
-                v-validate="{required: true, max: 150}"
-                v-on:focus="hidePlaceholder('signup', 'email')"
-                v-on:blur="updateInputStatus('signup', 'email')"
-              />
-              <span
-                class="help is-danger"
-                v-show="errors.has('email')">
-                {{ errors.first('email') }}
-              </span>
-            </div>
-            <div class="col-sm-6">
-              <!-- Restaurant name -->
-              <input
-                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('restaurantName') }"
-                name="restaurantName"
-                type="restaurantName"
-                v-bind:placeholder="form.signup.restaurantName.placeholder"
-                v-model="form.signup.restaurantName.value"
-                v-validate="{required: true, max: 150}"
-                v-on:focus="hidePlaceholder('signup', 'restaurantName')"
-                v-on:blur="updateInputStatus('signup', 'restaurantName')"
-                data-vv-as="restaurant name"
-              />
-              <span
-                class="help is-danger"
-                v-show="errors.has('restaurantName')">
-                {{ errors.first('restaurantName') }}
-              </span>
-            </div>
+    <div id="signupFormBox" class="formBox" v-else>
+      <!-- Registration form -->
+      <form id="signupForm">
+        <div class="row">
+          <h1>Sign up to waitr</h1>
+        </div>
+        <!-- First name -->
+        <div class="row">
+          <div class="col-sm-6">
+            <input
+              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('firstName') }"
+              name="firstName"
+              type="text"
+              v-bind:placeholder="form.signup.firstName.placeholder"
+              v-model="form.signup.firstName.value"
+              v-validate="{required: true, max: 100}"
+              v-on:focus="hidePlaceholder('signup', 'firstName')"
+              v-on:blur="updateInputStatus('signup', 'firstName')"
+              data-vv-as="first name"
+            />
+            <span
+              class="help is-danger"
+              v-show="errors.has('firstName')">
+              {{ errors.first('firstName') }}
+            </span>
           </div>
 
-          <div class="row">
-            <div class="col-sm-6">
-              <!-- Password -->
-              <input
-                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('password') }"
-                name="password"
-                type="password"
-                v-bind:placeholder="form.signup.password.placeholder"
-                v-model="form.signup.password.value"
-                v-validate="{required: true, min: 6, max: 30}"
-                v-on:focus="hidePlaceholder('signup', 'password')"
-                v-on:blur="updateInputStatus('signup', 'password')"
-              />
-              <span
-                class="help is-danger"
-                v-show="errors.has('password')">
-                {{ errors.first('password') }}
-              </span>
-            </div>
-            <div class="col-sm-6">
-              <!-- Confirm Password -->
-              <input
-                :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1}"
-                name="confirmPassword"
-                type="password"
-                v-bind:placeholder="form.signup.confirmPassword.placeholder"
-                v-model="form.signup.confirmPassword.value"
-                v-validate="'confirmed:password|required'"
-                v-on:focus="hidePlaceholder('signup', 'confirmPassword')"
-                v-on:blur="updateInputStatus('signup', 'confirmPassword')"
-                data-vv-as="confirm password"
-              />
-              <span
-                class="help is-danger"
-                v-show="errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1">
-                {{ errors.first('confirmPassword') }}
-              </span>
-            </div>
+          <!-- Last name -->
+          <div class="col-sm-6">
+            <input
+              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('lastName') }"
+              name="lastName"
+              type="text"
+              v-bind:placeholder="form.signup.lastName.placeholder"
+              v-model="form.signup.lastName.value"
+              v-validate="{required: true, max: 100}"
+              v-on:focus="hidePlaceholder('signup', 'lastName')"
+              v-on:blur="updateInputStatus('signup', 'lastName')"
+              data-vv-as="last name"
+            />
+            <span
+              class="help is-danger"
+              v-show="errors.has('lastName')">
+              {{ errors.first('lastName') }}
+            </span>
           </div>
+        </div>
 
-          <div class="row">
-            <!-- Registration button and links -->
-            <button
-              class="inputButton"
-              v-on:click="registerUser()"
-              type="button">
-              Sign me up!
-            </button>
-            <div class="text-center">
-              Already have an account?
-              <a
-                class="formLink"
-                v-on:click="showLoginForm">
-                Login
-              </a>
-            </div>
+        <div class="row">
+          <div class="col-sm-6">
+            <!-- Email address -->
+            <input
+              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('email') }"
+              name="email"
+              type="email"
+              v-bind:placeholder="form.signup.email.placeholder"
+              v-model="form.signup.email.value"
+              v-validate="{required: true, max: 150}"
+              v-on:focus="hidePlaceholder('signup', 'email')"
+              v-on:blur="updateInputStatus('signup', 'email')"
+            />
+            <span
+              class="help is-danger"
+              v-show="errors.has('email')">
+              {{ errors.first('email') }}
+            </span>
           </div>
-        </form>
+          <div class="col-sm-6">
+            <!-- Restaurant name -->
+            <input
+              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('restaurantName') }"
+              name="restaurantName"
+              type="restaurantName"
+              v-bind:placeholder="form.signup.restaurantName.placeholder"
+              v-model="form.signup.restaurantName.value"
+              v-validate="{required: true, max: 150}"
+              v-on:focus="hidePlaceholder('signup', 'restaurantName')"
+              v-on:blur="updateInputStatus('signup', 'restaurantName')"
+              data-vv-as="restaurant name"
+            />
+            <span
+              class="help is-danger"
+              v-show="errors.has('restaurantName')">
+              {{ errors.first('restaurantName') }}
+            </span>
+          </div>
+        </div>
 
-        <!-- Login form -->
-        <form id="login" v-else>
-          <h1>Login to waitr</h1>
-          <input
-            class="input pass"
-            type="email"
-            v-bind:placeholder="form.login.email.placeholder"
-            v-model="form.login.email.value"
-            v-on:focus="hidePlaceholder('login', 'email')"
-            v-on:blur="updateInputStatus('login', 'email')"
-          />
-          <input
-            class="input pass"
-            type="password"
-            v-bind:placeholder="form.login.password.placeholder"
-            v-model="form.login.password.value"
-            v-on:focus="hidePlaceholder('login', 'password')"
-            v-on:blur="updateInputStatus('login', 'password')"
-          />
+        <div class="row">
+          <div class="col-sm-6">
+            <!-- Password -->
+            <input
+              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('password') }"
+              name="password"
+              type="password"
+              v-bind:placeholder="form.signup.password.placeholder"
+              v-model="form.signup.password.value"
+              v-validate="{required: true, min: 6, max: 30}"
+              v-on:focus="hidePlaceholder('signup', 'password')"
+              v-on:blur="updateInputStatus('signup', 'password')"
+            />
+            <span
+              class="help is-danger"
+              v-show="errors.has('password')">
+              {{ errors.first('password') }}
+            </span>
+          </div>
+          <div class="col-sm-6">
+            <!-- Confirm Password -->
+            <input
+              :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1}"
+              name="confirmPassword"
+              type="password"
+              v-bind:placeholder="form.signup.confirmPassword.placeholder"
+              v-model="form.signup.confirmPassword.value"
+              v-validate="'confirmed:password|required'"
+              v-on:focus="hidePlaceholder('signup', 'confirmPassword')"
+              v-on:blur="updateInputStatus('signup', 'confirmPassword')"
+              data-vv-as="confirm password"
+            />
+            <span
+              class="help is-danger"
+              v-show="errors.has('confirmPassword') && inputs.hasHadFocus.indexOf('confirmPassword') > -1">
+              {{ errors.first('confirmPassword') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Registration button and links -->
           <button
-            type="button"
             class="inputButton"
-            v-on:click="logUserIn()">
-            Sign me in
+            v-on:click="registerUser()"
+            type="button">
+            Sign me up!
           </button>
-          <div class="text-center"">
-              Don't have an account?
-              <a
-                class="formLink"
-                v-on:click="hideLoginForm">
-                Sign up
-              </a>
-              <!--
-              -
-              <a
-                class="formLink">
-                Forgot password
-              </a>
-              -->
+          <div class="text-center">
+            Already have an account?
+            <a
+              class="formLink"
+              v-on:click="showLoginForm">
+              Login
+            </a>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -438,7 +439,7 @@ export default {
     left: 0;
   }
 
-  #logbox {
+  .formBox {
     padding: 10px;
     margin: 0 auto;
     width: 400px;
@@ -449,18 +450,18 @@ export default {
     color: #fff;
   }
 
-@-webkit-keyframes autofill {
-  to {
-    background: none;
-    color: #fff;
+  @-webkit-keyframes autofill {
+    to {
+      background: none;
+      color: #fff;
+    }
   }
-}
 
-input.input.pass:-webkit-autofill {
-  -webkit-animation-name: autofill !important;
-  -webkit-animation-fill-mode: both !important;
-  -webkit-box-shadow: none !important;
-}
+  input.input.pass:-webkit-autofill {
+    -webkit-animation-name: autofill !important;
+    -webkit-animation-fill-mode: both !important;
+    -webkit-box-shadow: none !important;
+  }
 
   h1 {
     text-align: center;
@@ -485,7 +486,7 @@ input.input.pass:-webkit-autofill {
     font-size: 13px;
   }
 
-  #login input {
+  #loginForm input {
     width: 60%;
   }
 
@@ -566,12 +567,17 @@ input.input.pass:-webkit-autofill {
     text-decoration: underline;
   }
 
-  #login {
+  #loginForm {
     padding-top: 50px;
   }
 
+  /**
+    Both the login-form box and the signup-form box have class .formBox.
+    The login-form box has ID #loginFormBox.
+    The signup-form box has ID #signupFormBox.
+  **/
   @media (min-width: 1500px) and (min-height: 1000px) {
-    #logbox {
+    .formBox {
       width: 600px;
       height: 50vh;
       margin-top: 25vh;
@@ -593,7 +599,7 @@ input.input.pass:-webkit-autofill {
   }
 
   @media (min-width: 1800px) and (min-height: 1100px) {
-    #logbox {
+    .formBox {
       width: 700px;
     }
     h1 {
@@ -613,7 +619,7 @@ input.input.pass:-webkit-autofill {
   }
 
   @media (min-width: 2300px) and (min-height: 1300px) {
-    #logbox {
+    .formBox {
       width: 900px;
       padding: 60px;
     }
@@ -631,7 +637,7 @@ input.input.pass:-webkit-autofill {
   }
 
   @media (max-width: 767px) {
-    #logbox {
+    .formBox {
       margin-top: 20px;
     }
     input {
@@ -652,13 +658,13 @@ input.input.pass:-webkit-autofill {
   }
 
   @media (max-width: 540px) {
-    #logbox {
+    .formBox {
       width: 380px;
     }
   }
 
   @media (max-width: 440px) {
-    #logbox {
+    .formBox {
       width: 320px;
     }
     .inputButton {
@@ -667,7 +673,7 @@ input.input.pass:-webkit-autofill {
   }
 
   @media (max-width: 375px) {
-    #logbox {
+    .formBox {
       width: 290px;
     }
   }
@@ -678,7 +684,7 @@ input.input.pass:-webkit-autofill {
       min-height: 100vh;
       padding-bottom: 40px;
     }
-    #logbox {
+    .formBox {
       height: 70vh;
       min-height: 450px;
       margin-top: 15vh;
@@ -692,7 +698,7 @@ input.input.pass:-webkit-autofill {
       min-height: 100vh;
       padding-bottom: 40px;
     }
-    #logbox {
+    .formBox {
       height: 80vh;
       min-height: 450px;
       margin-top: 10vh;
