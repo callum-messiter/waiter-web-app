@@ -90,10 +90,17 @@ export default {
 
   created() {
 
+    bus.$on('userConfirmation_saveCategoryChanges', (data, trigger) => {
+      this.updateCategoryName(data, trigger);
+    });
+
     bus.$on('userConfirmation_deleteCategory', (trigger) => {
       this.deleteCategory(trigger);
     });
 
+    /**
+      If we listen for these event in the Item component, the action function fires n times, where n = num of items (all of which are deleted). This seems to be caused by there being, effectivey, n "copies" of the item template. Why doesn't the same thing happen with deleting categories?
+    **/
     bus.$on('userConfirmation_addNewItem', (data, trigger) => {
       this.createNewItem(data, trigger.catId, trigger.catIndex)
     });
@@ -102,7 +109,6 @@ export default {
       this.deleteItem(trigger);
     });
 
-    // If we listen for this event in the Item component, because it fires n times, where n = num of items (all of which are deleted). Why doesn't the same thing happen with deleting categories?
     bus.$on('userConfirmation_saveItemChanges', (data, trigger) => {
       this.updateItem(data, trigger);
     });
@@ -121,9 +127,11 @@ export default {
       we also update the state, which is then reflected in the view. It is important to keep the backend data and the
       front-end state syncronised
     **/
-    updateCategoryName(name) {
-      this.$http.put('category/update/'+this.editMode.category.id, {
-        name: name,
+    updateCategoryName(data, trigger) {
+      const catName = data.name;
+
+      this.$http.put('category/update/'+trigger.catId, {
+        name: data.name,
         menuId: JSON.parse(localStorage.menu).menuId
       }, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
@@ -131,11 +139,10 @@ export default {
         if(res.status == 200) {
           // If the updates were successfully persisted to the database, update the state to reflect the changes
           this.$store.commit('updateCategoryName', {
-            name: this.categories[this.editMode.category.index].name,
-            index: this.editMode.category.index
+            name: catName,
+            index: trigger.catIndex
           });
-          // Exist edit mode and show success alert
-          this.exitEditMode();
+
           this.showAlert('success', 'Your category was successfully updated!')
         }
       }).catch((res) => {
@@ -144,7 +151,15 @@ export default {
     },
 
     showEditCategoryModal(catId, catIndex) {
-
+      const catName = this.categories[catIndex].name;
+      this.showModalForm(
+        'category_edit',
+        'Update your category ' + catName,
+        'Save',
+        {catIndex, catId},
+        {name: catName},
+        'Delete Category'
+      );
     },
 
     /**

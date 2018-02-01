@@ -120,18 +120,6 @@ export default {
       }).catch((res) => {
         this.handleApiError(res);
       });
-    },
-
-    /**
-      The "new category" data property is bound to the new-category input. The user can fill out the field, and once
-      he clicks to add the new category, or discard it, we have to reset it back to its default state
-    **/
-    resetNewCategory() {
-      this.newCategory = {
-        categoryId: null,
-        name: null,
-        items: []
-      }
     }
 
   }

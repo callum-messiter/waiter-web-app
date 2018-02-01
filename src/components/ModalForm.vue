@@ -17,14 +17,18 @@
           </div>
         </div>
 
+        <!-- 
+            **The contents of the modal body vary depending on the particular action being performed by the user.**
+        -->
+        
         <div class="modal-body">
           <!--
             Add-Item form
           -->
           <form id="addItem" v-if="modal.name == 'item_add'">
-            <!-- Item name -->
             <div class="row">
               <div class="col-xs-6">
+                <!-- Item name -->
                 <input
                   :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
                   name="itemName"
@@ -58,6 +62,7 @@
                 </span>
               </div>
               <div class="col-xs-12">
+                <!-- Item Description -->
                 <input
                   :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
                   name="itemDescription"
@@ -74,55 +79,15 @@
                   {{ errors.first('itemDescription') }}
                 </span>
               </div>
-            <!-- Item Description -->
-
-            </div>
-            <!-- Save Item Button -->
-            <div class="row">
-            <button
-              type="button"
-              class="btn btn-primary"
-              v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, 'item', modal.trigger)">
-              {{modal.buttons.primary}}
-            </button>
-            </div>
-          </form>
-
-          <!--
-            Add-Category form
-          -->
-          <form id="addCategory" v-if="modal.name == 'category_add'">
-          <!-- Category name -->
-            <div class="row">
-              <div class="col-xs-9">
-                <input
-                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
-                  name="categoryName"
-                  type="text"
-                  placeholder="Category name"
-                  v-model="form.category.name"
-                  v-validate="{required: true, max: 30}"
-                  data-vv-as="category name"
-                />
-              </div>
-              <div class="col-xs-3">
-                <!-- Save Category Button -->
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
-                  {{modal.buttons.primary}}
-                </button>
-              </div>
             </div>
             <div class="row">
-              <div class="col-xs-9">
-                <span
-                  class="help is-danger"
-                  v-show="errors.has('categoryName')">
-                  {{ errors.first('categoryName') }}
-                </span>
-              </div>
+              <!-- Save Item Button -->
+              <button
+                type="button"
+                class="btn btn-primary"
+                v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, 'item', modal.trigger)">
+                {{modal.buttons.primary}}
+              </button>
             </div>
           </form>
 
@@ -197,6 +162,86 @@
             </div>
           </form>
 
+          <!--
+            Add-Category form
+          -->
+          <form id="addCategory" v-if="modal.name == 'category_add'">
+          <!-- Category name -->
+            <div class="row">
+              <div class="col-xs-9">
+                <input
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
+                  name="categoryName"
+                  type="text"
+                  placeholder="Category name"
+                  v-model="form.category.name"
+                  v-validate="{required: true, max: 30}"
+                  data-vv-as="category name"
+                />
+              </div>
+              <div class="col-xs-3">
+                <!-- Save Category Button -->
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
+                  {{modal.buttons.primary}}
+                </button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-9">
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('categoryName')">
+                  {{ errors.first('categoryName') }}
+                </span>
+              </div>
+            </div>
+          </form>
+
+          <!--
+            Edit-Category form
+          -->
+          <form id="editCategory" v-if="modal.name == 'category_edit'">
+          <!-- Category name -->
+            <div class="row">
+              <div class="col-xs-8 col-xs-offset-2">
+                <input
+                  :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
+                  name="categoryName"
+                  type="text"
+                  placeholder="Category name"
+                  v-model="form.category.name"
+                  v-validate="{required: true, max: 30}"
+                  data-vv-as="category name"
+                />
+                <span
+                  class="help is-danger"
+                  v-show="errors.has('categoryName')">
+                  {{ errors.first('categoryName') }}
+                </span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-8 col-xs-offset-2">
+                <!-- Save Category Button -->
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  v-on:click="emitSaveCategoryChanges()">
+                  {{modal.buttons.primary}}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary delete-button"
+                  v-on:click="emitDeleteCategoryConfirmation()">
+                  {{modal.buttons.warning}}
+                </button>
+              </div>
+            </div>
+          </form>
+
         </div>
       </div>
     </div>
@@ -244,9 +289,18 @@ export default {
     bus.$on('showModalForm', (modal) => {
       Object.assign(this.modal, modal);
 
+      /**
+        TODO: Combine the two conditional statements below
+      **/
+
       // If we are editing an item, we should pre-fill the item form with the current item data
       if(this.modal.name == 'item_edit') {
         Object.assign(this.form.item, modal.data);
+      }
+
+      // If we are editing an category, we should pre-fill the category form with the current category data
+      if(this.modal.name == 'category_edit') {
+        Object.assign(this.form.category, modal.data);
       }
     });
   },
@@ -287,6 +341,11 @@ export default {
       }
     },
 
+
+    /**
+      TODO: Compose emitSaveItemChanges and emitSaveCategoryChanges into a single function.
+      Functions can be broken down into confirmation of actions (create, edit, delete)
+    **/
     emitSaveItemChanges() {
       // First check if the user has actually made any changes to the item
       if(!_.isEqual(this.form.item, this.modal.data)) {
@@ -296,6 +355,16 @@ export default {
       }
       // In any case, hide the modal and reset the form
       this.closeModal('item_edit');
+    },
+
+    emitSaveCategoryChanges() {
+      // First check if the user has actually made any changes to the item
+      if(!_.isEqual(this.form.category, this.modal.data)) {
+        // Only emit the event (which will trigger the API call) if the user has made changes
+        bus.$emit('userConfirmation_saveCategoryChanges', this.form.category, this.modal.trigger);
+      }
+      // In any case, hide the modal and reset the form
+      this.closeModal('category_edit');
     },
 
     closeModal(modalName) {
@@ -312,6 +381,7 @@ export default {
           form = 'item';
           break;
         case 'category_add':
+        case 'category_edit':
           form = 'category';
           break;
         default:
