@@ -442,12 +442,20 @@ export default {
   .formBox {
     padding: 10px;
     margin: 0 auto;
-    width: 400px;
+    width: 420px;
     height: 70vh;
     margin-top: 15vh;
     background-color: rgba(0, 0, 0, 0.8);
     padding: 30px 20px 20px 20px;
     color: #fff;
+  }
+
+  #signupFormBox {
+    min-height: 480px;
+  }
+
+  #signupFormBox .row {
+    height: 70px;
   }
 
   @-webkit-keyframes autofill {
@@ -585,6 +593,9 @@ export default {
     h1 {
       font-size: 50px !important;
     }
+    #signupFormBox .row {
+      height: 80px;
+    }
     input {
       height: 60px !important;
       font-size: 18px !important;
@@ -630,6 +641,9 @@ export default {
       font-size: 25px !important;
       height: 80px !important;
     }
+    #signupFormBox .row {
+      height: 100px;
+    }
     .inputButton {
       height: 80px;
       font-size: 30px;
@@ -654,6 +668,18 @@ export default {
     }
     .text-center {
       margin-top: -15px !important;
+    }
+    #signupFormBox {
+      min-height: 520px;
+    }
+    #signupFormBox .row {
+      height: auto;
+    }
+    #signupFormBox .row input {
+      height: 30px !important;
+    }
+    #signupFormBox .col-sm-6 {
+      height: 52px !important;
     }
   }
 

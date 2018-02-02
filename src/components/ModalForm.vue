@@ -17,10 +17,10 @@
           </div>
         </div>
 
-        <!-- 
+        <!--
             **The contents of the modal body vary depending on the particular action being performed by the user.**
         -->
-        
+
         <div class="modal-body">
           <!--
             Add-Item form
@@ -224,7 +224,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-xs-8 col-xs-offset-2">
+              <div class="col-xs-10 col-xs-offset-1">
                 <!-- Save Category Button -->
                 <button
                   type="button"
