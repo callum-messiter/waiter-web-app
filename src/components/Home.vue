@@ -451,6 +451,7 @@ export default {
   }
 
   #signupFormBox {
+  	width: 500px;
     min-height: 480px;
   }
 
