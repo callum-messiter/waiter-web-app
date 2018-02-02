@@ -153,6 +153,25 @@ export default {
       });
     },
 
+    /**
+      Here we send a request to the API to deactivate the category (by setting categories.active = 0). If the data is successfully persisted to the database, we also update the state, which is then reflected in the view (the category panel disappears). It is important to keep the backend data and the front-end state syncronised
+    **/
+    deleteCategory(trigger) {
+      this.$http.put('category/deactivate/'+trigger.catId, {}, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+
+      }).then((res) => {
+        if(res.status == 200) {
+          // If the updates were successfully persisted to the database, update the state to reflect the changes
+          this.$store.commit('deleteCategory', trigger.catIndex);
+          this.showAlert('success', 'Your category was successfully deleted!');
+        }
+
+      }).catch((res) => {
+        this.handleApiError(res);
+      });
+    },
+
   }
 
 }

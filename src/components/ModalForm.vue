@@ -85,7 +85,7 @@
               <button
                 type="button"
                 class="btn btn-primary"
-                v-on:click="emitUserConfirmation('userConfirmation_addNewItem', modal.name, 'item', modal.trigger)">
+                v-on:click="emitAddNewConfirmation('userConfirmation_addNewItem', modal.name, 'item', modal.trigger)">
                 {{modal.buttons.primary}}
               </button>
             </div>
@@ -184,7 +184,7 @@
                 <button
                   type="button"
                   class="btn btn-primary"
-                  v-on:click="emitUserConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
+                  v-on:click="emitAddNewConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
                   {{modal.buttons.primary}}
                 </button>
               </div>
@@ -319,7 +319,7 @@ export default {
 
       Then, when one of the actional modal buttons is clicked (e.g. Add new category), this modal, via the below method, emits and event back to the target component. The target component will be listening to the relevant event, and upon receiving it, will execute the necessary logic (e.g. by calling the addCategory method.)
     **/
-    emitUserConfirmation(eventName, modalName, form, trigger) {
+    emitAddNewConfirmation(eventName, modalName, form, trigger) {
       // Check if any of the fields are empty
       var fields = this.form[form];
       var allFieldsFilled = true;
@@ -367,6 +367,18 @@ export default {
       this.closeModal('category_edit');
     },
 
+    emitDeleteItemConfirmation() {
+      bus.$emit('userConfirmation_deleteItem', this.modal.trigger);
+      this.modal.isVisible = false;
+      this.resetFormData(this.modal.name); // The delete-item button is accessed by the edit-item form (so clear it!)
+    },
+
+    emitDeleteCategoryConfirmation() {
+      bus.$emit('userConfirmation_deleteCategory', this.modal.trigger);
+      this.modal.isVisible = false;
+      this.resetFormData(this.modal.name); // The delete-category button is accessed by the edit-category form (so clear it!)
+    },
+
     closeModal(modalName) {
       this.modal.isVisible = false;
       this.resetFormData(modalName);
@@ -375,6 +387,9 @@ export default {
     resetFormData(modalName) {
       // First check which form has been filled in
       var form = '';
+      /**
+        TODO: just check if the string contains the substring 'item' or 'category'
+      **/
       switch(modalName) {
         case 'item_add':
         case 'item_edit':
@@ -393,12 +408,6 @@ export default {
       Object.keys(obj).forEach((key) => {
         obj[key] = '';
       });
-    },
-
-    emitDeleteItemConfirmation() {
-      bus.$emit('userConfirmation_deleteItem', this.modal.trigger);
-      this.modal.isVisible = false;
-      this.resetFormData(this.modal.name);
     }
 
   }
