@@ -11,7 +11,7 @@
       <div class="received-container col-sm-6">
         <h3>Received Orders <img src="../assets/waiter-icon.png"/></h3>
         <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.receivedByKitchen">
-          <div class="panel-heading container-fluid">
+          <div class="panel-heading orderCardHeader container-fluid">
             <div class="row">
               <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
               <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
@@ -47,7 +47,7 @@
       <div class="accepted-container col-sm-6">
         <h3>Accepted Orders <img src="../assets/cutlery-icon.png"></h3>
         <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.acceptedByKitchen">
-          <div class="panel-heading container-fluid">
+          <div class="panel-heading orderCardHeader container-fluid">
             <div class="row">
               <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
               <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
@@ -298,7 +298,7 @@ export default {
     We should add two new distinct class name and reference them in the CSS, instead.
   **/
 
-  .panel-heading {
+  .orderCardHeader {
     background-color: #262626 !important;
     border: 1px solid #262626 !important;
     min-height: 35px;

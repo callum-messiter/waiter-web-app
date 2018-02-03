@@ -1,7 +1,7 @@
 <template>
   <div class="panel-group" id="accordion">
     <div v-for="category in categories" class="panel panel-default">
-      <div class="panel-heading">
+      <div class="panel-heading categoryPanelHeader">
         <h4 class="panel-title">
           <!-- Category name -->
           <a
@@ -269,8 +269,8 @@ export default {
     border-bottom: 0 !important;
   }
 
-  .panel-heading {
-    background-color: #151515;
+  .categoryPanelHeader {
+    background-color: #151515 !important;
     color: #469ada !important;
     padding-right: 3px;
   }
