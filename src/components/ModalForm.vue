@@ -85,7 +85,7 @@
               <button
                 type="button"
                 class="btn btn-primary"
-                v-on:click="emitAddNewConfirmation('userConfirmation_addNewItem', modal.name, 'item', modal.trigger)">
+                v-on:click="emitAddNewConfirmation('userConfirmation_addNewItem')">
                 {{modal.buttons.primary}}
               </button>
             </div>
@@ -159,7 +159,7 @@
               <button
                 type="button"
                 class="btn btn-primary delete-button"
-                v-on:click="emitDeleteItemConfirmation()">
+                v-on:click="emitDeleteConfirmation('userConfirmation_deleteItem')">
                 {{modal.buttons.warning}}
               </button>
             </div>
@@ -168,7 +168,11 @@
           <!--
             Add-Category form
           -->
-          <form id="addCategory" v-if="modal.name == 'category_add'">
+          <form 
+            id="addCategory" 
+            v-if="modal.name == 'category_add'" 
+            v-on:keyup.enter="emitAddNewConfirmation('userConfirmation_addNewCategory')"
+          >
           <!-- Category name -->
             <div class="row">
               <div class="col-xs-9">
@@ -187,7 +191,7 @@
                 <button
                   type="button"
                   class="btn btn-primary"
-                  v-on:click="emitAddNewConfirmation('userConfirmation_addNewCategory', modal.name, form.category, trigger={})">
+                  v-on:click="emitAddNewConfirmation('userConfirmation_addNewCategory')">
                   {{modal.buttons.primary}}
                 </button>
               </div>
@@ -238,7 +242,7 @@
                 <button
                   type="button"
                   class="btn btn-primary delete-button"
-                  v-on:click="emitDeleteCategoryConfirmation()">
+                  v-on:click="emitDeleteConfirmation('userConfirmation_deleteCategory')">
                   {{modal.buttons.warning}}
                 </button>
               </div>
@@ -321,9 +325,10 @@ export default {
 
       Then, when one of the actional modal buttons is clicked (e.g. Add new category), this modal, via the below method, emits and event back to the target component. The target component will be listening to the relevant event, and upon receiving it, will execute the necessary logic (e.g. by calling the addCategory method.)
     **/
-    emitAddNewConfirmation(eventName, modalName, form, trigger) {
-      // Check if any of the fields are empty
-      var fields = this.form[form];
+    emitAddNewConfirmation(eventName) {
+      // Determine which form is active
+      const formName = this.modal.name.substr(0, this.modal.name.indexOf('_')); // e.g. 'item_edit' => 'item'
+      var fields = this.form[formName];
       var allFieldsFilled = true;
       Object.keys(fields).forEach((key) => {
         if(fields[key].toString().trim() === "") { allFieldsFilled = false; }
@@ -331,15 +336,10 @@ export default {
 
       // Only send the event if there are no form errors, and no empty fields
       if(!this.errors.any() && allFieldsFilled === true) {
-        // Check which form has been submitted
-        if(form == 'item') {
-          var data = this.form.item;
-        } else if(form == 'category') {
-          var data = this.form.item;
-        }
-        bus.$emit(eventName, data, trigger);
+        const data = this.form[formName];
+        bus.$emit(eventName, data, this.modal.trigger);
         this.modal.isVisible = false;
-        this.resetFormData(modalName);
+        this.resetFormData(this.modal.name);
       }
     },
 
@@ -356,7 +356,7 @@ export default {
         bus.$emit('userConfirmation_saveItemChanges', this.form.item, this.modal.trigger);
       }
       // In any case, hide the modal and reset the form
-      this.closeModal('item_edit');
+      this.closeModal(this.modal.name);
     },
 
     emitSaveCategoryChanges() {
@@ -366,19 +366,13 @@ export default {
         bus.$emit('userConfirmation_saveCategoryChanges', this.form.category, this.modal.trigger);
       }
       // In any case, hide the modal and reset the form
-      this.closeModal('category_edit');
+      this.closeModal(this.modal.name);
     },
 
-    emitDeleteItemConfirmation() {
-      bus.$emit('userConfirmation_deleteItem', this.modal.trigger);
+    emitDeleteConfirmation(eventName) {
+      bus.$emit(eventName, this.modal.trigger);
       this.modal.isVisible = false;
-      this.resetFormData(this.modal.name); // The delete-item button is accessed by the edit-item form (so clear it!)
-    },
-
-    emitDeleteCategoryConfirmation() {
-      bus.$emit('userConfirmation_deleteCategory', this.modal.trigger);
-      this.modal.isVisible = false;
-      this.resetFormData(this.modal.name); // The delete-category button is accessed by the edit-category form (so clear it!)
+      this.resetFormData(this.modal.name); // The delete button is accessed by the respective edit form (so clear it!)
     },
 
     closeModal(modalName) {

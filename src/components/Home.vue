@@ -200,16 +200,12 @@
 // Events bus
 import { bus } from '../main';
 
-// Components
-import Alert from './Alert';
-
 // Mixins
 import functions from '../mixins/functions';
 
 export default {
   name: 'Home',
   components: {
-    'alert': Alert
   },
   mixins: [functions],
   data() {
@@ -294,12 +290,6 @@ export default {
       inputs: {
         hasFocus: '',
         hasHadFocus: []
-      },
-      alert: {
-        isVisible: true,
-        type: null,
-        summary: null,
-        message: null,
       }
     }
   },
@@ -330,6 +320,7 @@ export default {
         this.inputs.hasHadFocus.push(input);
       }
     },
+
     showLoginForm() {
       // Reset the signup form
       this.form.signup = JSON.parse(JSON.stringify(this.formDefault.signup));

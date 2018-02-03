@@ -116,7 +116,6 @@ export default {
         if(res.status == 200) {
           newCategory.categoryId = res.body.data.createdCategoryId;
           this.$store.commit('addCategory', newCategory);
-          this.resetNewCategory();
           this.showAlert('success', 'New category "' + categoryName + '" was successfully added to your menu!');
         }
 
