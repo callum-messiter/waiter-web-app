@@ -153,7 +153,7 @@
               <button
                 type="button"
                 class="btn btn-primary"
-                v-on:click="emitSaveItemChanges()">
+                v-on:click="emitUpdate('userConfirmation_saveItemChanges')">
                 {{modal.buttons.primary}}
               </button>
               <button
@@ -236,7 +236,7 @@
                 <button
                   type="button"
                   class="btn btn-primary"
-                  v-on:click="emitSaveCategoryChanges()">
+                  v-on:click="emitUpdate('userConfirmation_saveCategoryChanges')">
                   {{modal.buttons.primary}}
                 </button>
                 <button
@@ -343,27 +343,15 @@ export default {
       }
     },
 
-
-    /**
-      TODO: Compose emitSaveItemChanges and emitSaveCategoryChanges into a single function.
-      Functions can be broken down into confirmation of actions (create, edit, delete)
-    **/
-    emitSaveItemChanges() {
-      // First check if the user has actually made any changes to the item
-      if(!_.isEqual(this.form.item, this.modal.data)) {
-        // Only emit the event (which will trigger the API call) if the user has made changes
-        this.form.item.itemId = this.modal.trigger.itemId;
-        bus.$emit('userConfirmation_saveItemChanges', this.form.item, this.modal.trigger);
-      }
-      // In any case, hide the modal and reset the form
-      this.closeModal(this.modal.name);
-    },
-
-    emitSaveCategoryChanges() {
-      // First check if the user has actually made any changes to the item
-      if(!_.isEqual(this.form.category, this.modal.data)) {
-        // Only emit the event (which will trigger the API call) if the user has made changes
-        bus.$emit('userConfirmation_saveCategoryChanges', this.form.category, this.modal.trigger);
+    emitUpdate(eventName) {
+      const formName = this.modal.name.substr(0, this.modal.name.indexOf('_')); // e.g. 'item_edit' => 'item'
+      // Only emit the event (which will trigger the API call) if the user has made changes
+      if(!_.isEqual(this.form[formName], this.modal.data)) {
+        // TODO: this is complicated, can't we organise the data in the trigger component?
+        if(formName == 'item') {
+          this.form.item.itemId = this.modal.trigger.itemId;
+        }
+        bus.$emit(eventName, this.form[formName], this.modal.trigger);
       }
       // In any case, hide the modal and reset the form
       this.closeModal(this.modal.name);
