@@ -297,6 +297,13 @@ export default {
     }
   },
 
+  /**
+    We use the event bus to communicate between other components and this modal component. This means that we don't need to repeat the modal HTML/CSS markup in every component which triggers the modal to be displayed.
+
+    First, the trigger component emits and event to this modal component, which renders the modal with the data passed to it, making it visible to the user.
+
+    Then, when one of the actional modal buttons is clicked (e.g. Add new category), this modal, via the below method, emits and event back to the target component. The target component will be listening to the relevant event, and upon receiving it, will execute the necessary logic (e.g. by calling the addCategory method.)
+  **/
   created () {
     bus.$on('showModalForm', (modal) => {
       // The modal data (title, msg, etc.) is sent by the trigger component in the event. Here we set it and render it to the DOM
@@ -305,12 +312,12 @@ export default {
       // For editing data, we should prefill the form with the current data (which is also sent in the event)
       const modalName = this.modal.name;
       if(modalName.indexOf('edit') !== -1) {
-        const prefix = modalName.substr(0, modalName.indexOf('_')); // e.g. 'item_edit' -> 'item'
+        const formName = modalName.substr(0, modalName.indexOf('_')); // e.g. 'item_edit' -> 'item'
         // Check that the modalName contains a valid form name (e.g. 'item', 'category')
-        if(!this.form.hasOwnProperty(prefix)) {
+        if(!this.form.hasOwnProperty(formName)) {
           console.log('Invalid modal name: ' + modalName);
         } else {
-          Object.assign(this.form[prefix], modal.data);
+          Object.assign(this.form[formName], modal.data);
         }
       }
     });
@@ -324,11 +331,8 @@ export default {
 
   methods: {
     /**
-      We use the event bus to communicate between other components and this modal component. This means that we don't need to repeat the modal HTML/CSS markup in every component which triggers the modal to be displayed.
-
-      First, the trigger component emits and event to this modal component, which renders the modal with the data passed to it, making it visible to the user.
-
-      Then, when one of the actional modal buttons is clicked (e.g. Add new category), this modal, via the below method, emits and event back to the target component. The target component will be listening to the relevant event, and upon receiving it, will execute the necessary logic (e.g. by calling the addCategory method.)
+      Add some new data object to the database (e.g. an item or category). This method will send an event,
+      containing the new data, to the original component, which will execute the API call
     **/
     sendAddNewEvent() {
       // Determine which form is active
@@ -349,6 +353,10 @@ export default {
       }
     },
 
+    /**
+      Update some data in the database (e.g. an item or category). This method will send an event,
+      containing the new data, to the original component, which will execute the API call
+    **/
     sendUpdateEvent() {
       const formName = this.modal.name.substr(0, this.modal.name.indexOf('_')); // e.g. 'item_edit' => 'item'
       // Only emit the event (which will trigger the API call) if the user has made changes
@@ -364,6 +372,11 @@ export default {
       this.closeModal(this.modal.name);
     },
 
+    /**
+      Delete some data from the database (e.g. an item or category). This method will send an event,
+      containing the data reference point (e.g. an item or category ID), to the original component, 
+      which will execute the API call
+    **/
     sendDeleteEvent() {
       const formName = this.modal.name.substr(0, this.modal.name.indexOf('_')); // e.g. 'item_edit' => 'item'
       const eventName = this.event.delete + this.capitalise(formName);
@@ -372,11 +385,18 @@ export default {
       this.resetFormData(this.modal.name); // The delete button is accessed by the respective edit form (so clear it!)
     },
 
+    /**
+      This code is implicit in the above action functions, but this method is required since it is called directly
+      when the user clicks the "x" icon
+    **/
     closeModal(modalName) {
       this.modal.isVisible = false;
       this.resetFormData(modalName);
     },
 
+    /**
+      Whenever the user selects to close the modal, we should reset whichever form was active
+    **/
     resetFormData(modalName) {
       // Determine which form is active
       const formName = modalName.substr(0, modalName.indexOf('_')); // e.g. 'item_edit' => 'item'
