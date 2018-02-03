@@ -1,6 +1,12 @@
 <template>
 	<div class="container">
-		<restaurant-menu></restaurant-menu>
+		<clip-loader 
+			class="spinner" 
+			:color="spinner.color" 
+			:size="spinner.size"
+			v-if="spinner.visible">
+		</clip-loader>
+		<restaurant-menu v-else></restaurant-menu>
 	</div>
 </template>
 
@@ -21,6 +27,7 @@ if(localStorage.getItem('restaurant') !== null) {
 
 // Components
 import RestaurantMenu from './RestaurantMenu';
+import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
 
 // Mixins
 import functions from '../mixins/functions';
@@ -31,7 +38,8 @@ import { bus } from '../main';
 export default {
 	name: 'Dashboard',
 	components: {
-    'restaurant-menu': RestaurantMenu
+    'restaurant-menu': RestaurantMenu,
+    'clip-loader': ClipLoader
   },
   mixins: [functions],
 
@@ -41,7 +49,12 @@ export default {
 				name: 'Spices',
 				imageUrl: '',
 			},
-			menuName: 'Main Menu'
+			menuName: 'Main Menu',
+			spinner: {
+				visible: true,
+				color: '#469ada',
+				size: '70px'
+			}
 		}
 	},
 
@@ -59,6 +72,7 @@ export default {
 	    this.$http.get('menu/'+menuId, {
 	      headers: {Authorization: JSON.parse(localStorage.user).token}
 	    }).then((res) => {
+	    	this.spinner.visible = false;
 	      this.$store.commit('setMenu', res.body.data);
 
 	    }).catch((res) => {
@@ -80,4 +94,12 @@ export default {
 		margin-bottom: 40px;
 		background-color: #0a0a0a;
 	}
+
+	.spinner {
+		position: fixed;
+		top: 50% !important;
+		left: 50% !important;
+		transform: translate(-50%, -50%);
+	}
+
 </style>
