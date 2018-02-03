@@ -369,26 +369,10 @@ export default {
     },
 
     resetFormData(modalName) {
-      // First check which form has been filled in
-      var form = '';
-      /**
-        TODO: just check if the string contains the substring 'item' or 'category'
-      **/
-      switch(modalName) {
-        case 'item_add':
-        case 'item_edit':
-          form = 'item';
-          break;
-        case 'category_add':
-        case 'category_edit':
-          form = 'category';
-          break;
-        default:
-          console.log('Error [ModalForm component]: modal name ' + modalName + ' not handled!');
-          return false;
-      }
+      // Determine which form is active
+      const formName = modalName.substr(0, modalName.indexOf('_')); // e.g. 'item_edit' => 'item'
       // Then set all properties of the form object to an empty string
-      var obj = this.form[form];
+      var obj = this.form[formName];
       Object.keys(obj).forEach((key) => {
         obj[key] = '';
       });
