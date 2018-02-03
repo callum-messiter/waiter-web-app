@@ -1,6 +1,12 @@
 <template>
   <div class="container-fluid">
-    <div class="inner">
+    <clip-loader 
+      class="spinner" 
+      :color="spinner.color" 
+      :size="spinner.size" 
+      v-if="spinner.visible">
+    </clip-loader>
+    <div class="inner" v-else>
     <!-- If there are no live orders, inform the user -->
     <div class="row zeroOrders" v-if="orders.length < 1">
       <img class="zeroOrdersIcon" src="../assets/safebox.png"/>
@@ -82,6 +88,7 @@
 <script>
 // Components
 import Alert from './Alert';
+import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
 
 // Mixins
 import functions from '../mixins/functions';
@@ -92,7 +99,8 @@ import moment from 'moment';
 export default {
   name: 'LiveKitchen',
   components: {
-    'alert': Alert
+    'alert': Alert,
+    'clip-loader': ClipLoader
   },
   mixins: [functions],
 
@@ -113,6 +121,11 @@ export default {
         400: 'Woohoo! You accepted an order - the customer was notified and accidentally screamed a bit.',
         999: 'The order was rejected. The customer\'s hopes and dreams crumble before us.',
         1000: 'Great job! Another customer is about to fall in love with ' + JSON.parse(localStorage.restaurant).name
+      },
+      spinner: {
+        visible: true,
+        color: '#469ada',
+        size: '70px'
       }
     }
   },
@@ -126,6 +139,7 @@ export default {
     this.$http.get('order/getAllLive/'+restaurantId, {
       headers: {Authorization: JSON.parse(localStorage.user).token}
     }).then((res) => {
+      this.spinner.visible = false;
       const orders = res.body.data;
 
       // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
@@ -393,17 +407,24 @@ export default {
   -webkit-appearance: none;
   /*width: 0px;*/
   height: 8px;
-}
+  }
 
-::-webkit-scrollbar-track {
-  background-color: #262626;
-  border-radius: 10px;
-}
+  ::-webkit-scrollbar-track {
+    background-color: #262626;
+    border-radius: 10px;
+  }
 
-::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  background-color: rgba(0, 0, 0, 1);
-  -webkit-box-shadow: none;
-}
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 1);
+    -webkit-box-shadow: none;
+  }
+
+  .spinner {
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+  }
 
 </style>
