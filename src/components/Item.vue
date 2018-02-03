@@ -65,14 +65,6 @@ export default {
   },
 
   created() {
-
-    /**
-      This event is emitted by the modal component, when the user clicks the "Discard Changes" button
-    **/
-    bus.$on('userConfirmation_discardItemChanges', (trigger) => {
-      this.resetItem(trigger);
-    });
-
   },
 
   computed: {

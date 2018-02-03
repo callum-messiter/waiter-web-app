@@ -50,11 +50,11 @@ export default {
   },
 
   created() {
-    bus.$on('userConfirmation_addNewCategory', (data, trigger) => {
+    bus.$on('userConfirmation_addCategory', (data, trigger) => {
         this.addCategory(data.name);
     });
 
-    bus.$on('userConfirmation_saveCategoryChanges', (data, trigger) => {
+    bus.$on('userConfirmation_updateCategory', (data, trigger) => {
       this.updateCategoryName(data, trigger);
     });
 

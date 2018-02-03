@@ -85,7 +85,7 @@
               <button
                 type="button"
                 class="btn btn-primary"
-                v-on:click="emitAddNewConfirmation('userConfirmation_addNewItem')">
+                v-on:click="sendAddNewEvent()">
                 {{modal.buttons.primary}}
               </button>
             </div>
@@ -153,13 +153,13 @@
               <button
                 type="button"
                 class="btn btn-primary"
-                v-on:click="emitUpdate('userConfirmation_saveItemChanges')">
+                v-on:click="sendUpdateEvent()">
                 {{modal.buttons.primary}}
               </button>
               <button
                 type="button"
                 class="btn btn-primary delete-button"
-                v-on:click="emitDeleteConfirmation('userConfirmation_deleteItem')">
+                v-on:click="sendDeleteEvent()">
                 {{modal.buttons.warning}}
               </button>
             </div>
@@ -171,7 +171,7 @@
           <form 
             id="addCategory" 
             v-if="modal.name == 'category_add'" 
-            v-on:keyup.enter="emitAddNewConfirmation('userConfirmation_addNewCategory')"
+            v-on:keyup.enter="sendAddNewEvent()"
           >
           <!-- Category name -->
             <div class="row">
@@ -191,7 +191,7 @@
                 <button
                   type="button"
                   class="btn btn-primary"
-                  v-on:click="emitAddNewConfirmation('userConfirmation_addNewCategory')">
+                  v-on:click="sendAddNewEvent()">
                   {{modal.buttons.primary}}
                 </button>
               </div>
@@ -236,13 +236,13 @@
                 <button
                   type="button"
                   class="btn btn-primary"
-                  v-on:click="emitUpdate('userConfirmation_saveCategoryChanges')">
+                  v-on:click="sendUpdateEvent()">
                   {{modal.buttons.primary}}
                 </button>
                 <button
                   type="button"
                   class="btn btn-primary delete-button"
-                  v-on:click="emitDeleteConfirmation('userConfirmation_deleteCategory')">
+                  v-on:click="sendDeleteEvent()">
                   {{modal.buttons.warning}}
                 </button>
               </div>
@@ -288,6 +288,11 @@ export default {
         category: {
           name: ''
         }
+      },
+      event: {
+        add: 'userConfirmation_addNew',
+        update: 'userConfirmation_update',
+        delete: 'userConfirmation_delete'
       }
     }
   },
@@ -325,7 +330,7 @@ export default {
 
       Then, when one of the actional modal buttons is clicked (e.g. Add new category), this modal, via the below method, emits and event back to the target component. The target component will be listening to the relevant event, and upon receiving it, will execute the necessary logic (e.g. by calling the addCategory method.)
     **/
-    emitAddNewConfirmation(eventName) {
+    sendAddNewEvent() {
       // Determine which form is active
       const formName = this.modal.name.substr(0, this.modal.name.indexOf('_')); // e.g. 'item_edit' => 'item'
       var fields = this.form[formName];
@@ -336,6 +341,7 @@ export default {
 
       // Only send the event if there are no form errors, and no empty fields
       if(!this.errors.any() && allFieldsFilled === true) {
+        const eventName = this.event.add + this.capitalise(formName);
         const data = this.form[formName];
         bus.$emit(eventName, data, this.modal.trigger);
         this.modal.isVisible = false;
@@ -343,7 +349,7 @@ export default {
       }
     },
 
-    emitUpdate(eventName) {
+    sendUpdateEvent() {
       const formName = this.modal.name.substr(0, this.modal.name.indexOf('_')); // e.g. 'item_edit' => 'item'
       // Only emit the event (which will trigger the API call) if the user has made changes
       if(!_.isEqual(this.form[formName], this.modal.data)) {
@@ -351,13 +357,16 @@ export default {
         if(formName == 'item') {
           this.form.item.itemId = this.modal.trigger.itemId;
         }
+        const eventName = this.event.update + this.capitalise(formName);
         bus.$emit(eventName, this.form[formName], this.modal.trigger);
       }
       // In any case, hide the modal and reset the form
       this.closeModal(this.modal.name);
     },
 
-    emitDeleteConfirmation(eventName) {
+    sendDeleteEvent() {
+      const formName = this.modal.name.substr(0, this.modal.name.indexOf('_')); // e.g. 'item_edit' => 'item'
+      const eventName = this.event.delete + this.capitalise(formName);
       bus.$emit(eventName, this.modal.trigger);
       this.modal.isVisible = false;
       this.resetFormData(this.modal.name); // The delete button is accessed by the respective edit form (so clear it!)
@@ -376,6 +385,10 @@ export default {
       Object.keys(obj).forEach((key) => {
         obj[key] = '';
       });
+    },
+
+    capitalise(string) {
+      return string[0].toUpperCase() + string.slice(1);
     }
 
   }

@@ -100,7 +100,7 @@ export default {
       this.deleteItem(trigger);
     });
 
-    bus.$on('userConfirmation_saveItemChanges', (data, trigger) => {
+    bus.$on('userConfirmation_updateItem', (data, trigger) => {
       this.updateItem(data, trigger);
     });
   },
