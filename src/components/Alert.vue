@@ -33,6 +33,10 @@ export default {
 		bus.$on('showAlert', (alert) => {
 			this.displayFlashMsg(alert);
 		});
+
+		bus.$on('hideAlert', (alert) => {
+			this.hideFlashMsg(alert);
+		});
 	},
 	methods: {
 		displayFlashMsg(alert) {
@@ -40,6 +44,14 @@ export default {
       setTimeout(() => {
         this.alert.isVisible = false;
       }, 5000);
+		},
+
+		/**
+			This is needed because we will call it directly just before redirection to other routes,
+			to clear the flash message if the user visits a different screen
+		**/
+		hideFlashMsg() {
+			this.alert.isVisible = false;
 		}
 	}
 }

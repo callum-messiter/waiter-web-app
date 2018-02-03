@@ -349,8 +349,10 @@ export default {
             this.$store.commit('authenticateUser');
             // Redirect user to their dashboard
             if(isLoginAutomatic === true) {
+              this.hideAlert();
               this.$router.push('/dashboard');
             } else {
+              this.hideAlert();
               this.$router.push('/live-kitchen');
             }
             this.form = JSON.parse(JSON.stringify(this.formDefault));

@@ -17,6 +17,10 @@ export default {
       bus.$emit('showAlert', alert);
     },
 
+    hideAlert() {
+      bus.$emit('hideAlert', alert);
+    },
+
     /**
       Our (mostly) warning messages which prompt the user to confirm their intentions. We send the data to the Modal
       component, which renders the modal accordingly. When the user clicks a modal button, the Modal component emits an event, 
