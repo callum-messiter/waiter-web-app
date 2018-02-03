@@ -86,6 +86,7 @@
 </template>
 
 <script>
+
 // Components
 import Alert from './Alert';
 import ClipLoader from 'vue-spinner/src/ClipLoader.vue';

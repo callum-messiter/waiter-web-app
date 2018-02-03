@@ -78,7 +78,7 @@ export default {
 		font-family: 'grotesque';
 		font-weight: bold;
 		color: #fff;
-		position: absolute;
+		position: fixed;
 		/*top: 70vh;
 		left: 50vw;*/
 		bottom: 0px;

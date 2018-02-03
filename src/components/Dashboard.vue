@@ -12,19 +12,6 @@
 
 <script>
 
-// LiveKitchen connection via WebSockets
-import Vue from 'vue';
-import VueSocketio from 'vue-socket.io';
-import config from '../../config/config';
-
-if(localStorage.getItem('restaurant') !== null) {
-  	const r = JSON.parse(localStorage.restaurant);
-  	if(r.hasOwnProperty('restaurantId')) {
-  		// http://host?restaurantId={restaurantId}
-  		Vue.use(VueSocketio, 'http://callummessiter.work:3000?restaurantId='+r.restaurantId);
-  	}
-}
-
 // Components
 import RestaurantMenu from './RestaurantMenu';
 import ClipLoader from 'vue-spinner/src/ClipLoader.vue';

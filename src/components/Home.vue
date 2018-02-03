@@ -197,6 +197,11 @@
 
 <script>
 
+// LiveKitchen connection via WebSockets
+import Vue from 'vue';
+import VueSocketio from 'vue-socket.io';
+import config from '../../config/config';
+
 // Events bus
 import { bus } from '../main';
 
@@ -343,10 +348,12 @@ export default {
             localStorage.setItem('isAuth', true);
             localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
             localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
-            // Reset the login form
-            this.form.login = JSON.parse(JSON.stringify(this.formDefault.login));
+            // Reset the forms
+            this.form = JSON.parse(JSON.stringify(this.formDefault));
             // Set auth state to true
             this.$store.commit('authenticateUser');
+
+            this.connectToWebSocketsServer();
             // Redirect user to their dashboard
             if(isLoginAutomatic === true) {
               this.hideAlert();
@@ -355,7 +362,6 @@ export default {
               this.hideAlert();
               this.$router.push('/live-kitchen');
             }
-            this.form = JSON.parse(JSON.stringify(this.formDefault));
           }
         }).catch((res) => {
           this.handleApiError(res);
@@ -385,6 +391,16 @@ export default {
         }).catch((res) => {
           this.handleApiError(res);
         });
+      }
+    },
+
+    connectToWebSocketsServer() {
+      if(localStorage.getItem('restaurant') !== null) {
+        const r = JSON.parse(localStorage.restaurant);
+        if(r.hasOwnProperty('restaurantId')) {
+          // http://host?restaurantId={restaurantId}
+          Vue.use(VueSocketio, 'http://callummessiter.work:3000?restaurantId='+r.restaurantId);
+        }
       }
     }
   },
