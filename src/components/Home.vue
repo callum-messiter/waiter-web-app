@@ -3,7 +3,7 @@
 
     <!-- Login form -->
     <div id="loginFormBox" class="formBox" v-if="loginFormIsVisible">
-      <form id="loginForm">
+      <form id="loginForm" v-on:keyup.enter="logUserIn()">
         <h1>Login to waitr</h1>
         <input
           class="input pass"
@@ -47,7 +47,7 @@
 
     <div id="signupFormBox" class="formBox" v-else>
       <!-- Registration form -->
-      <form id="signupForm">
+      <form id="signupForm" v-on:keyup.enter="registerUser()">
         <div class="row">
           <h1>Sign up to waitr</h1>
         </div>
@@ -371,6 +371,7 @@ export default {
     },
 
     registerUser() {
+      // TODO: The form should not be submitted until each input has had focus
       // Validate inputs (betters: if there are errors, set the button to red/unclickable using a computed property)
       if(!this.errors.any() && this.inputs.hasHadFocus.length > 0) {
         // Make the API call

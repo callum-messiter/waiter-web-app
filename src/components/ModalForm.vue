@@ -1,6 +1,6 @@
 <template>
   <transition name="modalForm" v-if="modal.isVisible">
-   <div class="modal" style="display: block">
+   <div class="modal" style="display: block" v-on:keydown.esc="closeModal(modal.name)">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
 
@@ -102,6 +102,7 @@
                   :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
                   name="itemName"
                   type="text"
+                  placeholder="Item name"
                   v-model="form.item.name"
                   v-validate="{required: true, max: 30}"
                   data-vv-as="item name"
@@ -117,6 +118,7 @@
                 <money
                   :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
                   name="itemPrice"
+                  placeholder="Item price"
                   v-model="form.item.price"
                   v-bind="money"
                   v-validate="{required: true, max: 4}"
@@ -134,6 +136,7 @@
                   :class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
                   name="itemDescription"
                   type="text"
+                  placeholder="Item description"
                   v-model="form.item.description"
                   v-validate="{required: true, max: 40}"
                   data-vv-as="item description"
@@ -287,20 +290,19 @@ export default {
 
   created () {
     bus.$on('showModalForm', (modal) => {
+      // The modal data (title, msg, etc.) is sent by the trigger component in the event. Here we set it and render it to the DOM
       Object.assign(this.modal, modal);
 
-      /**
-        TODO: Combine the two conditional statements below
-      **/
-
-      // If we are editing an item, we should pre-fill the item form with the current item data
-      if(this.modal.name == 'item_edit') {
-        Object.assign(this.form.item, modal.data);
-      }
-
-      // If we are editing an category, we should pre-fill the category form with the current category data
-      if(this.modal.name == 'category_edit') {
-        Object.assign(this.form.category, modal.data);
+      // For editing data, we should prefill the form with the current data (which is also sent in the event)
+      const modalName = this.modal.name;
+      if(modalName.indexOf('edit') !== -1) {
+        const prefix = modalName.substr(0, modalName.indexOf('_')); // e.g. 'item_edit' -> 'item'
+        // Check that the modalName contains a valid form name (e.g. 'item', 'category')
+        if(!this.form.hasOwnProperty(prefix)) {
+          console.log('Invalid modal name: ' + modalName);
+        } else {
+          Object.assign(this.form[prefix], modal.data);
+        }
       }
     });
   },
