@@ -399,7 +399,7 @@ export default {
         const r = JSON.parse(localStorage.restaurant);
         if(r.hasOwnProperty('restaurantId')) {
           // http://host?restaurantId={restaurantId}
-          Vue.use(VueSocketio, 'http://callummessiter.work:3000?restaurantId='+r.restaurantId);
+          Vue.use(VueSocketio, 'http://api.waitr.live?restaurantId='+r.restaurantId);
         }
       }
     }
