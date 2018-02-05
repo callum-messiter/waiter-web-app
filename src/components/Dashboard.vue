@@ -1,11 +1,13 @@
 <template>
 	<div class="container">
-		<clip-loader 
-			class="spinner" 
-			:color="spinner.color" 
-			:size="spinner.size"
-			v-if="spinner.visible">
-		</clip-loader>
+		<div class="loading" v-if="loading.still">
+			<clip-loader  
+				:color="loading.spinnerColor" 
+				:size="loading.spinnerSize"
+			>
+			</clip-loader>
+			<p class="loadingMsg">{{loading.msg}}</p>
+		</div>
 		<restaurant-menu v-else></restaurant-menu>
 	</div>
 </template>
@@ -37,10 +39,11 @@ export default {
 				imageUrl: '',
 			},
 			menuName: 'Main Menu',
-			spinner: {
-				visible: true,
-				color: '#469ada',
-				size: '70px'
+			loading: {
+				still: true,
+				spinnerColor: '#469ada',
+				spinnerSize: '70px',
+				msg: 'Loading your dashboard...'
 			}
 		}
 	},
@@ -59,7 +62,7 @@ export default {
 	    this.$http.get('menu/'+menuId, {
 	      headers: {Authorization: JSON.parse(localStorage.user).token}
 	    }).then((res) => {
-	    	this.spinner.visible = false;
+    	  this.loading.still = false;
 	      this.$store.commit('setMenu', res.body.data);
 
 	    }).catch((res) => {
@@ -82,11 +85,16 @@ export default {
 		background-color: #0a0a0a;
 	}
 
-	.spinner {
+	.loading {
 		position: fixed;
 		top: 50% !important;
 		left: 50% !important;
 		transform: translate(-50%, -50%);
+	}
+
+	.loadingMsg {
+		font-size: 16px;
+		color: #469ada;;
 	}
 
 </style>

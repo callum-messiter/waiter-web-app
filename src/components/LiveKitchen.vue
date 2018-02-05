@@ -1,11 +1,13 @@
 <template>
   <div class="container-fluid">
-    <clip-loader 
-      class="spinner" 
-      :color="spinner.color" 
-      :size="spinner.size" 
-      v-if="spinner.visible">
-    </clip-loader>
+    <div class="loading" v-if="loading.still">
+      <clip-loader  
+        :color="loading.spinnerColor" 
+        :size="loading.spinnerSize"
+      >
+      </clip-loader>
+      <p class="loadingMsg">Loading live orders for {{restaurantName}} ...</p>
+    </div>
     <div class="inner" v-else>
     <!-- If there are no live orders, inform the user -->
     <div class="row zeroOrders" v-if="orders.length < 1">
@@ -123,10 +125,10 @@ export default {
         999: 'The order was rejected. The customer\'s hopes and dreams crumble before us.',
         1000: 'Great job! Another customer is about to fall in love with ' + JSON.parse(localStorage.restaurant).name
       },
-      spinner: {
-        visible: true,
-        color: '#469ada',
-        size: '70px'
+      loading: {
+        still: true,
+        spinnerColor: '#469ada',
+        spinnerSize: '70px'
       }
     }
   },
@@ -140,7 +142,7 @@ export default {
     this.$http.get('order/getAllLive/'+restaurantId, {
       headers: {Authorization: JSON.parse(localStorage.user).token}
     }).then((res) => {
-      this.spinner.visible = false;
+      this.loading.still = false;
       const orders = res.body.data;
 
       // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
@@ -421,11 +423,16 @@ export default {
     -webkit-box-shadow: none;
   }
 
-  .spinner {
+  .loading {
     position: fixed;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%);
+  }
+
+  .loadingMsg {
+    font-size: 16px;
+    color: #469ada;;
   }
 
 </style>
