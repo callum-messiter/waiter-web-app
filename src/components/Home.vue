@@ -353,7 +353,6 @@ export default {
             // Set auth state to true
             this.$store.commit('authenticateUser');
 
-            this.connectToWebSocketsServer();
             // Redirect user to their dashboard
             if(isLoginAutomatic === true) {
               this.hideAlert();
@@ -391,16 +390,6 @@ export default {
         }).catch((res) => {
           this.handleApiError(res);
         });
-      }
-    },
-
-    connectToWebSocketsServer() {
-      if(localStorage.getItem('restaurant') !== null) {
-        const r = JSON.parse(localStorage.restaurant);
-        if(r.hasOwnProperty('restaurantId')) {
-          // http://host?restaurantId={restaurantId}
-          Vue.use(VueSocketio, 'http://api.waitr.live?restaurantId='+r.restaurantId);
-        }
       }
     }
   },
