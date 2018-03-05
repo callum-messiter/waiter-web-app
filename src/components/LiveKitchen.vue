@@ -6,7 +6,7 @@
         :size="loading.spinnerSize"
       >
       </clip-loader>
-      <p class="loadingMsg">Loading live orders for {{restaurantName}} ...</p>
+      <p class="loadingMsg">{{loading.msg}}</p>
     </div>
     <div class="inner" v-else>
     <!-- If there are no live orders, inform the user -->
@@ -26,12 +26,12 @@
               <!-- Reject-Order Icon -->
               <span
                 class="glyphicon glyphicon-remove pull-right"
-                v-on:click="updateOrderStatus(order, statuses.rejectedByKitchen)">
+                v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.rejectedByKitchen)">
               </span>
               <!-- Accept-Order Icon -->
               <span
                 class="glyphicon glyphicon-ok pull-right"
-                v-on:click="updateOrderStatus(order, statuses.acceptedByKitchen)">
+                v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.acceptedByKitchen)">
               </span>
             </div>
           </div>
@@ -62,7 +62,7 @@
               <!-- Send-Order-to-Custom Icon -->
               <span
                 class="glyphicon glyphicon-send pull-right"
-                v-on:click="updateOrderStatus(order, statuses.enRouteToCustomer)">
+                v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.enRouteToCustomer)">
               </span>
             </div>
           </div>
@@ -98,6 +98,7 @@ import functions from '../mixins/functions';
 
 // Dependencies
 import moment from 'moment';
+import underscore from 'underscore';
 
 export default {
   name: 'LiveKitchen',
@@ -128,57 +129,26 @@ export default {
       loading: {
         still: true,
         spinnerColor: '#469ada',
-        spinnerSize: '70px'
+        spinnerSize: '70px',
+        msg: 'Loading your live orders...'
       }
     }
   },
 
   created() {
-    /**
-      On refresh, get the up-to-date live order state for the restaurant, according to the backend
-    **/
-    const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-    // Get the live-orders object and add it to the store
-    this.$http.get('order/getAllLive/'+restaurantId, {
-      headers: {Authorization: JSON.parse(localStorage.user).token}
-    }).then((res) => {
-      this.loading.still = false;
-      const orders = res.body.data;
+    this.getAllLiveOrdersForRestaurant();
+    this.listenForNewOrdersFromServer();
+    this.listenForServerConfirmationOfOrderStatusUpdate();
+    this.intermittentlyUpdateTimeSinceOrdersWerePlaced();
+  },
 
-      // Check if there are any orders with status 200 (sentToKitchen) - then we can set them to receivedByKitchen
-      for(var i = 0; i < orders.length; i++) {
-        if(orders[i].status == this.statuses.sentToKitchen) {
-          // In each case, send an order-status update event to the server, and subsequently update the order's state
-          // once the server has confirmed the status has been updated in the database
-          this.updateOrderStatus(orders[i], this.statuses.receivedByKitchen);
-        }
-
-        // Only orders with status 200, 300, 400 should be sent to the restaurant
-        if(!this.statusesVisibleToKitchen.includes(orders[i].status)) {
-          console.log('Error: "api/order/getAllLive" returned an order with status: ' + orders[i].status);
-        }
-
-        // Set the time ago property
-        orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
-      }
-
-      this.$store.commit('setLiveOrders', orders);
-
-    }).catch((res) => {
-      this.handleApiError(res);
-    });
-
-    /**
-      The server finds all sockets which represent the restaurant who is the intended recipient of the order. It then
-      emits the 'neworder' event to these sockets; here we handle this event
-    **/
-    this.$options.sockets['newOrder'] = (order) => {
-      order.timeAgo = moment(order.time).utc().fromNow();
-      // Add the order to the state with the status set by the server: 200 (sentToKitchen)
-      this.$store.commit('addNewOrder', order);
-      // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
-      this.updateOrderStatus(order, this.statuses.receivedByKitchen);
-    };
+  methods: {
+    intermittentlyUpdateTimeSinceOrdersWerePlaced() {
+      // Intermittently update each order's "time ago" property
+      window.setInterval(() => {
+        this.$store.commit('updateTimeSinceOrdersPlaced');
+      }, 30000);
+    },
 
     /**
       Once we emit an order-status update to the server, the server will update the order's ststus in the database, before
@@ -186,19 +156,89 @@ export default {
 
       Only then do we update the order status in the state
     **/
-    this.$options.sockets['orderStatusUpdated'] = (order) => {
-      this.$store.commit('updateOrderStatus', order);
-      this.showAlert('success', this.successMsg[order.status]);
-    };
+    listenForServerConfirmationOfOrderStatusUpdate() {
+      this.$options.sockets['orderStatusUpdated'] = (order) => {
+        this.$store.commit('updateOrderStatus', order);
+        this.showAlert('success', this.successMsg[order.status]);
+      };
+    },
 
-    // Intermittently update each order's "time ago" property
-    window.setInterval(() => {
-      this.$store.commit('updateTimeSinceOrdersPlaced');
-    }, 30000);
-  },
+    /**
+      The server finds all sockets which represent the restaurant who is the intended recipient of the order. It then
+      emits the 'neworder' event to these sockets; here we handle this event
+    **/
+    listenForNewOrdersFromServer() {
+      this.$options.sockets['newOrder'] = (order) => {
+        order.timeAgo = moment(order.time).utc().fromNow();
+        // Add the order to the state with the status set by the server: 200 (sentToKitchen)
+        this.$store.commit('addNewOrder', order);
+        // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
+        this.sendUpdatedOrderStatusToBackend(order, this.statuses.receivedByKitchen);
+      };
+    },
 
-  methods: {
-    updateOrderStatus(order, status) {
+    /**
+      On refresh, get the up-to-date live order state for the restaurant, according to the backend
+    **/
+    getAllLiveOrdersForRestaurant() {
+      // TODO: function for doing this
+      // Check that the token is set; we need this for sending the order to the server
+      if(localStorage.getItem('restaurant') === null) {
+        return console.log('ERR [getAllLiveOrdersForRestaurant]: localStorage.restaurant not set.');
+      }
+
+      if(JSON.parse(localStorage.restaurant).restaurantId === undefined) {
+        return console.log('ERR [getAllLiveOrdersForRestaurant]: localStorage.restaurant.restaurantId not set.');
+      }
+
+      // Check that the token is set; we need this for sending the order to the server
+      if(localStorage.getItem('user') === null) {
+        return console.log('ERR [getAllLiveOrdersForRestaurant]: localStorage.user not set.');
+      }
+
+      if(JSON.parse(localStorage.user).token === undefined) {
+        return console.log('ERR [getAllLiveOrdersForRestaurant]: localStorage.user.token not set.');
+      }
+
+      const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
+      // Get the live-orders object and add it to the store
+      this.$http.get('order/getAllLive/'+restaurantId, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+      }).then((res) => {
+
+        if(_.size(res.body.data) < 1) {
+          this.loading.still = false; // Stop loading spinner once server responds
+          return true; // If there are no orders, we need not do anything
+        }
+
+        const orders = res.body.data;
+
+        // Set the timeAgo properties of all live orders
+        for(var i = 0; i < orders.length; i++) {
+          orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
+        }
+
+        // Push the updated orders to the store
+        this.$store.commit('setLiveOrders', orders);
+
+        // Check if there are any orders with "erroeous" statuses
+        for(var i = 0; i < orders.length; i++) {
+          // For any orders that haven't been able to reach the restaurant, update their status
+          if(orders[i].status == this.statuses.receivedByServer || orders[i].status == this.statuses.sentToKitchen) {
+            // Update order status on backend; the server will send confirmation and the state will be updated accoringly
+            this.sendUpdatedOrderStatusToBackend(orders[i], this.statuses.receivedByKitchen);
+          }
+        }
+
+        this.loading.still = false; // Stop loading spinner once server responds
+        return true;
+
+      }).catch((res) => {
+        this.handleApiError(res);
+      });
+    },
+
+    sendUpdatedOrderStatusToBackend(order, status) {
       this.$socket.emit('orderStatusUpdate', {
         headers: {
           token: JSON.parse(localStorage.user).token

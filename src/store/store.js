@@ -98,6 +98,7 @@ export default new Vuex.Store({
 		updateOrderStatus(state, order) {
 			// Find the order by its ID
 			const index = state.orders.findIndex(orderState => orderState.orderId == order.orderId);
+			console.log('INDEX: ' + index);
 			// Different statuses require different actions
 			switch(order.status) {
 				case statuses.receivedByKitchen:
