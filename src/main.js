@@ -8,7 +8,20 @@ import vueResource from 'vue-resource';
 import VeeValidate from 'vee-validate';
 import money from 'v-money'
 import config from '../config/config';
+import Raven from 'raven-js';
+import RavenVue from 'raven-js/plugins/vue';
 
+Raven
+.config('https://8b24d84322a149af90d3a6e5e3468f4a@sentry.io/696126')
+.addPlugin(RavenVue, Vue)
+.install();
+
+if(localStorage.getItem('user') !== null) {
+	Raven.setUserContext({
+		userId: JSON.parse(localStorage.user).userId || null,
+    email: JSON.parse(localStorage.user).email || null,
+	});
+}
 
 Vue.use(vueResource);
 Vue.http.options.root = config.apiBaseUrl;
