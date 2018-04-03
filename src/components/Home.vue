@@ -373,8 +373,7 @@ export default {
       // Validate inputs (betters: if there are errors, set the button to red/unclickable using a computed property)
       if(!this.errors.any() && this.inputs.hasHadFocus.length > 0) {
         // Make the API call
-        this.$http.post('user/create', {
-          userType: 'restaurateur',
+        this.$http.post('user/r', {
           firstName: this.form.signup.firstName.value,
           lastName: this.form.signup.lastName.value,
           restaurantName: this.form.signup.restaurantName.value,
