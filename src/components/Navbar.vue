@@ -11,8 +11,8 @@
         <li v-bind:class="{'active': $route.path == '/dashboard'}">
           <router-link to="/dashboard">Dashboard</router-link>
         </li>
-        <li v-bind:class="{'active': $route.path == '/live-kitchen'}">
-          <router-link to="/live-kitchen">LiveKitchen</router-link>
+        <li v-bind:class="{'active': $route.path == '/kitchen'}">
+          <router-link to="/kitchen">LiveKitchen</router-link>
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">

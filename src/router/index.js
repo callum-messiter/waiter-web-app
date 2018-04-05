@@ -20,7 +20,7 @@ export default new Router({
       component: Dashboard
     },
     {
-      path: '/live-kitchen',
+      path: '/kitchen',
       name: 'LiveKitchen',
       component: LiveKitchen
     }

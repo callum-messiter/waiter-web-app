@@ -302,7 +302,7 @@ export default {
   created () {
     // If the user is logged in, redirect them to their dashboard when they visit the home page
     if(this.userIsAuthenticated) {
-      this.$router.push('/live-kitchen');
+      this.$router.push('/kitchen');
     }
   },
 
@@ -348,6 +348,17 @@ export default {
             localStorage.setItem('isAuth', true);
             localStorage.setItem('restaurant', JSON.stringify(res.body.data.restaurant)); // restaurantId and name
             localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
+
+            // Connect to LiveKitchen
+            if(localStorage.getItem('user') !== null) {
+              const user = JSON.parse(localStorage.user);
+              if(user.hasOwnProperty('userId')) {
+                // http://host?customerId={userId}
+                // TODO: change to ?dinerId; change socketType to dinerId; change table names to socketsDiners and socketsRestaurantDiners
+                Vue.use(VueSocketio, 'https://api.waitr.live?customerId='+user.userId);
+              }
+            }
+
             // Reset the forms
             this.form = JSON.parse(JSON.stringify(this.formDefault));
             // Set auth state to true
@@ -359,7 +370,7 @@ export default {
               this.$router.push('/dashboard');
             } else {
               this.hideAlert();
-              this.$router.push('/live-kitchen');
+              this.$router.push('/kitchen');
             }
           }
         }).catch((res) => {
