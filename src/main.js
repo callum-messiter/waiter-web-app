@@ -16,6 +16,7 @@ Raven
 .addPlugin(RavenVue, Vue)
 .install();
 
+// TODO: set this also upon successful login
 if(localStorage.getItem('user') !== null) {
 	Raven.setUserContext({
 		userId: JSON.parse(localStorage.user).userId || null,

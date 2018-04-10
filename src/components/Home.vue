@@ -350,12 +350,11 @@ export default {
             localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
 
             // Connect to LiveKitchen
-            if(localStorage.getItem('user') !== null) {
-              const user = JSON.parse(localStorage.user);
-              if(user.hasOwnProperty('userId')) {
-                // http://host?customerId={userId}
-                // TODO: change to ?dinerId; change socketType to dinerId; change table names to socketsDiners and socketsRestaurantDiners
-                Vue.use(VueSocketio, 'https://api.waitr.live?customerId='+user.userId);
+            if(localStorage.getItem('restaurant') !== null) {
+              const r = JSON.parse(localStorage.restaurant);
+              if(r.hasOwnProperty('restaurantId')) {
+                // http://host?restaurantId={restaurantId}
+                Vue.use(VueSocketio, 'https://api.waitr.live?restaurantId='+r.restaurantId);
               }
             }
 
