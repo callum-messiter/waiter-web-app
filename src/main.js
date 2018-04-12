@@ -8,11 +8,12 @@ import vueResource from 'vue-resource';
 import VeeValidate from 'vee-validate';
 import money from 'v-money'
 import config from '../config/config';
+import settings from '../config/settings';
 import Raven from 'raven-js';
 import RavenVue from 'raven-js/plugins/vue';
 
 Raven
-.config('https://8b24d84322a149af90d3a6e5e3468f4a@sentry.io/696126')
+.config(settings.sentryUrl)
 .addPlugin(RavenVue, Vue)
 .install();
 
@@ -25,7 +26,7 @@ if(localStorage.getItem('user') !== null) {
 }
 
 Vue.use(vueResource);
-Vue.http.options.root = config.apiBaseUrl;
+Vue.http.options.root = settings.apiBaseUrl;
 
 
 Vue.use(VeeValidate);

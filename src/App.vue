@@ -17,7 +17,7 @@
 // LiveKitchen connection via WebSockets
 import Vue from 'vue';
 import VueSocketio from 'vue-socket.io';
-import config from '../config/config';
+import settings from '../config/settings';
 
 // Global components
 import Navbar from './components/Navbar';
@@ -46,7 +46,7 @@ export default {
       const r = JSON.parse(localStorage.restaurant);
       if(r.hasOwnProperty('restaurantId')) {
         // http://host?restaurantId={restaurantId}
-        Vue.use(VueSocketio, 'http://localhost:3000?restaurantId='+r.restaurantId);
+        Vue.use(VueSocketio, settings.webSocketsUrl+'?restaurantId='+r.restaurantId);
       }
     }
     

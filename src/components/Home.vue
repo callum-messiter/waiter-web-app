@@ -200,7 +200,7 @@
 // LiveKitchen connection via WebSockets
 import Vue from 'vue';
 import VueSocketio from 'vue-socket.io';
-import config from '../../config/config';
+import settings from '../../config/settings';
 
 // Events bus
 import { bus } from '../main';
@@ -354,7 +354,7 @@ export default {
               const r = JSON.parse(localStorage.restaurant);
               if(r.hasOwnProperty('restaurantId')) {
                 // http://host?restaurantId={restaurantId}
-                Vue.use(VueSocketio, 'https://api.waitr.live?restaurantId='+r.restaurantId);
+                Vue.use(VueSocketio, settings.webSocketsUrl+'?restaurantId='+r.restaurantId);
               }
             }
 
