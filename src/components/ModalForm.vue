@@ -347,6 +347,7 @@ export default {
       if(!this.errors.any() && allFieldsFilled === true) {
         const eventName = this.event.add + this.capitalise(formName);
         const data = this.form[formName];
+        console.log('EventName: ' + eventName);
         bus.$emit(eventName, data, this.modal.trigger);
         this.modal.isVisible = false;
         this.resetFormData(this.modal.name);

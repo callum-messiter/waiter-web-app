@@ -50,7 +50,8 @@ export default {
   },
 
   created() {
-    bus.$on('userConfirmation_addCategory', (data, trigger) => {
+    bus.$on('userConfirmation_addNewCategory', (data, trigger) => {
+
         this.addCategory(data.name);
     });
 
@@ -113,9 +114,8 @@ export default {
       }, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
-
-        if(res.status == 200) {
-          newCategory.categoryId = res.body.data.createdCategoryId;
+        if(res.status == 200 || res.status == 201) {
+          newCategory.categoryId = res.body.createdCategoryId;
           this.$store.commit('addCategory', newCategory);
           this.displayFlashMsg('New category "' + categoryName + '" was successfully added to your menu!', 'success');
           //this.showAlert('success', 'New category "' + categoryName + '" was successfully added to your menu!');
