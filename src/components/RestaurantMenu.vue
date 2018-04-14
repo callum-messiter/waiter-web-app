@@ -113,13 +113,16 @@ export default {
       }, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
+
         if(res.status == 200) {
           newCategory.categoryId = res.body.data.createdCategoryId;
           this.$store.commit('addCategory', newCategory);
-          this.showAlert('success', 'New category "' + categoryName + '" was successfully added to your menu!');
+          this.displayFlashMsg('New category "' + categoryName + '" was successfully added to your menu!', 'success');
+          //this.showAlert('success', 'New category "' + categoryName + '" was successfully added to your menu!');
         }
 
       }).catch((res) => {
+        alert(res);
         this.handleApiError(res);
       });
     },
@@ -144,8 +147,8 @@ export default {
             name: catName,
             index: trigger.catIndex
           });
-
-          this.showAlert('success', 'Your category was successfully updated!')
+          this.displayFlashMsg('Your category was successfully updated!', 'success');
+          //this.showAlert('success', 'Your category was successfully updated!')
         }
       }).catch((res) => {
         this.handleApiError(res);
@@ -163,7 +166,8 @@ export default {
         if(res.status == 200) {
           // If the updates were successfully persisted to the database, update the state to reflect the changes
           this.$store.commit('deleteCategory', trigger.catIndex);
-          this.showAlert('success', 'Your category was successfully deleted!');
+          this.displayFlashMsg('Your category was successfully deleted!', 'success');
+          //this.showAlert('success', 'Your category was successfully deleted!');
         }
 
       }).catch((res) => {

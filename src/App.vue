@@ -38,7 +38,7 @@ export default {
   created() {
     if(!this.userIsAuthenticated) {
       // If the user is not logged in, redirect them to the home page when they visit any other page
-      if(this.$route.path != '/' && this.$route.path != '/landing') {
+      if(this.$route.path != '/') {
         this.$router.push('/');
       }
     }
@@ -93,6 +93,13 @@ export default {
   .flash__message.error{
     background-color: #e60000 !important;
     border-color: #e60000 !important;
+    color: white !important;
+    font-size: 12px !important;
+  }
+
+  .flash__message.success{
+    background-color: #469ada !important;
+    border-color: #469ada !important;
     color: white !important;
     font-size: 12px !important;
   }

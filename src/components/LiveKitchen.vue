@@ -159,7 +159,8 @@ export default {
     listenForServerConfirmationOfOrderStatusUpdate() {
       this.$options.sockets['orderStatusUpdated'] = (order) => {
         this.$store.commit('updateOrderStatus', order);
-        this.showAlert('success', this.successMsg[order.status]);
+        this.displayFlashMsg(this.successMsg[order.status], 'success');
+        //this.showAlert('success', this.successMsg[order.status]);
       };
     },
 
