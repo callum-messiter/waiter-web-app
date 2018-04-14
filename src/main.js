@@ -11,6 +11,9 @@ import config from '../config/config';
 import settings from '../config/settings';
 import Raven from 'raven-js';
 import RavenVue from 'raven-js/plugins/vue';
+import VueFlashMessage from 'vue-flash-message';
+import VueAwesome from 'vue-awesome';
+Vue.component('icon', VueAwesome);
 
 Raven
 .config(settings.sentryUrl)
@@ -31,6 +34,14 @@ Vue.http.options.root = settings.apiBaseUrl;
 
 Vue.use(VeeValidate);
 Vue.use(money, {precision: 2});
+
+Vue.use(VueFlashMessage, {
+  messageOptions: {
+    timeout: 3000,
+    important: true
+  }
+});
+require('vue-flash-message/dist/vue-flash-message.min.css');
 
 // Use Bootstrap across the application
 import jQuery from 'jquery';
