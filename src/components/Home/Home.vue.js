@@ -53,7 +53,7 @@ export default {
         // If the login is manual (the user has used the signin form), we must validate it
         if(this.someFieldsAreEmpty(this.forms.signin)) {
           this.displayFlashMsg(
-            'The username and password you entered did not match our records. Please double-check and try again.'.
+            'The username and password you entered did not match our records. Please double-check and try again.',
             'error'
           );
           return;
