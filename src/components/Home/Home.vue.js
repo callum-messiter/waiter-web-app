@@ -52,8 +52,9 @@ export default {
       } else {
         // If the login is manual (the user has used the signin form), we must validate it
         if(this.someFieldsAreEmpty(this.forms.signin)) {
-          this.displayErrorMsg(
-            'The username and password you entered did not match our records. Please double-check and try again.'
+          this.displayFlashMsg(
+            'The username and password you entered did not match our records. Please double-check and try again.'.
+            'error'
           );
           return;
         }
@@ -86,13 +87,13 @@ export default {
       // Check validation errors
       this.$validator.validateAll(scope).then((result) => {
         if(this.errors.any()) {
-          this.displayErrorMsg(this.errors.all()[0]);
+          this.displayFlashMsg(this.errors.all()[0], 'error');
           return;
         }
 
         // Check for empty fields (v-validate doesn't catch this if the user doesn't give focus to the inputs)
         if(this.someFieldsAreEmpty(this.forms.signup)) {
-          this.displayErrorMsg('Please fill in all the fields!');
+          this.displayFlashMsg('Please fill in all the fields!', 'error');
           return;
         }
 
