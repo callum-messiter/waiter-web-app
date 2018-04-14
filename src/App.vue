@@ -4,6 +4,7 @@
     <!-- Navbar -->
     <navbar></navbar>
     <div class="container">
+      <flash-message class="navbar-fixed-top"></flash-message>
       <modal></modal>
       <modalForm></modalForm>
       <!-- Main page content -->
@@ -37,7 +38,7 @@ export default {
   created() {
     if(!this.userIsAuthenticated) {
       // If the user is not logged in, redirect them to the home page when they visit any other page
-      if(this.$route.path != '/') {
+      if(this.$route.path != '/' && this.$route.path != '/landing') {
         this.$router.push('/');
       }
     }
@@ -61,41 +62,39 @@ export default {
 </script>
 
 <style>
-/**
-body {
-  background:
-    url(./assets/home-image.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
-**/
 
-#app {
-  font-family: Helvetica, 'Avenir', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  /*color: #2c3e50;*/
-  margin-top: 50px;
-}
+  #app {
+    font-family: Helvetica, 'Avenir', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    /*color: #2c3e50;*/
+    margin-top: 50px;
+  }
 
-/** 
-  Cheating a bit, but when building the app (npm run build), 
-  the two stylings below are not adhered to. There must be a conflict
-  somewhere in the CSS, which manifests following minification. 
+  /** 
+    Cheating a bit, but when building the app (npm run build), 
+    the two stylings below are not adhered to. There must be a conflict
+    somewhere in the CSS, which manifests following minification. 
 
-  But I can't be bothered to find it, and I was under the impression
-  that CSS properties set here would be respected globally (so long as 'scoped' was removed from
-  the style tag).
-**/
+    But I can't be bothered to find it, and I was under the impression
+    that CSS properties set here would be respected globally (so long as 'scoped' was removed from
+    the style tag).
+  **/
 
-body {
-  background-color: #0a0a0a !important;
-}
+  body {
+    background-color: #0a0a0a !important;
+  }
 
-.container-fluid {
-  padding: 0 !important;
-}
+  .container-fluid {
+    padding: 0 !important;
+  }
+
+  .flash__message.error{
+    background-color: #e60000 !important;
+    border-color: #e60000 !important;
+    color: white !important;
+    font-size: 12px !important;
+  }
+
 </style>

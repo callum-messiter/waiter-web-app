@@ -76,7 +76,15 @@ export default {
           console.log(res);
         }
       }
-      this.showAlert('error', msg);
+      this.displayErrorMsg(msg, 'error');
+      //this.showAlert('error', msg);
+    },
+
+    displayErrorMsg(msg) {
+      msg = 'Oops! '+msg;
+      // TODO: Get the error, update the message, and reset the timer
+      this.flash().destroyAll();
+      setTimeout(() => { this.flash(msg, 'error'); }, 100);
     }
     
 	}
