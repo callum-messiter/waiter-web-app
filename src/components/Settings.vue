@@ -16,7 +16,7 @@
 			        <icon name="building"></icon>
 			        <input 
 			        	name="legal_entity_business_name" 
-			        	v-model="forms['companyDetails'].legal_entity_business_name"
+			        	v-model="defaults.restaurantName"
 			        	placeholder="Company Name"
 			        	v-validate="{
 			        		required: requiredFields['companyDetails'].includes('legal_entity_business_name'), 
@@ -109,7 +109,7 @@
 			        <icon name="user"></icon>
 			        <input 
 			        	name="legal_entity_first_name"
-			        	v-model="forms['companyRep'].legal_entity_first_name"
+			        	v-model="defaults.comRep.firstName"
 			        	placeholder="First Name"
 			        	v-validate="{
 			        		required: requiredFields['companyRep'].includes('legal_entity_first_name'), 
@@ -126,7 +126,7 @@
 			        <icon name="user"></icon>
 			        <input 
 			        	name="legal_entity_last_name"
-			        	v-model="forms['companyRep'].legal_entity_last_name"
+			        	v-model="defaults.comRep.lastName"
 			        	placeholder="Last Name"
 			        	v-validate="{
 			        		required: requiredFields['companyRep'].includes('legal_entity_last_name'), 
@@ -253,7 +253,7 @@
 			        <icon name="user"></icon>
 			        <input 
 			        	name="account_holder_name" 
-			        	v-model="forms['companyBankAccount'].account_holder_name"
+			        	v-model="defaults.comRep.fullName"
 			        	placeholder="Account Holder Name"
 			        	v-validate="{
 			        		required: requiredFields['companyBankAccount'].includes('account_holder_name'), 
@@ -365,7 +365,6 @@ export default {
 			// We should also get these details from Stripe's API and populate the inputs with them
 			forms: {
 				companyDetails: {
-					legal_entity_business_name: JSON.parse(localStorage.getItem('restaurant')).name || '',
 					legal_entity_address_line1: '',
 					legal_entity_address_city: '',
 					legal_entity_address_postal_code: '',
@@ -374,8 +373,6 @@ export default {
 				companyRep: {
 					tos_acceptance_date: '',
 					tos_acceptance_ip: '',
-					legal_entity_first_name: JSON.parse(localStorage.getItem('user')).firstName || '',
-					legal_entity_last_name: JSON.parse(localStorage.getItem('user')).lastName || '',
 					legal_entity_dob_day: '',
 					legal_entity_dob_month: '',
 					legal_entity_dob_year: '',
@@ -389,7 +386,6 @@ export default {
 					currency: '',
 					routing_number: '', // sort code
 					account_number: '',
-					account_holder_name: '',
 					account_holder_type: '',
 				}
 			},
@@ -442,8 +438,72 @@ export default {
         // If there are no errors, destroy any message that is visible
         this.flash().destroyAll();
       });
-			// TODO: (For Updating Details) Only send the data that has changed
 
+			// If the user clicks "Accept" to TOS, set the date and IP (we will only show the TOS once)
+			const tosDate = Math.floor(Date.now() / 1000);
+
+			var accToken = '';
+			if(scope == 'companyBankAccount') {
+				// Bank account details -> waitr API -> Stripe API -> returns a token to be stored in `external_account`
+				this.forms.companyBankAccount.account_holder_name = this.defaults.comRep.fullName;
+				const bankAcc = this.forms.companyBankAccount;
+			}
+
+			const account = this.buildAccountObject(tosDate, accToken);
+			// Send the upated account object to our API, which will handle sending it to Stripe
+			console.log(account);
+		},
+
+		buildAccountObject(tosDate='', accToken='') {
+			return {
+				external_account: accToken,
+				tos_acceptance: {
+					date: tosDate,
+					ip: '' // set this on the server side: req.connection.remoteAddress
+				},
+				legal_entity: {
+					first_name: this.defaults.comRep.firstName,
+					last_name: this.defaults.comRep.lastName,
+					type: 'company',
+					business_name: this.defaults.restaurantName,
+					business_tax_id: this.forms.companyDetails.legal_entity_business_tax_id,
+					address : {
+						line1: this.forms.companyDetails.legal_entity_address_line1,
+						city: this.forms.companyDetails.legal_entity_address_city,
+						postal_code: this.forms.companyDetails.legal_entity_address_postal_code
+					},
+					personal_address: {
+						line1: this.forms.companyRep.legal_entity_personal_address_line1,
+						city: this.forms.companyRep.legal_entity_personal_address_city,
+						postal_code: this.forms.companyRep.legal_entity_personal_address_postal_code
+					},
+					dob: {
+						day: this.forms.companyRep.legal_entity_dob_day,
+						month: this.forms.companyRep.legal_entity_dob_month,
+						year: this.forms.companyRep.legal_entity_dob_year
+					}
+				}
+			}
+
+		}
+
+	},
+
+	computed: {
+		defaults() {
+			var full = '';
+			const fn = JSON.parse(localStorage.getItem('user')).firstName || '';
+			const ln = JSON.parse(localStorage.getItem('user')).lastName || '';
+			if(fn != '' && ln != '') { full = fn+' '+ln }
+			
+			return {
+				restaurantName: JSON.parse(localStorage.getItem('restaurant')).name || '',
+				comRep: {
+					firstName: fn,
+					lastName: ln,
+					fullName: full
+				}
+			}
 		}
 	}
 }
@@ -461,36 +521,6 @@ stripeParams: {
 			first_name: '', // required
 			last_name: '', // required
 			type: 'individual', // required
-			address : {
-				city: '',
-				line1: '',
-				postal_code: ''
-			},
-			dob: {
-				day: '', // required
-				month: '', // required
-				year: '' // required
-			}
-		}
-	},
-
-	company: {
-		external_account: '', // required (get from Stripe Api)
-		tos_acceptance: {
-			date: '', // required
-			ip: '' // required
-		},
-		legal_entity: {
-			first_name: '', // required
-			last_name: '', // required
-			type: 'company', // required
-			business_name: '', // required
-			business_tax_id: '', // Companies House Registration Number (CRN)
-			personal_address: {
-				city: '',
-				line1: '',
-				postal_code: ''
-			},
 			address : {
 				city: '',
 				line1: '',
