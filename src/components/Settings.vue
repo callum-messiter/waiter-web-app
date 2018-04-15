@@ -9,271 +9,307 @@
 	  <div class="row">
 
 		  <div class="col-sm-4">
-				<form id="companyDetails" data-vv-scope="companyDetails">
+				<form id="companyDetails" v-on:keyup.enter="submit('companyDetails')" data-vv-scope="companyDetails">
 					<h4>Company Details <icon class="header-icon" name="info"></icon></h4>
 			    <div class="input-group">
 			      <div class="input-row">
 			        <icon name="building"></icon>
 			        <input 
-			        	name="business_name" 
+			        	name="legal_entity_business_name" 
+			        	v-model="forms['companyDetails'].legal_entity_business_name"
 			        	placeholder="Company Name"
-			        	v-validate="{required: true, max: 200}"
+			        	v-validate="{
+			        		required: requiredFields['companyDetails'].includes('legal_entity_business_name'), 
+			        		max: 200
+			        	}"
 			        	data-vv-as="company name"
-			        />
+			        />	
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyDetails'].includes('business_name')"
-			        >*</span>
-			      </div>
-			      <div class="input-row">
-			        <icon name="globe"></icon>
-			        <!-- Dropdown list with country codes -->
-			        <input 
-			        	name="country" 
-			        	placeholder="Country"
-			        	v-validate="{required: true}"
-			        />
-			        <span 
-			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyDetails'].includes('country')"
-			        >*</span>
-			      </div>
-			      <div class="input-row">
-			        <icon name="pound-sign"></icon>
-			        <!-- Dropdown list with country codes -->
-			        <input 
-			        	name="currency" 
-			        	placeholder="Currency"
-			        	v-validate="{required: true}"
-			        />
-			        <span 
-			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyDetails'].includes('currency')"
+			        	v-if="requiredFields['companyDetails'].includes('legal_entity_business_name')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="map-marker-alt"></icon>
 			        <input 
-			        	name="line1" 
+			        	name="legal_entity_address_line1"
+			        	v-model="forms['companyDetails'].legal_entity_address_line1"
 			        	placeholder="Address Line 1"
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyDetails'].includes('legal_entity_address_line1')
+			        	}"
 			        	data-vv-as="address line 1"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyDetails'].includes('line1')"
+			        	v-if="requiredFields['companyDetails'].includes('legal_entity_address_line1')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="map-marker-alt"></icon>
 			        <input 
-			        	name="city" 
+			        	name="legal_entity_address_city"
+			        	v-model="forms['companyDetails'].legal_entity_address_city" 
 			        	placeholder="City"
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyDetails'].includes('legal_entity_address_city')
+			        	}"
+			        	data-vv-as="city"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyDetails'].includes('city')"
+			        	v-if="requiredFields['companyDetails'].includes('legal_entity_address_city')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="map-marker-alt"></icon>
 			        <!-- Dropdown list with country codes -->
 			        <input 
-			        	name="postal_code" 
+			        	name="legal_entity_address_postal_code"
+			        	v-model="forms['companyDetails'].legal_entity_address_postal_code" 
 			        	placeholder="Postcode"
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyDetails'].includes('legal_entity_address_postal_code')
+			        	}"
 			        	data-vv-as="postcode"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyDetails'].includes('postal_code')"
+			        	v-if="requiredFields['companyDetails'].includes('legal_entity_address_postal_code')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="money-bill-alt"></icon>
 			        <input 
-			        	name="business_tax_id" 
+			        	name="legal_entity_business_tax_id"
+			        	v-model="forms['companyDetails'].legal_entity_business_tax_id"
 			        	placeholder="Companies House Registration Number"
-			        	v-validate="{required: true, max: 200}"
+			        	v-validate="{
+			        		required: requiredFields['companyDetails'].includes('legal_entity_business_tax_id'),
+			        		max: 200
+			        	}"
 			        	data-vv-as="Companies House registration number"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyDetails'].includes('business_tax_id')"
+			        	v-if="requiredFields['companyDetails'].includes('legal_entity_business_tax_id')"
 			        >*</span>
 			      </div>
 			    </div>
 			    
-			    <button type="button">Save</button>
+			    <button type="button" v-on:click="submit('companyDetails')">Save</button>
 			  </form>
 			</div>
 
 			<div class="col-sm-4">
-				<form id="companyRep" data-vv-scope="companyRep">
+				<form id="companyRep" v-on:keyup.enter="submit('companyRep')" data-vv-scope="companyRep">
 					<h4>Company Representative <icon class="header-icon" name="user"></icon></h4>
 			    <div class="input-group">
 			      <div class="input-row">
 			        <icon name="user"></icon>
 			        <input 
-			        	name="firstName" 
+			        	name="legal_entity_first_name"
+			        	v-model="forms['companyRep'].legal_entity_first_name"
 			        	placeholder="First Name"
-			        	v-validate="{required: true, max: 100}"
+			        	v-validate="{
+			        		required: requiredFields['companyRep'].includes('legal_entity_first_name'), 
+			        		max: 100
+			        	}"
 			        	data-vv-as="first name"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyRep'].includes('firstName')"
+			        	v-if="requiredFields['companyRep'].includes('legal_entity_first_name')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="user"></icon>
 			        <input 
-			        	name="lastName" 
+			        	name="legal_entity_last_name"
+			        	v-model="forms['companyRep'].legal_entity_last_name"
 			        	placeholder="Last Name"
-			        	v-validate="{required: true, max: 100}"
+			        	v-validate="{
+			        		required: requiredFields['companyRep'].includes('legal_entity_last_name'), 
+			        		max: 100
+			        	}"
 			        	data-vv-as="last name"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyRep'].includes('lastName')"
+			        	v-if="requiredFields['companyRep'].includes('legal_entity_last_name')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="calendar"></icon>
 			        <input 
-			        	name="dob_day" 
+			        	name="legal_entity_dob_day"
+			        	v-model="forms['companyRep'].legal_entity_dob_day"
 			        	placeholder="DoB (day)" 
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyRep'].includes('legal_entity_dob_day'),
+			        		numeric: true
+			        	}"
 			        	data-vv-as="DoB (day)"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyRep'].includes('dob_day')"
+			        	v-if="requiredFields['companyRep'].includes('legal_entity_dob_day')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="calendar"></icon>
 			        <input 
-			        	name="dob_month" 
+			        	name="legal_entity_dob_month"
+			        	v-model="forms['companyRep'].legal_entity_dob_month"
 			        	placeholder="DoB (month)" 
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyRep'].includes('legal_entity_dob_month'),
+			        		numeric: true
+			        	}"
 			        	data-vv-as="DoB (month)"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyRep'].includes('dob_month')"
+			        	v-if="requiredFields['companyRep'].includes('legal_entity_dob_month')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="calendar"></icon>
 			        <input 
-			        	name="dob_year" 
+			        	name="legal_entity_dob_year"
+			        	v-model="forms['companyRep'].legal_entity_dob_year"
 			        	placeholder="DoB (year)" 
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyRep'].includes('legal_entity_dob_year'),
+			        		numeric: true
+			        	}"
 			        	data-vv-as="DoB (year)"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyRep'].includes('dob_year')"
+			        	v-if="requiredFields['companyRep'].includes('legal_entity_dob_year')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="address-book"></icon>
 			        <input 
-			        	name="personal_address_line1" 
+			        	name="legal_entity_personal_address_line1"
+			        	v-model="forms['companyRep'].legal_entity_personal_address_line1" 
 			        	placeholder="Line 1"
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyRep'].includes('legal_entity_personal_address_line1')
+			        	}"
 			        	data-vv-as="personal address (line 1)"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyRep'].includes('personal_address_line1')"
+			        	v-if="requiredFields['companyRep'].includes('legal_entity_personal_address_line1')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="address-book"></icon>
 			        <input 
-			        	name="personal_address_city" 
+			        	name="legal_entity_personal_address_city"
+			        	v-model="forms['companyRep'].legal_entity_personal_address_city" 
 			        	placeholder="City"
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyRep'].includes('legal_entity_address_city')
+			        	}"
 			        	data-vv-as="personal address (city)"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyRep'].includes('personal_address_city')"
+			        	v-if="requiredFields['companyRep'].includes('legal_entity_personal_address_city')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="address-book"></icon>
 			        <!-- Dropdown list with country codes -->
 			        <input 
-			        	name="personal_address_postal_code" 
+			        	name="legal_entity_personal_address_postal_code"
+			        	v-model="forms['companyRep'].legal_entity_personal_address_postal_code" 
 			        	placeholder="Postcode"
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyRep'].includes('legal_entity_address_postal_code')
+			        	}"
 			        	data-vv-as="personal address (postcode)"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyRep'].includes('personal_address_postal_code')"
+			        	v-if="requiredFields['companyRep'].includes('legal_entity_personal_address_postal_code')"
 			        >*</span>
 			      </div>
 			    </div>
 			    
-			    <button type="button">Save</button>
+			    <button type="button" v-on:click="submit('companyRep')">Save</button>
 			  </form>
 			</div>
 
 			<div class="col-sm-4">
-				<form id="companyBankAccount" data-vv-scope="companyBankAccount">
+				<form id="companyBankAccount" v-on:keyup.enter="submit('companyBankAccount')" data-vv-scope="companyBankAccount">
 					<h4>Company Bank Account <icon class="header-icon" name="credit-card"></icon></h4>
 			    <div class="input-group">
 			      <div class="input-row">
 			        <icon name="user"></icon>
 			        <input 
-			        	name="accountHolderName" 
+			        	name="account_holder_name" 
+			        	v-model="forms['companyBankAccount'].account_holder_name"
 			        	placeholder="Account Holder Name"
-			        	v-validate="{required: true, max: 205}"
+			        	v-validate="{
+			        		required: requiredFields['companyBankAccount'].includes('account_holder_name'), 
+			        		max: 205
+			        	}"
 			        	data-vv-as="account holder name"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyBankAccount'].includes('accountHolderName')"
+			        	v-if="requiredFields['companyBankAccount'].includes('account_holder_name')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="credit-card"></icon>
 			        <input 
-			        	name="accountNum" 
+			        	name="account_number"
+			        	v-model="forms['companyBankAccount'].account_number"
 			        	placeholder="Account Number"
-			        	v-validate="{required: true, numeric: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyBankAccount'].includes('account_number'), 
+			        		numeric: true
+			        	}"
 			        	data-vv-as="account number"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyBankAccount'].includes('accountNum')"
+			        	v-if="requiredFields['companyBankAccount'].includes('account_number')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="credit-card"></icon>
 			        <input 
-			        	name="sortCode" 
+			        	name="routing_number"
+			        	v-model="forms['companyBankAccount'].routing_number"
 			        	placeholder="Sort Code"
-			        	v-validate="{required: true, numeric: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyBankAccount'].includes('routing_number'), 
+			        		numeric: true
+			        	}"
 			        	data-vv-as="sort code"
 			        />
 			        <span 
 			        	class="requiredMarker" 
-			        	v-if="requiredFields['companyBankAccount'].includes('sortCode')"
+			        	v-if="requiredFields['companyBankAccount'].includes('routing_number')"
 			        >*</span>
 			      </div>
 			      <div class="input-row">
 			        <icon name="globe"></icon>
 			        <!-- Dropdown list with country codes -->
 			        <input 
-			        	name="country" 
+			        	name="country"
+			        	v-model="forms['companyBankAccount'].country"
 			        	placeholder="Country"
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyBankAccount'].includes('country')
+			        	}"
 			        />
 			        <span 
 			        	class="requiredMarker" 
@@ -284,9 +320,12 @@
 			        <icon name="pound-sign"></icon>
 			        <!-- Dropdown list with country codes -->
 			        <input 
-			        	name="currency" 
+			        	name="currency"
+			        	v-model="forms['companyBankAccount'].currency"
 			        	placeholder="Currency"
-			        	v-validate="{required: true}"
+			        	v-validate="{
+			        		required: requiredFields['companyBankAccount'].includes('currency')
+			        	}"
 			        />
 			        <span 
 			        	class="requiredMarker" 
@@ -295,7 +334,7 @@
 			      </div>
 			    </div>
 			    
-			    <button type="button">Save</button>
+			    <button type="button" v-on:click="submit('companyBankAccount')">Save</button>
 			  </form>
 			</div>
 		</div>
@@ -323,92 +362,59 @@ export default {
 
 	data() {
 		return {
-			stripeParams: {
-				
-				individual: {
-					external_account: '', // required (get from Stripe Api)
-					tos_acceptance: {
-						date: '', // required
-						ip: '' // required
-					},
-					legal_entity: {
-						first_name: '', // required
-						last_name: '', // required
-						type: 'individual', // required
-						address : {
-							city: '',
-							line1: '',
-							postal_code: ''
-						},
-						dob: {
-							day: '', // required
-							month: '', // required
-							year: '' // required
-						}
-					}
+			// We should also get these details from Stripe's API and populate the inputs with them
+			forms: {
+				companyDetails: {
+					legal_entity_business_name: JSON.parse(localStorage.getItem('restaurant')).name || '',
+					legal_entity_address_line1: '',
+					legal_entity_address_city: '',
+					legal_entity_address_postal_code: '',
+					legal_entity_business_tax_id: ''
 				},
-
-				company: {
-					external_account: '', // required (get from Stripe Api)
-					tos_acceptance: {
-						date: '', // required
-						ip: '' // required
-					},
-					legal_entity: {
-						first_name: '', // required
-						last_name: '', // required
-						type: 'company', // required
-						business_name: '', // required
-						business_tax_id: '', // Companies House Registration Number (CRN)
-						personal_address: {
-							city: '',
-							line1: '',
-							postal_code: ''
-						},
-						address : {
-							city: '',
-							line1: '',
-							postal_code: ''
-						},
-						dob: {
-							day: '', // required
-							month: '', // required
-							year: '' // required
-						}
-					}
+				companyRep: {
+					tos_acceptance_date: '',
+					tos_acceptance_ip: '',
+					legal_entity_first_name: JSON.parse(localStorage.getItem('user')).firstName || '',
+					legal_entity_last_name: JSON.parse(localStorage.getItem('user')).lastName || '',
+					legal_entity_dob_day: '',
+					legal_entity_dob_month: '',
+					legal_entity_dob_year: '',
+					legal_entity_personal_address_line1: '',
+					legal_entity_personal_address_city: '',
+					legal_entity_personal_address_postal_code: ''
+				},
+				// These details are sent to Stripe's API, and a token is returned. We store this token in the external_account param
+				companyBankAccount: {
+					country: '',
+					currency: '',
+					routing_number: '', // sort code
+					account_number: '',
+					account_holder_name: '',
+					account_holder_type: '',
 				}
-
 			},
 
-			// These details are sent to Stripe's API, and a token is returned. We store this token in the external_account param
-			bankAccountParams: {
-				country: '',
-				currency: '',
-				routing_number: '', // sort code
-				account_number: '',
-				account_holder_name: '',
-				account_holder_type: '',
-			},
+			// We should call Stripe's API with the restaurant's Stripe Account ID, and check which verification params
+			// are required. Then we should add them to these arrays.
 
 			requiredFields: {
 				companyDetails: [
-					'business_name',
-					'country',
-					'currency'
+					'legal_entity_business_name',
+					//'email'
 				],
 				companyRep: [
-					'firstName',
-					'lastName',
-					'dob_day',
-					'dob_month',
-					'dob_year'
+					'legal_entity_first_name',
+					'legal_entity_last_name',
+					'legal_entity_dob_day',
+					'legal_entity_dob_month',
+					'legal_entity_dob_year'
 				],
 				companyBankAccount: [
 					'country',
 					'currency',
-					'sortCode',
-					'accountNum',
-					'accountHolderName'
+					'routing_number',
+					'account_number',
+					'account_holder_name'
 				]
 			},
 
@@ -421,8 +427,86 @@ export default {
 		}
 	},
 
-	created () {}
+	created () {
+	},
+
+	methods: {
+		submit(scope) {
+
+			// Check if the required fields are set
+			this.$validator.validateAll(scope).then((result) => {
+        if(this.errors.any(scope)) {
+          this.displayFlashMsg(this.errors.all(scope)[0], 'error');
+          return;
+        }
+        // If there are no errors, destroy any message that is visible
+        this.flash().destroyAll();
+      });
+			// TODO: (For Updating Details) Only send the data that has changed
+
+		}
+	}
 }
+
+/**
+stripeParams: {
+	
+	individual: {
+		external_account: '', // required (get from Stripe Api)
+		tos_acceptance: {
+			date: '', // required
+			ip: '' // required
+		},
+		legal_entity: {
+			first_name: '', // required
+			last_name: '', // required
+			type: 'individual', // required
+			address : {
+				city: '',
+				line1: '',
+				postal_code: ''
+			},
+			dob: {
+				day: '', // required
+				month: '', // required
+				year: '' // required
+			}
+		}
+	},
+
+	company: {
+		external_account: '', // required (get from Stripe Api)
+		tos_acceptance: {
+			date: '', // required
+			ip: '' // required
+		},
+		legal_entity: {
+			first_name: '', // required
+			last_name: '', // required
+			type: 'company', // required
+			business_name: '', // required
+			business_tax_id: '', // Companies House Registration Number (CRN)
+			personal_address: {
+				city: '',
+				line1: '',
+				postal_code: ''
+			},
+			address : {
+				city: '',
+				line1: '',
+				postal_code: ''
+			},
+			dob: {
+				day: '', // required
+				month: '', // required
+				year: '' // required
+			}
+		}
+	}
+
+}
+
+**/
 
 </script>
 
