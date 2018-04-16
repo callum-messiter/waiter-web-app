@@ -178,8 +178,7 @@ export default {
             catIndex: catIndex
           });
 
-          this.displayFlashMsg('Your new item was successfully added to your menu!', 'success');
-          //this.showAlert('success', 'Your new item was successfully added to your menu!');
+          this.showAlert('success', 'Your new item was successfully added to your menu!');
         }
       }).catch((res) => {
         this.handleApiError(res);
@@ -210,8 +209,7 @@ export default {
       }).then((res) => {
         const payload = {updatedItem, trigger};
         this.$store.commit('updateItem', payload); // Update the item state
-        this.displayFlashMsg('Your item was successfully updated!', 'success');
-        //this.showAlert('success','Your item was successfully updated!'); // Display the alert if successful
+        this.showAlert('success','Your item was successfully updated!'); // Display the alert if successful
       }).catch((res) => {
         this.handleApiError(res);
       });
@@ -227,8 +225,7 @@ export default {
       }).then((res) => {
         this.$store.commit('deleteItem', trigger);
         // Display the alert if successful
-        this.displayFlashMsg('Your item was successfully deleted!', 'success');
-        //this.showAlert('success', 'Your item was successfully deleted!');
+        this.showAlert('success', 'Your item was successfully deleted!');
 
       }).catch((res) => {
         this.handleApiError(res);

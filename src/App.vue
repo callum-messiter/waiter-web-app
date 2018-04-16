@@ -90,7 +90,7 @@ export default {
   **/
 
   body {
-    background-color: #0a0a0a !important;
+    background-color: #1b1c23 !important;
   }
 
   .container-fluid {

@@ -82,7 +82,7 @@ export default {
 		padding-bottom: 20px;
 		margin-top: 10px;
 		margin-bottom: 40px;
-		background-color: #0a0a0a;
+		background-color: #1b1c23;
 	}
 
 	.loading {
