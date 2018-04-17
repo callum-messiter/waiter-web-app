@@ -43,12 +43,14 @@ export default {
 
   methods: {
     logUserOut() {
+      // TODO: if a user is logged in, then logs out, then creates a new user, the LiveKitchen shows the previous user's state
+      // We need to reset state upon logout
       localStorage.removeItem('user');
       localStorage.removeItem('restaurant');
       localStorage.removeItem('menu');
       this.$store.commit('deauthenticateUser');
       localStorage.isAuth = false;
-      this.$router.push('/');
+      this.$router.push({ path: '/', query: {logout: true} });
     }
   },
 

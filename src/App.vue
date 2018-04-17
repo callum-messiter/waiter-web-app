@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <alert></alert>
     <!-- Navbar -->
     <navbar></navbar>
     <div class="container">
@@ -22,7 +21,6 @@ import settings from '../config/settings';
 
 // Global components
 import Navbar from './components/Navbar';
-import Alert from './components/Alert';
 import Modal from './components/Modal';
 import ModalForm from './components/ModalForm';
 
@@ -30,7 +28,6 @@ export default {
   name: 'app',
   components: {
     'navbar': Navbar,
-    'alert': Alert,
     'modal': Modal,
     'modalForm': ModalForm,
   },
@@ -63,6 +60,15 @@ export default {
   watch: {
     '$route' (to, from) {
       this.flash().destroyAll();
+      if(to.hasOwnProperty('query')) {
+        if(to.query.hasOwnProperty('logout')) {
+          if(to.query.logout == true) {
+            // reset the state
+            location.reload();
+          }
+        }
+      }
+
     }
   }
 }
@@ -90,7 +96,7 @@ export default {
   **/
 
   body {
-    background-color: #1b1c23 !important;
+    background-color: #1b1c23;
   }
 
   .container-fluid {

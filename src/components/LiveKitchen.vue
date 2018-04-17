@@ -90,7 +90,6 @@
 <script>
 
 // Components
-import Alert from './Alert';
 import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
 
 // Mixins
@@ -103,7 +102,6 @@ import underscore from 'underscore';
 export default {
   name: 'LiveKitchen',
   components: {
-    'alert': Alert,
     'clip-loader': ClipLoader
   },
   mixins: [functions],

@@ -48,9 +48,6 @@ import cloneDeep from 'clone-deep';
 import lodash from 'lodash';
 import {Money} from 'v-money'
 
-// Events bus
-import { bus } from '../main';
-
 import config from '../../config/config';
 
 export default {

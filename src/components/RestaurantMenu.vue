@@ -28,7 +28,6 @@
 <script>
 // Components
 import Category from './Category';
-import Alert from './Alert';
 
 // Mixins
 import functions from '../mixins/functions';
@@ -39,8 +38,7 @@ import { bus } from '../main';
 export default {
   name: 'RestaurantMenu',
   components: {
-    'category': Category,
-    'alert': Alert
+    'category': Category
   },
   mixins: [functions],
 
@@ -122,7 +120,6 @@ export default {
         }
 
       }).catch((res) => {
-        alert(res);
         this.handleApiError(res);
       });
     },
