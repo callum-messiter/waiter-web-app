@@ -56,7 +56,6 @@ export default {
     }
   },
 
-  // Remove flash message from UI when route changes
   watch: {
     '$route' (to, from) {
       this.flash().destroyAll();
@@ -96,7 +95,7 @@ export default {
   **/
 
   body {
-    background-color: #1b1c23;
+    background-color: #1b1c23 !important;
   }
 
   .container-fluid {
