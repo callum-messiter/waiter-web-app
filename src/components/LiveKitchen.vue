@@ -18,7 +18,21 @@
     <div class="row" v-else>
       <div class="received-container col-sm-6">
         <h3>Received Orders <img src="../assets/waiter-icon.png"/></h3>
-        <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.receivedByKitchen">
+        <div 
+          class="panel panel-default"
+          :class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }"
+          v-for="order in orders" 
+          v-if="order.status == statuses.receivedByKitchen"
+        >
+          <!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
+          <clip-loader
+            v-if="ordersAwaitingStatusUpdate.includes(order.orderId)"
+            class="orderLoadingSpinner"
+            :color="loading.spinnerColor"
+          >
+          </clip-loader>
+
+          <!-- Main order-card content -->
           <div class="panel-heading orderCardHeader container-fluid">
             <div class="row">
               <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
@@ -26,11 +40,13 @@
               <!-- Reject-Order Icon -->
               <span
                 class="glyphicon glyphicon-remove pull-right"
+                v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
                 v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.rejectedByKitchen)">
               </span>
               <!-- Accept-Order Icon -->
               <span
                 class="glyphicon glyphicon-ok pull-right"
+                v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
                 v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.acceptedByKitchen)">
               </span>
             </div>
@@ -54,7 +70,24 @@
       <!-- Orders accepted by the kitchen, and thus in progress. Ordered by recency (oldest at top)-->
       <div class="accepted-container col-sm-6">
         <h3>Accepted Orders <img src="../assets/cutlery-icon.png"></h3>
-        <div class="panel panel-default" v-for="order in orders" v-if="order.status == statuses.acceptedByKitchen">
+
+        <!-- If the order card is awaiting a status update confirmation from the server, we reduce the opacity
+          and display the loading spinner -->
+        <div 
+          class="panel panel-default"
+          :class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }"
+          v-for="order in orders" 
+          v-if="order.status == statuses.acceptedByKitchen"
+        >
+          <!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
+          <clip-loader
+            v-if="ordersAwaitingStatusUpdate.includes(order.orderId)"
+            class="orderLoadingSpinner"
+            :color="loading.spinnerColor"
+          >
+          </clip-loader>
+
+          <!-- Main order-card content -->
           <div class="panel-heading orderCardHeader container-fluid">
             <div class="row">
               <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
@@ -62,6 +95,7 @@
               <!-- Send-Order-to-Custom Icon -->
               <span
                 class="glyphicon glyphicon-send pull-right"
+                v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
                 v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.enRouteToCustomer)">
               </span>
             </div>
@@ -129,7 +163,8 @@ export default {
         spinnerColor: '#469ada',
         spinnerSize: '70px',
         msg: 'Loading your live orders...'
-      }
+      },
+      ordersAwaitingStatusUpdate: []
     }
   },
 
@@ -156,9 +191,14 @@ export default {
     **/
     listenForServerConfirmationOfOrderStatusUpdate() {
       this.$options.sockets['orderStatusUpdated'] = (order) => {
+        // When we send a status update to the server, we show a loading spinner on the order
+        // When the server sends back a confirmation, we remove the spinner and set the card back to normal
+        if(this.ordersAwaitingStatusUpdate.includes(order.orderId)) {
+          const index = this.ordersAwaitingStatusUpdate.indexOf(order.orderId);
+          this.ordersAwaitingStatusUpdate.splice(index, 1);
+        }
         this.$store.commit('updateOrderStatus', order);
         this.displayFlashMsg(this.successMsg[order.status], 'success');
-        //this.showAlert('success', this.successMsg[order.status]);
       };
     },
 
@@ -180,24 +220,6 @@ export default {
       On refresh, get the up-to-date live order state for the restaurant, according to the backend
     **/
     getAllLiveOrdersForRestaurant() {
-      // TODO: function for doing this
-      // Check that the token is set; we need this for sending the order to the server
-      if(localStorage.getItem('restaurant') === null) {
-        return console.log('ERR [getAllLiveOrdersForRestaurant]: localStorage.restaurant not set.');
-      }
-
-      if(JSON.parse(localStorage.restaurant).restaurantId === undefined) {
-        return console.log('ERR [getAllLiveOrdersForRestaurant]: localStorage.restaurant.restaurantId not set.');
-      }
-
-      // Check that the token is set; we need this for sending the order to the server
-      if(localStorage.getItem('user') === null) {
-        return console.log('ERR [getAllLiveOrdersForRestaurant]: localStorage.user not set.');
-      }
-
-      if(JSON.parse(localStorage.user).token === undefined) {
-        return console.log('ERR [getAllLiveOrdersForRestaurant]: localStorage.user.token not set.');
-      }
 
       const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
       // Get the live-orders object and add it to the store
@@ -249,6 +271,10 @@ export default {
           status: status
         }
       });
+      // When we send a status update to the server, we show a loading spinner on the order
+      // When the server sends back a confirmation, we find the orderId in the below array, and 
+      // remove the spinner
+      this.ordersAwaitingStatusUpdate.push(order.orderId);
     }
   },
 
@@ -375,6 +401,11 @@ export default {
 
   .panel {
     margin: 20px auto;
+    position: relative;
+  }
+
+  .panel-loading {
+    opacity: 0.4 !important;
   }
 
   .panel-default {
@@ -472,6 +503,17 @@ export default {
   .loadingMsg {
     font-size: 16px;
     color: #469ada;;
+  }
+
+  .orderCard_loading {
+    opacity: 0.4;
+  }
+
+  .orderLoadingSpinner {
+    position: absolute;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
   }
 
 </style>
