@@ -61,12 +61,11 @@ export default {
       We will handle every API error like this, in the catch block of our promise
     **/
     handleApiError(res) {
-      var msg;
+      var msg = 'Oops! The waiter system experienced an error - please try again. If the issue persists, contact our support team.';
       if(res.body && res.body.errorKey) {
-        msg = res.body.userMsg; // The API returns a user-friendly error message
+        //msg = res.body.userMsg; // The API returns a user-friendly error message
 
       } else {
-        msg = 'Oops! The waiter system experienced an error - please try again. If the issue persists, contact our support team.';
         if(res.status && res.statusText) {
           // Save to server logs (once implemented)
           console.log(res.status + " " + res.statusText);
@@ -76,7 +75,7 @@ export default {
           console.log(res);
         }
       }
-      this.displayFlashMsg(msg, 'error');
+      this.displayFlashMsg('get out', 'error');
       //this.showAlert('error', msg);
     },
 
@@ -84,6 +83,7 @@ export default {
       if(type == 'error') {
         msg = 'Oops! '+msg
       }
+      console.log('displayFlashMsg ' + msg);
       // TODO: Get the error, update the message, and reset the timer
       this.flash().destroyAll();
       setTimeout(() => {
