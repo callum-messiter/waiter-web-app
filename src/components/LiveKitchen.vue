@@ -208,6 +208,7 @@ export default {
     **/
     listenForNewOrdersFromServer() {
       this.$options.sockets['newOrder'] = (order) => {
+        // TODO: API sends UNIX timestamp - we convert to local timezone
         order.timeAgo = moment(order.time).utc().fromNow();
         // Add the order to the state with the status set by the server: 200 (sentToKitchen)
         this.$store.commit('addNewOrder', order);
@@ -236,6 +237,7 @@ export default {
 
         // Set the timeAgo properties of all live orders
         for(var i = 0; i < orders.length; i++) {
+          // TODO: API sends UNIX timestamp - we convert to local timezone
           orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
         }
 
