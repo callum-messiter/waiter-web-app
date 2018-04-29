@@ -7,7 +7,6 @@
     src="../../assets/logo.png" 
     v-bind:class="{ 'logo-image': activeForm == 'signin', 'logo-image-small': activeForm == 'signup' }"
   >
-  <h4 class="tagline" v-if="activeForm == 'signup'">Sign up for your free 10-day trial!</h4>
   <h4 class="tagline" v-if="activeForm == 'signin'">Let's start taking some orders!</h4>
 
   <!-- 
