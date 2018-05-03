@@ -122,7 +122,6 @@ export default {
         }
 
       }).catch((res) => {
-        alert(res);
         this.handleApiError(res);
       });
     },

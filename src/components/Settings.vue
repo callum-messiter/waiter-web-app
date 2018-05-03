@@ -431,13 +431,13 @@ export default {
 
 			// Check if the required fields are set
 			this.$validator.validateAll(scope).then((result) => {
-        if(this.errors.any(scope)) {
-          this.displayFlashMsg(this.errors.all(scope)[0], 'error');
-          return;
-        }
-        // If there are no errors, destroy any message that is visible
-        this.flash().destroyAll();
-      });
+				if(this.errors.any(scope)) {
+				  this.displayFlashMsg(this.errors.all(scope)[0], 'error');
+				  return;
+				}
+				// If there are no errors, destroy any message that is visible
+				this.flash().destroyAll();
+			});
 
 			// If the user clicks "Accept" to TOS, set the date and IP (we will only show the TOS once)
 			const tosDate = Math.floor(Date.now() / 1000);
@@ -450,40 +450,53 @@ export default {
 			}
 
 			const account = this.buildAccountObject(tosDate, accToken);
+			// Add the restaurantId - a required param for the API
+			account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
 			// Send the upated account object to our API, which will handle sending it to Stripe
-			console.log(account);
+			this.$http.patch('payment/updateStripeAccount', account, {
+				headers: {Authorization: JSON.parse(localStorage.user).token}
+			}).then((res) => {
+
+				if(res.status == 200 || res.status == 201) {
+						console.log(res.body);
+					  this.displayFlashMsg('Your details were successfully updated!', 'success');
+				}
+
+			}).catch((res) => {
+				this.handleApiError(res);
+			});
 		},
 
 		buildAccountObject(tosDate='', accToken='') {
-			return {
-				external_account: accToken,
-				tos_acceptance: {
-					date: tosDate,
-					ip: '' // set this on the server side: req.connection.remoteAddress
-				},
-				legal_entity: {
-					first_name: this.defaults.comRep.firstName,
-					last_name: this.defaults.comRep.lastName,
-					type: 'company',
-					business_name: this.defaults.restaurantName,
-					business_tax_id: this.forms.companyDetails.legal_entity_business_tax_id,
-					address : {
-						line1: this.forms.companyDetails.legal_entity_address_line1,
-						city: this.forms.companyDetails.legal_entity_address_city,
-						postal_code: this.forms.companyDetails.legal_entity_address_postal_code
+				return {
+					external_account: accToken,
+					tos_acceptance: {
+						date: tosDate,
+						ip: '' // set this on the server side: req.connection.remoteAddress
 					},
-					personal_address: {
-						line1: this.forms.companyRep.legal_entity_personal_address_line1,
-						city: this.forms.companyRep.legal_entity_personal_address_city,
-						postal_code: this.forms.companyRep.legal_entity_personal_address_postal_code
-					},
-					dob: {
-						day: this.forms.companyRep.legal_entity_dob_day,
-						month: this.forms.companyRep.legal_entity_dob_month,
-						year: this.forms.companyRep.legal_entity_dob_year
+					legal_entity: {
+						first_name: this.defaults.comRep.firstName,
+						last_name: this.defaults.comRep.lastName,
+						type: 'company',
+						business_name: this.defaults.restaurantName,
+						business_tax_id: this.forms.companyDetails.legal_entity_business_tax_id,
+						address : {
+							line1: this.forms.companyDetails.legal_entity_address_line1,
+							city: this.forms.companyDetails.legal_entity_address_city,
+							postal_code: this.forms.companyDetails.legal_entity_address_postal_code
+						},
+						personal_address: {
+							line1: this.forms.companyRep.legal_entity_personal_address_line1,
+							city: this.forms.companyRep.legal_entity_personal_address_city,
+							postal_code: this.forms.companyRep.legal_entity_personal_address_postal_code
+						},
+						dob: {
+							day: this.forms.companyRep.legal_entity_dob_day,
+							month: this.forms.companyRep.legal_entity_dob_month,
+							year: this.forms.companyRep.legal_entity_dob_year
+						}
 					}
 				}
-			}
 
 		}
 
