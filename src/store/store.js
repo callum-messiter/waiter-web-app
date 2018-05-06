@@ -13,6 +13,7 @@ const statuses = {
 	sentToKitchen: 200,
 	receivedByKitchen: 300,
 	acceptedByKitchen: 400,
+	paymentFailed: 998,
 	rejectedByKitchen: 999,
 	enRouteToCustomer: 1000,
 	// receivedByCustomer: 2000 // would be set by deliverer of food
@@ -108,6 +109,7 @@ export default new Vuex.Store({
 					break;
 
 				case statuses.rejectedByKitchen:
+				case statuses.paymentFailed:
 				case statuses.enRouteToCustomer:
 					// Simply remove the order from the state, since it no longer has a status that makes it visible to the kitchen
 					state.orders.splice(index, 1);

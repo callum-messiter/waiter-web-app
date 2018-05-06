@@ -147,6 +147,7 @@ export default {
         sentToKitchen: 200,
         receivedByKitchen: 300, // this would be a notification of receipt
         acceptedByKitchen: 400,
+        paymentFailed: 998,
         rejectedByKitchen: 999,
         enRouteToCustomer: 1000,
         // returnedByCustomer: 666,
