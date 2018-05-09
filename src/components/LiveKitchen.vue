@@ -75,13 +75,16 @@
           and display the loading spinner -->
         <div 
           class="panel panel-default"
-          :class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }"
+          :class="{ 
+            'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) 
+            || order.status == statuses.acceptedByKitchen
+          }"
           v-for="order in orders" 
           v-if="order.status == statuses.acceptedByKitchen || order.status == statuses.paymentSuccessful"
         >
           <!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
           <clip-loader
-            v-if="ordersAwaitingStatusUpdate.includes(order.orderId) || order.status == statuses.paymentSuccessful"
+            v-if="ordersAwaitingStatusUpdate.includes(order.orderId) || order.status == statuses.acceptedByKitchen"
             class="orderLoadingSpinner"
             :color="loading.spinnerColor"
           >
@@ -211,7 +214,7 @@ export default {
         }
 
         if(this.errorMsg.hasOwnProperty(order.status)) {
-          this.displayFlashMsg(this.errorMsg[order.status], 'error');
+          this.displayFlashMsg(this.ErrorMsg[order.status], 'error');
         }
 
       };
