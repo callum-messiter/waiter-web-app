@@ -12,9 +12,10 @@ const statuses = {
 	receivedByServer: 100,
 	sentToKitchen: 200,
 	receivedByKitchen: 300,
+	rejectedByKitchen: 999,
 	acceptedByKitchen: 400,
 	paymentFailed: 998,
-	rejectedByKitchen: 999,
+	paymentSuccessful: 500,
 	enRouteToCustomer: 1000,
 	// receivedByCustomer: 2000 // would be set by deliverer of food
 	// returnedByCustomer: 666,
@@ -99,11 +100,11 @@ export default new Vuex.Store({
 		updateOrderStatus(state, order) {
 			// Find the order by its ID
 			const index = state.orders.findIndex(orderState => orderState.orderId == order.orderId);
-			console.log('INDEX: ' + index);
 			// Different statuses require different actions
 			switch(order.status) {
 				case statuses.receivedByKitchen:
 				case statuses.acceptedByKitchen:
+				case statuses.paymentSuccessful:
 					// Set the status of the order to the updated status received from the server
 					state.orders[index].status = order.status;
 					break;

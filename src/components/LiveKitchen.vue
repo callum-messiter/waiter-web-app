@@ -17,7 +17,7 @@
     <!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
     <div class="row" v-else>
       <div class="received-container col-sm-6">
-        <h3>Received Orders <img src="../assets/waiter-icon.png"/></h3>
+        <h3>New Orders <img src="../assets/waiter-icon.png"/></h3>
         <div 
           class="panel panel-default"
           :class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }"
@@ -69,7 +69,7 @@
       </div>
       <!-- Orders accepted by the kitchen, and thus in progress. Ordered by recency (oldest at top)-->
       <div class="accepted-container col-sm-6">
-        <h3>Accepted Orders <img src="../assets/cutlery-icon.png"></h3>
+        <h3>Orders We've Accepted<img src="../assets/cutlery-icon.png"></h3>
 
         <!-- If the order card is awaiting a status update confirmation from the server, we reduce the opacity
           and display the loading spinner -->
@@ -77,11 +77,11 @@
           class="panel panel-default"
           :class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }"
           v-for="order in orders" 
-          v-if="order.status == statuses.acceptedByKitchen"
+          v-if="order.status == statuses.acceptedByKitchen || order.status == statuses.paymentSuccessful"
         >
           <!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
           <clip-loader
-            v-if="ordersAwaitingStatusUpdate.includes(order.orderId)"
+            v-if="ordersAwaitingStatusUpdate.includes(order.orderId) || order.status == statuses.paymentSuccessful"
             class="orderLoadingSpinner"
             :color="loading.spinnerColor"
           >
@@ -143,21 +143,27 @@ export default {
   data() {
     return {
       statuses: {
+        sentToServer: 50,
         receivedByServer: 100,
         sentToKitchen: 200,
-        receivedByKitchen: 300, // this would be a notification of receipt
+        receivedByKitchen: 300,
+        rejectedByKitchen: 999,
         acceptedByKitchen: 400,
         paymentFailed: 998,
-        rejectedByKitchen: 999,
+        paymentSuccessful: 500,
         enRouteToCustomer: 1000,
         // returnedByCustomer: 666,
         // eaten: 500 // May be set once the user has sent feedback
       },
       successMsg: {
         300: 'A new order just arrived!',
-        400: 'Woohoo! You accepted an order - the customer was notified and accidentally screamed a bit.',
+        400: 'Woohoo! You accepted an order - we\'re just processing the customer\'s payment...',
+        500: 'Woohoo! The customer\'s payment was successful!',
         999: 'The order was rejected. The customer\'s hopes and dreams crumble before us.',
         1000: 'Great job! Another customer is about to fall in love with ' + JSON.parse(localStorage.restaurant).name
+      },
+      errorMsg: {
+        998: 'Oh no! The customer\'s payment was unsuccessful. The order has been cancelled.'
       },
       loading: {
         still: true,
@@ -199,7 +205,15 @@ export default {
           this.ordersAwaitingStatusUpdate.splice(index, 1);
         }
         this.$store.commit('updateOrderStatus', order);
-        this.displayFlashMsg(this.successMsg[order.status], 'success');
+
+        if(this.successMsg.hasOwnProperty(order.status)) {
+          this.displayFlashMsg(this.successMsg[order.status], 'success');
+        }
+
+        if(this.errorMsg.hasOwnProperty(order.status)) {
+          this.displayFlashMsg(this.errorMsg[order.status], 'error');
+        }
+
       };
     },
 
