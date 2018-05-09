@@ -214,7 +214,7 @@ export default {
         }
 
         if(this.errorMsg.hasOwnProperty(order.status)) {
-          this.displayFlashMsg(this.ErrorMsg[order.status], 'error');
+          this.displayFlashMsg(this.errorMsg[order.status], 'error');
         }
 
       };
