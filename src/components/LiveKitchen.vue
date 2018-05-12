@@ -226,8 +226,9 @@ export default {
     **/
     listenForNewOrdersFromServer() {
       this.$options.sockets['newOrder'] = (order) => {
+        console.log('live order: ' + JSON.stringify(order));
         // TODO: API sends UNIX timestamp - we convert to local timezone
-        order.timeAgo = moment(order.time).utc().fromNow();
+        order.timeAgo = moment(order.time).fromNow();
         // Add the order to the state with the status set by the server: 200 (sentToKitchen)
         this.$store.commit('addNewOrder', order);
         // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
@@ -255,8 +256,9 @@ export default {
 
         // Set the timeAgo properties of all live orders
         for(var i = 0; i < orders.length; i++) {
+          console.log('time: ' + orders[i].time);
           // TODO: API sends UNIX timestamp - we convert to local timezone
-          orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
+          orders[i].timeAgo = moment(orders[i].time).fromNow();
         }
 
         // Push the updated orders to the store
