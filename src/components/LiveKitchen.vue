@@ -226,10 +226,9 @@ export default {
     **/
     listenForNewOrdersFromServer() {
       this.$options.sockets['newOrder'] = (order) => {
-        console.log('live order: ' + JSON.stringify(order));
         // order.time is a utc timestamp (milliseconds); since 
         // machine clocks are not necessarily synchronised, remove 20 secs from the time to avoid ("in a few seconds")
-        order.timeAgo = moment(order.time - 200).fromNow();
+        order.timeAgo = moment(order.time - 10000).fromNow();
         // Add the order to the state with the status set by the server: 200 (sentToKitchen)
         this.$store.commit('addNewOrder', order);
         // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
