@@ -10,7 +10,10 @@
     </div>
     <div class="inner" v-else>
     <!-- If there are no live orders, inform the user -->
-    <div class="row zeroOrders" v-if="orders.length < 1">
+    <div 
+      class="row zeroOrders" 
+      v-if="Object.keys(orders.received).length < 1 && Object.keys(orders.accepted).length < 1"
+    >
       <img class="zeroOrdersIcon" src="../assets/safebox.png"/>
       <h4 class="zeroOrdersMsg">{{restaurantName}} has no live orders right now...</h4>
     </div>
@@ -18,51 +21,61 @@
     <div class="row" v-else>
       <div class="received-container col-sm-6">
         <h3>New Orders <img src="../assets/waiter-icon.png"/></h3>
-        <div 
-          class="panel panel-default"
-          :class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }"
-          v-for="order in orders" 
-          v-if="order.status == statuses.receivedByKitchen"
-        >
-          <!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
-          <clip-loader
-            v-if="ordersAwaitingStatusUpdate.includes(order.orderId)"
-            class="orderLoadingSpinner"
-            :color="loading.spinnerColor"
-          >
-          </clip-loader>
+        <div v-for="(table, key) in orders.received" class="table">
+          <h4 style="color: white">Table {{key}} <icon name="users"></icon></h4>
 
-          <!-- Main order-card content -->
-          <div class="panel-heading orderCardHeader container-fluid">
-            <div class="row">
-              <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
-              <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
-              <!-- Reject-Order Icon -->
-              <span
-                class="glyphicon glyphicon-remove pull-right"
-                v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
-                v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.rejectedByKitchen)">
-              </span>
-              <!-- Accept-Order Icon -->
-              <span
-                class="glyphicon glyphicon-ok pull-right"
-                v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
-                v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.acceptedByKitchen)">
-              </span>
-            </div>
+          <!-- 
+          <div class="orderIncoming row" v-if="key == 10">
+            <pacman-loader :color="orderIncoming.color" :size="orderIncoming.size"></pacman-loader>
+            <p class="orderIncomingMsg">Hold on - someone else from table {{key}} is currently placing an order</p>
           </div>
-          <div class="panel-body text-left">
-            <div class="row">
-              <div class="col-md-2">
-                <img src="../assets/menu-icon.png"/>
+          -->
+          <div 
+            v-for="order in table"
+            class="panel panel-default"
+            :class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }" 
+            v-if="order.status == statuses.receivedByKitchen"
+          >
+            <!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
+            <clip-loader
+              v-if="ordersAwaitingStatusUpdate.includes(order.orderId)"
+              class="orderLoadingSpinner"
+              :color="loading.spinnerColor"
+            >
+            </clip-loader>
+
+            <!-- Main order-card content -->
+            <div class="panel-heading orderCardHeader container-fluid">
+              <div class="row">
+                <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
+                <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
+                <!-- Reject-Order Icon -->
+                <span
+                  class="glyphicon glyphicon-remove pull-right"
+                  v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
+                  v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.rejectedByKitchen)">
+                </span>
+                <!-- Accept-Order Icon -->
+                <span
+                  class="glyphicon glyphicon-ok pull-right"
+                  v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
+                  v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.acceptedByKitchen)">
+                </span>
               </div>
-                <div class="item-container">
-                  <div class="pairWrapper" v-for="pair in order.itemPairs">
-                    <ul class="items">
-                      <li class="item-name" v-for="item in pair">{{item.name}}</li>
-                    </ul>
-                  </div>
+            </div>
+            <div class="panel-body text-left">
+              <div class="row">
+                <div class="col-md-2">
+                  <img src="../assets/menu-icon.png"/>
                 </div>
+                  <div class="item-container">
+                    <div class="pairWrapper" v-for="pair in order.itemPairs">
+                      <ul class="items">
+                        <li class="item-name" v-for="item in pair">{{item.name}}</li>
+                      </ul>
+                    </div>
+                  </div>
+              </div>
             </div>
           </div>
         </div>
@@ -71,48 +84,51 @@
       <div class="accepted-container col-sm-6">
         <h3>Orders We've Accepted<img src="../assets/cutlery-icon.png"></h3>
 
-        <!-- If the order card is awaiting a status update confirmation from the server, we reduce the opacity
-          and display the loading spinner -->
-        <div 
-          class="panel panel-default"
-          :class="{ 
-            'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) 
-            || order.status == statuses.acceptedByKitchen
-          }"
-          v-for="order in orders" 
-          v-if="order.status == statuses.acceptedByKitchen || order.status == statuses.paymentSuccessful"
-        >
-          <!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
-          <clip-loader
-            v-if="ordersAwaitingStatusUpdate.includes(order.orderId) || order.status == statuses.acceptedByKitchen"
-            class="orderLoadingSpinner"
-            :color="loading.spinnerColor"
+        <div v-for="(table, key) in orders.accepted" class="table">
+          <h4 style="color: white">Table {{key}} <icon name="users"></icon></h4>
+          <!-- If the order card is awaiting a status update confirmation from the server, we reduce the opacity
+            and display the loading spinner -->
+          <div
+            v-for="order in table" 
+            class="panel panel-default"
+            :class="{ 
+              'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) 
+              || order.status == statuses.acceptedByKitchen
+            }" 
+            v-if="order.status == statuses.acceptedByKitchen || order.status == statuses.paymentSuccessful"
           >
-          </clip-loader>
+            <!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
+            <clip-loader
+              v-if="ordersAwaitingStatusUpdate.includes(order.orderId) || order.status == statuses.acceptedByKitchen"
+              class="orderLoadingSpinner"
+              :color="loading.spinnerColor"
+            >
+            </clip-loader>
 
-          <!-- Main order-card content -->
-          <div class="panel-heading orderCardHeader container-fluid">
-            <div class="row">
-              <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
-              <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
-              <!-- Send-Order-to-Custom Icon -->
-              <span
-                class="glyphicon glyphicon-send pull-right"
-                v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
-                v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.enRouteToCustomer)">
-              </span>
-            </div>
-          </div>
-          <div class="panel-body text-left">
-            <div class="row">
-              <div class="col-md-2">
-                <img src="../assets/menu-icon.png"/>
+            <!-- Main order-card content -->
+            <div class="panel-heading orderCardHeader container-fluid">
+              <div class="row">
+                <h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
+                <h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
+                <!-- Send-Order-to-Custom Icon -->
+                <span
+                  class="glyphicon glyphicon-send pull-right"
+                  v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
+                  v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.enRouteToCustomer)">
+                </span>
               </div>
-              <div class="item-container">
-                <div class="pairWrapper" v-for="pair in order.itemPairs">
-                  <ul class="items">
-                    <li class="item-name" v-for="item in pair">{{item.name}}</li>
-                  </ul>
+            </div>
+            <div class="panel-body text-left">
+              <div class="row">
+                <div class="col-md-2">
+                  <img src="../assets/menu-icon.png"/>
+                </div>
+                <div class="item-container">
+                  <div class="pairWrapper" v-for="pair in order.itemPairs">
+                    <ul class="items">
+                      <li class="item-name" v-for="item in pair">{{item.name}}</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -128,6 +144,7 @@
 
 // Components
 import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
+import PacmanLoader from 'vue-spinner/src/pulseLoader.vue';
 
 // Mixins
 import functions from '../mixins/functions';
@@ -139,7 +156,8 @@ import underscore from 'underscore';
 export default {
   name: 'LiveKitchen',
   components: {
-    'clip-loader': ClipLoader
+    'clip-loader': ClipLoader,
+    'pacman-loader': PacmanLoader
   },
   mixins: [functions],
 
@@ -173,6 +191,11 @@ export default {
         spinnerColor: '#469ada',
         spinnerSize: '70px',
         msg: 'Loading your live orders...'
+      },
+      orderIncoming: {
+        color: '#ff6a00',
+        size: '5px',
+        msg: 'Hold on - someone else from this table is currently placing an order.'
       },
       ordersAwaitingStatusUpdate: []
     }
@@ -256,8 +279,6 @@ export default {
 
         // Set the timeAgo properties of all live orders
         for(var i = 0; i < orders.length; i++) {
-          console.log('time: ' + orders[i].time);
-          // TODO: API sends UNIX timestamp - we convert to local timezone
           orders[i].timeAgo = moment(orders[i].time).fromNow();
         }
 
@@ -324,28 +345,52 @@ export default {
     **/
     orders() {
       var orders = this.$store.getters.getLiveOrders.orders;
+      console.log(orders);
+      var orderObj = {
+        received: {}, 
+        accepted: {}
+      };
+
       for(var i = 0; i < orders.length; i++) {
+        
+        // Create item pairs
         const items = orders[i].items;
-        // Loop through the items and
-        if(items.length < 1) {
-          console.log('Error: order has no items!'); // should never happen (checked in customer app and API)
-        } else {
-          var itemPairs = [];
-          for(var j = 0 ; j < items.length; j+=2) {
-            // If: There is only one item and this is the first iteration, or
-            // there is an odd number of items and this is the final iteration,
-            // then we will add only the current item, items[j], to the array of pairs
-            if(items[j+1] !== undefined) {
-                itemPairs.push([items[j], items[j+1]]);
-            } else {
-                itemPairs.push([items[j]]);
-            }
+        var itemPairs = [];
+        for(var j = 0 ; j < items.length; j+=2) {
+          if(items[j+1] !== undefined) {
+              itemPairs.push([items[j], items[j+1]]);
+          } else {
+              itemPairs.push([items[j]]);
           }
-          // Set the order.items to the itemPairs object
           orders[i].itemPairs = itemPairs;
         }
+
+        // Group orders by table
+        var column;
+        switch(orders[i].status) {
+          case this.statuses.receivedByKitchen:
+            column = 'received';
+            break;
+          case this.statuses.acceptedByKitchen:
+          case this.statuses.paymentSuccessful:
+            column = 'accepted';
+            break;
+          default:
+            console.log('nope');
+            continue;
+        }
+
+        console.log('col: ' + column);
+        if(orderObj[column].hasOwnProperty(orders[i].tableNo)) {
+          orderObj[column][orders[i].tableNo].push(orders[i]);
+        } else {
+          orderObj[column][orders[i].tableNo] = [orders[i]];
+        }
+
       }
-      return orders;
+
+      console.log(JSON.stringify(orderObj));
+      return orderObj;
     },
 
     numOrders() {
@@ -536,6 +581,14 @@ export default {
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%);
+  }
+
+  .table {
+    padding-top: 20px !important;
+  }
+
+  .orderIncomingMsg {
+    color: #ff6a00;
   }
 
 </style>

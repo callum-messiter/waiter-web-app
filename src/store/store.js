@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-
 import cloneDeep from 'clone-deep';
 import moment from 'moment';
 import underscore from 'underscore';
@@ -72,7 +71,6 @@ export default new Vuex.Store({
 			state.menu.categories.splice(catIndex, 1);
 		},
 		updateCategoryName(state, cat) {
-			console.log(JSON.stringify(cat));
 			state.menu.categories[cat.index].name = cat.name;
 		},
 		resetCategory(state) {
