@@ -144,7 +144,7 @@
 
 // Components
 import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
-import PacmanLoader from 'vue-spinner/src/pulseLoader.vue';
+import PacmanLoader from 'vue-spinner/src/PulseLoader.vue';
 
 // Mixins
 import functions from '../mixins/functions';
@@ -341,7 +341,7 @@ export default {
         received: [], 
         accepted: []
       };
-        
+
       // 1) Create item pairs so we can display the order items as a 2 by X matrix
       for(var i = 0; i < orders.length; i++) {
         const items = orders[i].items;
