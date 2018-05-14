@@ -160,7 +160,7 @@ export default new Vuex.Store({
 				}
 			}
 			return {
-				orders: _.sortBy(state.orders, 'time'),
+				orders: state.orders,
 				numOrders: {received: received, accepted: accepted}
 			}
 		}

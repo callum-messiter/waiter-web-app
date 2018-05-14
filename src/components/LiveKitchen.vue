@@ -21,8 +21,8 @@
     <div class="row" v-else>
       <div class="received-container col-sm-6">
         <h3>New Orders <img src="../assets/waiter-icon.png"/></h3>
-        <div v-for="(table, key) in orders.received" class="table">
-          <h4 style="color: white">Table {{key}} <icon name="users"></icon></h4>
+        <div v-for="table in orders.received" class="table">
+          <h4 style="color: white">Table {{table.tableNo}} <icon name="users"></icon></h4>
 
           <!-- 
           <div class="orderIncoming row" v-if="key == 10">
@@ -31,7 +31,7 @@
           </div>
           -->
           <div 
-            v-for="order in table"
+            v-for="order in table.orders"
             class="panel panel-default"
             :class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }" 
             v-if="order.status == statuses.receivedByKitchen"
@@ -84,12 +84,12 @@
       <div class="accepted-container col-sm-6">
         <h3>Orders We've Accepted<img src="../assets/cutlery-icon.png"></h3>
 
-        <div v-for="(table, key) in orders.accepted" class="table">
-          <h4 style="color: white">Table {{key}} <icon name="users"></icon></h4>
+        <div v-for="table in orders.accepted" class="table">
+          <h4 style="color: white">Table {{table.tableNo}} <icon name="users"></icon></h4>
           <!-- If the order card is awaiting a status update confirmation from the server, we reduce the opacity
             and display the loading spinner -->
           <div
-            v-for="order in table" 
+            v-for="order in table.orders" 
             class="panel panel-default"
             :class="{ 
               'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) 
@@ -331,29 +331,19 @@ export default {
     },
 
     /**
-      Each order comes with an array of the items it contains (each item is represented by an object).
-
-      In order to render the order's items in a horizontal list of pairs, we need to create a new array
-      containining item-pair arrays, each containing two or fewer item objects.
-
-      We add this array of pairs, itemPairs, to each the order object *as a new, distinct property*.
-      This means that each order object will contain both the original items array, and the new itemPairs
-      array. We render to the DOM items from the itemPairs array.
-
-      If we need want to revert back, we can just set the computed property orders to return the orders state,
-      and update the HTML accordingly.
+      Lots of manipulation of the orders array is required so that the orders can be displayed as required.
+      But the following is a messy collection of hacks that hurts my eyes - IMRPROVE
     **/
     orders() {
-      var orders = this.$store.getters.getLiveOrders.orders;
-      console.log(orders);
-      var orderObj = {
-        received: {}, 
-        accepted: {}
-      };
+      const orders = _.sortBy(this.$store.getters.getLiveOrders.orders, 'time').reverse();
 
-      for(var i = 0; i < orders.length; i++) {
+      var orderObj = {
+        received: [], 
+        accepted: []
+      };
         
-        // Create item pairs
+      // 1) Create item pairs so we can display the order items as a 2 by X matrix
+      for(var i = 0; i < orders.length; i++) {
         const items = orders[i].items;
         var itemPairs = [];
         for(var j = 0 ; j < items.length; j+=2) {
@@ -376,20 +366,47 @@ export default {
             column = 'accepted';
             break;
           default:
-            console.log('nope');
             continue;
         }
 
-        console.log('col: ' + column);
-        if(orderObj[column].hasOwnProperty(orders[i].tableNo)) {
-          orderObj[column][orders[i].tableNo].push(orders[i]);
+        // 2) Group orders by table number but the table with the most recent order should be at the top of the list)
+
+        /*
+          orders: {
+             received: [
+             {
+                tableNo: 10,
+                orders: [
+                  {order1},
+                  {order2}
+                ]
+             },
+             {order2},
+             {order3}
+          }
+        */
+        const group = orderObj[column]; /* e.g. orders.received = [] */
+        /* If no table obj has been created yet, create the first one */
+        if(group.length < 1) {
+          group.push( { tableNo: orders[i].tableNo, orders: [orders[i]] } );
         } else {
-          orderObj[column][orders[i].tableNo] = [orders[i]];
+          /* Now loop through the table objects */
+          var tableAlreadyExists = false;
+          for(var j = 0; j < group.length; j++) {
+            /* If the order is from this table, add it to the orders array of this table obj */
+            if(group[j].tableNo == orders[i].tableNo) {
+              group[j].orders.push(orders[i]);
+              tableAlreadyExists = true;
+            }
+          }
+          /* If this order's table is not yet represented by a table obj, create the table obj */
+          if(!tableAlreadyExists) {
+            group.push( { tableNo: orders[i].tableNo, orders: [orders[i]] } );
+          }
         }
 
       }
 
-      console.log(JSON.stringify(orderObj));
       return orderObj;
     },
 
