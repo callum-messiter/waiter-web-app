@@ -104,7 +104,7 @@
                   type="text"
                   placeholder="Item name"
                   v-model="form.item.name"
-                  v-validate="{required: true, max: 30}"
+                  v-validate="{required: true, max: 100}"
                   data-vv-as="item name"
                 />
                 <span
@@ -138,7 +138,7 @@
                   type="text"
                   placeholder="Item description"
                   v-model="form.item.description"
-                  v-validate="{required: true, max: 40}"
+                  v-validate="{required: true, max: 500}"
                   data-vv-as="item description"
                 />
                 <span
