@@ -142,6 +142,8 @@
 
 <script>
 
+var newOrderNotification = new Audio('./static/audio/quite-impressed.mp3');
+
 // Components
 import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
 import PacmanLoader from 'vue-spinner/src/PulseLoader.vue';
@@ -256,6 +258,7 @@ export default {
         this.$store.commit('addNewOrder', order);
         // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
         this.sendUpdatedOrderStatusToBackend(order, this.statuses.receivedByKitchen);
+        newOrderNotification.play();
       };
     },
 
