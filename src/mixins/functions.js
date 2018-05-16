@@ -63,7 +63,7 @@ export default {
     handleApiError(res) {
       var msg = 'Oops! The waiter system experienced an error - please try again. If the issue persists, contact our support team.';
       if(res.body && res.body.errorKey) {
-        //msg = res.body.userMsg; // The API returns a user-friendly error message
+        msg = res.body.userMsg; // The API returns a user-friendly error message
 
       } else {
         if(res.status && res.statusText) {
@@ -75,7 +75,7 @@ export default {
           console.log(res);
         }
       }
-      this.displayFlashMsg('get out', 'error');
+      this.displayFlashMsg(msg, 'error');
       //this.showAlert('error', msg);
     },
 

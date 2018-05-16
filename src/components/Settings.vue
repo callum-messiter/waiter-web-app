@@ -353,6 +353,9 @@ import functions from '../mixins/functions';
 // Events bus
 import { bus } from '../main';
 
+import settings from '../../config/settings';
+const stripe = Stripe(settings.stripePubKey);
+
 export default {
 	name: 'Settings',
 	components: {
@@ -386,7 +389,7 @@ export default {
 					currency: '',
 					routing_number: '', // sort code
 					account_number: '',
-					account_holder_type: '',
+					account_holder_type: 'company',
 				}
 			},
 
@@ -447,8 +450,32 @@ export default {
 				// Bank account details -> waitr API -> Stripe API -> returns a token to be stored in `external_account`
 				this.forms.companyBankAccount.account_holder_name = this.defaults.comRep.fullName;
 				const bankAcc = this.forms.companyBankAccount;
+				stripe.createToken('bank_account', bankAcc)
+				.then((res) => {
+
+					const account = {
+						restaurantId: JSON.parse(localStorage.restaurant).restaurantId,
+						legal_entity_additional_owners: '',
+						external_account: res.token.id
+					}
+					return this.$http.patch('payment/updateStripeAccount', account, {
+						headers: {Authorization: JSON.parse(localStorage.user).token}
+					});
+
+				}).then((res) => {
+
+					if(res.status == 200 || res.status == 201) {
+						console.log(res.body);
+						return this.displayFlashMsg('Your details were successfully updated!', 'success');
+					}
+
+				}).catch((err) => {
+					this.displayFlashMsg(err, 'error');
+				});
+
 			}
 
+			/*
 			const account = this.buildAccountObject(tosDate, accToken);
 			// Add the restaurantId - a required param for the API
 			account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
@@ -458,13 +485,14 @@ export default {
 			}).then((res) => {
 
 				if(res.status == 200 || res.status == 201) {
-						console.log(res.body);
-					  this.displayFlashMsg('Your details were successfully updated!', 'success');
+					console.log(res.body);
+					this.displayFlashMsg('Your details were successfully updated!', 'success');
 				}
 
 			}).catch((res) => {
 				this.handleApiError(res);
 			});
+			*/
 		},
 
 		buildAccountObject(tosDate='', accToken='') {
