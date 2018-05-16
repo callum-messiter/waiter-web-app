@@ -385,9 +385,7 @@ export default {
                   {order1},
                   {order2}
                 ]
-             },
-             {order2},
-             {order3}
+             }
           }
         */
         const group = orderObj[column]; /* e.g. orders.received = [] */
