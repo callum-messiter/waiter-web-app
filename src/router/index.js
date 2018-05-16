@@ -25,10 +25,12 @@ export default new Router({
       name: 'LiveKitchen',
       component: LiveKitchen
     },
+    /*
     {
       path: '/settings',
       name: 'Settings',
       component: Settings
     },
+    */
   ]
 })
