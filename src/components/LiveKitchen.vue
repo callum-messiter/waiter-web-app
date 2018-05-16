@@ -1,5 +1,6 @@
 <template>
   <div class="container-fluid">
+    <audio id="newOrderNotification" src="./static/audio/quite-impressed.mp3"></audio>
     <div class="loading" v-if="loading.still">
       <clip-loader  
         :color="loading.spinnerColor" 
@@ -258,6 +259,7 @@ export default {
         this.$store.commit('addNewOrder', order);
         // Whenever we receive a new orer, we should send an order-status update to the server: "receivedByKitchen"
         this.sendUpdatedOrderStatusToBackend(order, this.statuses.receivedByKitchen);
+        const newOrderNotification = document.getElementById("newOrderNotification"); 
         newOrderNotification.play();
       };
     },
