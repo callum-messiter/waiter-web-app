@@ -32,7 +32,8 @@ export default new Vuex.Store({
 			name: null,
 			categories: []
 		},
-		orders: []
+		orders: [],
+		tableBreakdown: {}
 	},
 	mutations: {
 		/**
@@ -126,6 +127,27 @@ export default new Vuex.Store({
 					orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
 				}
 			}
+		},
+
+		/*
+			Tables (real-time info about the tables, e.g. how many people are sitting at a given table)
+		*/
+		setTable(state, tableInfo) {
+			state.tableBreakdown = tableInfo;
+		},
+
+		incrementActiveUsersAtTable(state, tableNo) {
+			const tb = state.tableBreakdown;
+			if(tb.hasOwnProperty(tableNo)) return tb[tableNo]++;
+			Vue.set(tb, tableNo, 1);
+		},
+
+		decrementActiveUsersAtTable(state, tableNo) {
+			const tb = state.tableBreakdown;
+			if(tb.hasOwnProperty(tableNo)) {
+				if(tb[tableNo] > 1) return tb[tableNo]--;
+				Vue.delete(tb, tableNo);
+			}
 		}
 
 	},
@@ -163,6 +185,13 @@ export default new Vuex.Store({
 				orders: state.orders,
 				numOrders: {received: received, accepted: accepted}
 			}
+		},
+
+		/**
+			Tables
+		**/
+		getLiveTableBreakdown(state) {
+			return state.tableBreakdown;
 		}
 	}
 });

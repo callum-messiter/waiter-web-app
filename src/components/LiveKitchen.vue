@@ -25,12 +25,11 @@
         <div v-for="table in orders.received" class="table">
           <h4 style="color: white">Table {{table.tableNo}} <icon name="users"></icon></h4>
 
-          <!-- 
-          <div class="orderIncoming row" v-if="key == 10">
+          <div class="orderIncoming row" v-if="tableBreakdown[table.tableNo] > 0">
             <pacman-loader :color="orderIncoming.color" :size="orderIncoming.size"></pacman-loader>
-            <p class="orderIncomingMsg">Hold on - someone else from table {{key}} is currently placing an order</p>
+            <p class="orderIncomingMsg">Hold on - someone else from table {{table.tableNo}} is currently placing an order</p>
           </div>
-          -->
+
           <div 
             v-for="order in table.orders"
             class="panel panel-default"
@@ -212,6 +211,7 @@ export default {
   },
 
   methods: {
+
     intermittentlyUpdateTimeSinceOrdersWerePlaced() {
       // Intermittently update each order's "time ago" property
       window.setInterval(() => {
@@ -417,12 +417,8 @@ export default {
       return this.$store.getters.getLiveOrders.numOrders
     },
 
-    statusesVisibleToKitchen() {
-      return [
-        this.statuses.sentToKitchen,
-        this.statuses.receivedByKitchen,
-        this.statuses.acceptedByKitchen
-      ]
+    tableBreakdown() {
+      return this.$store.getters.getLiveTableBreakdown;
     }
   }
 }
