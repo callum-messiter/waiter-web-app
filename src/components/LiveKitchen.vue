@@ -206,6 +206,7 @@ export default {
   created() {
     this.getAllLiveOrdersForRestaurant();
     this.listenForNewOrdersFromServer();
+    this.listenForTableUpdatesFromServer();
     this.listenForServerConfirmationOfOrderStatusUpdate();
     this.intermittentlyUpdateTimeSinceOrdersWerePlaced();
   },
@@ -251,6 +252,12 @@ export default {
       emits the 'neworder' event to these sockets; here we handle this event
     **/
     listenForNewOrdersFromServer() {
+      this.$options.sockets['tableUpdate'] = (data) => {
+        this.$store.commit('incrementActiveUsersAtTable', data.tableNo);
+      };
+    },
+
+    listenForTableUpdatesFromServer() {
       this.$options.sockets['newOrder'] = (order) => {
         // order.time is a utc timestamp (milliseconds); since 
         // machine clocks are not necessarily synchronised, remove 20 secs from the time to avoid ("in a few seconds")
