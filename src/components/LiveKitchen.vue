@@ -205,6 +205,7 @@ export default {
 
   created() {
     this.getAllLiveOrdersForRestaurant();
+    this.getUpToDateTableBreakdown();
     this.listenForNewOrdersFromServer();
     this.listenForTableUpdatesFromServer();
     this.listenForServerConfirmationOfOrderStatusUpdate();
@@ -252,7 +253,7 @@ export default {
       emits the 'neworder' event to these sockets; here we handle this event
     **/
     listenForTableUpdatesFromServer() {
-      this.$options.sockets['userJoinedTable'] = (data) => {
+      this.$options.sockets['userJoinedTable'] = (data) => {  
         this.$store.commit('incrementActiveUsersAtTable', data.tableNo);
       };
 
@@ -315,6 +316,23 @@ export default {
 
       }).catch((res) => {
         this.handleApiError(res);
+      });
+    },
+
+    getUpToDateTableBreakdown() {
+      const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
+
+      this.$http.get('table/users/'+restaurantId, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+      }).then((res) => {
+
+        const tblUsers = res.body.data;
+        for(var i = 0; i < tblUsers.length; i++) {
+          this.$store.commit('incrementActiveUsersAtTable', tblUsers[0].tableNo);
+        }
+
+      }).catch((err) => {
+        this.handleApiError(err);
       });
     },
 
