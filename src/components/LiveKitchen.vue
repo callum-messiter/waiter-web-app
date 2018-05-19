@@ -253,8 +253,11 @@ export default {
     **/
     listenForTableUpdatesFromServer() {
       this.$options.sockets['userJoinedTable'] = (data) => {
-        console.log('got table update');
-        this.$store.commit('incrementActiveUsersAtTable', data.tableBreakdown);
+        this.$store.commit('incrementActiveUsersAtTable', data.tableNo);
+      };
+
+      this.$options.sockets['userLeftTable'] = (data) => {
+        this.$store.commit('decrementActiveUsersAtTable', data.tableNo);
       };
     },
 
