@@ -251,13 +251,14 @@ export default {
       The server finds all sockets which represent the restaurant who is the intended recipient of the order. It then
       emits the 'neworder' event to these sockets; here we handle this event
     **/
-    listenForNewOrdersFromServer() {
-      this.$options.sockets['tableUpdate'] = (data) => {
-        this.$store.commit('incrementActiveUsersAtTable', data.tableNo);
+    listenForTableUpdatesFromServer() {
+      this.$options.sockets['userJoinedTable'] = (data) => {
+        console.log('got table update');
+        this.$store.commit('incrementActiveUsersAtTable', data.tableBreakdown);
       };
     },
 
-    listenForTableUpdatesFromServer() {
+    listenForNewOrdersFromServer() {
       this.$options.sockets['newOrder'] = (order) => {
         // order.time is a utc timestamp (milliseconds); since 
         // machine clocks are not necessarily synchronised, remove 20 secs from the time to avoid ("in a few seconds")
