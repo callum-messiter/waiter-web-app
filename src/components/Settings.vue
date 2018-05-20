@@ -446,53 +446,44 @@ export default {
 			const tosDate = Math.floor(Date.now() / 1000);
 
 			var accToken = '';
-			if(scope == 'companyBankAccount') {
-				// Bank account details -> waitr API -> Stripe API -> returns a token to be stored in `external_account`
-				this.forms.companyBankAccount.account_holder_name = this.defaults.comRep.fullName;
-				const bankAcc = this.forms.companyBankAccount;
-				stripe.createToken('bank_account', bankAcc)
-				.then((res) => {
+			this.tokeniseBankAccount(scope, this.forms.companyBankAccount)
+			.then((res) => {
 
-					const account = {
-						restaurantId: JSON.parse(localStorage.restaurant).restaurantId,
-						legal_entity_additional_owners: '',
-						external_account: res.token.id
-					}
-					return this.$http.patch('payment/updateStripeAccount', account, {
-						headers: {Authorization: JSON.parse(localStorage.user).token}
-					});
+				if(res.created) { accToken = res.token; }
+				const account = this.buildAccountObject(tosDate, accToken);
+				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
 
-				}).then((res) => {
-
-					if(res.status == 200 || res.status == 201) {
-						console.log(res.body);
-						return this.displayFlashMsg('Your details were successfully updated!', 'success');
-					}
-
-				}).catch((err) => {
-					this.displayFlashMsg(err, 'error');
+				if(!res.created) return true;
+				return this.$http.patch('payment/updateStripeAccount', account, {
+					headers: {Authorization: JSON.parse(localStorage.user).token}
 				});
 
-			}
-
-			/*
-			const account = this.buildAccountObject(tosDate, accToken);
-			// Add the restaurantId - a required param for the API
-			account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-			// Send the upated account object to our API, which will handle sending it to Stripe
-			this.$http.patch('payment/updateStripeAccount', account, {
-				headers: {Authorization: JSON.parse(localStorage.user).token}
 			}).then((res) => {
 
+				if(res === true) return true;
 				if(res.status == 200 || res.status == 201) {
-					console.log(res.body);
 					this.displayFlashMsg('Your details were successfully updated!', 'success');
 				}
 
-			}).catch((res) => {
-				this.handleApiError(res);
+			}).catch((err) => {
+				this.handleApiError(err);
 			});
-			*/
+		},
+
+		tokeniseBankAccount(scope, bankAcc) {
+			return new Promise((resolve, reject) => {
+				if(scope != 'companyBankAccount') return resolve({created: false, token: null});
+
+				stripe.createToken('bank_account', bankAcc)
+				.then((res) => {
+					return resolve({
+						created: true,
+						token: res.token.id
+					});
+				}).catch((err) => {
+					return reject(err);
+				});
+			});
 		},
 
 		buildAccountObject(tosDate='', accToken='') {
