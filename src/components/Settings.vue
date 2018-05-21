@@ -311,9 +311,12 @@ export default {
 
 				var dob = {};
 				if(this.malformedDob != "") {
+					if(this.isValidDate(this.malformedDob)) {
+						throw {fieldsInvalid: true, error: 'Please provide a valid date of birth.'};
+					}
 					dob = this.setDob(this.malformedDob); /* Split date into its three component */
 				}
-				console.log('dob: ' + JSON.stringify(dob));
+
 				const account = this.buildAccountObject(tosDate, accToken, dob);
 				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
 				return this.$http.patch('payment/updateStripeAccount', account, {
@@ -376,6 +379,14 @@ export default {
 				month: date[1], 
 				day: date[2]
 			}
+		},
+
+		isValidDate(dateString) {
+			const regEx = /^\d{4}-\d{2}-\d{2}$/;
+			if(!dateString.match(regEx)) return false;  /* Invalid format */
+			const d = new Date(dateString);
+			if(!d.getTime() && d.getTime() !== 0) return false; /* Invalid date */
+			return d.toISOString().slice(0,10) === dateString;
 		},
 
 		buildAccountObject(tosDate='', accToken='', dob) {
