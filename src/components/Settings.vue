@@ -311,7 +311,7 @@ export default {
 
 				var dob = {};
 				if(this.malformedDob != "") {
-					if(this.isValidDate(this.malformedDob)) {
+					if(!this.isValidDate(this.malformedDob)) {
 						throw {fieldsInvalid: true, error: 'Please provide a valid date of birth.'};
 					}
 					dob = this.setDob(this.malformedDob); /* Split date into its three component */
