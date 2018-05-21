@@ -60,31 +60,21 @@ export default {
     /**
       We will handle every API error like this, in the catch block of our promise
     **/
-    handleApiError(res) {
+    handleApiError(err) {
       var msg = 'Oops! The waiter system experienced an error - please try again. If the issue persists, contact our support team.';
-      if(res.body && res.body.errorKey) {
-        msg = res.body.userMsg; // The API returns a user-friendly error message
-
-      } else {
-        if(res.status && res.statusText) {
-          // Save to server logs (once implemented)
-          console.log(res.status + " " + res.statusText);
-
-        } else {
-          // Save to server logs (once implemented)
-          console.log(res);
-        }
+      if(err === undefined) return this.displayFlashMsg(msg, 'error');
+      if(err.body === undefined) return this.displayFlashMsg(msg, 'error');
+      
+      if(err.body.userMsg === undefined) {
+        console.log(err);
+        return this.displayFlashMsg(msg, 'error');
       }
+      msg = err.body.userMsg; /* The API returns a user-friendly error message */
       this.displayFlashMsg(msg, 'error');
-      //this.showAlert('error', msg);
     },
 
     displayFlashMsg(msg, type) {
-      if(type == 'error') {
-        msg = 'Oops! '+msg
-      }
-      console.log('displayFlashMsg ' + msg);
-      // TODO: Get the error, update the message, and reset the timer
+      // if(type == 'error') { msg = 'Oops! ' + msg }
       this.flash().destroyAll();
       setTimeout(() => {
         this.flash(msg, type, { timeout: 5000 }); 

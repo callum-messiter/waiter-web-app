@@ -199,7 +199,8 @@
 			      <div class="input-row">
 			        <icon name="globe"></icon>
 			        <!-- Dropdown list with country codes -->
-			        <input 
+			        <input
+			        	readonly 
 			        	name="country"
 			        	v-model="forms['companyBankAccount'].country"
 			        	placeholder="Country"
@@ -211,6 +212,7 @@
 			        <icon name="pound-sign"></icon>
 			        <!-- Dropdown list with country codes -->
 			        <input 
+			        	readonly
 			        	name="currency"
 			        	v-model="forms['companyBankAccount'].currency"
 			        	placeholder="Currency"
@@ -271,8 +273,8 @@ export default {
 				},
 				// These details are sent to Stripe's API, and a token is returned. We store this token in the external_account param
 				companyBankAccount: {
-					country: '',
-					currency: '',
+					country: 'GB',
+					currency: 'gbp',
 					routing_number: '', // sort code
 					account_number: '',
 					account_holder_type: 'company',
@@ -295,26 +297,23 @@ export default {
 	methods: {
 
 		submit(scope) {
-
-			// Check if the required fields are set
-			this.$validator.validateAll(scope).then((result) => {
-				if(this.errors.any(scope)) {
-				  this.displayFlashMsg(this.errors.all(scope)[0], 'error');
-				  return;
-				}
-				// If there are no errors, destroy any message that is visible
-				this.flash().destroyAll();
-			});
-
 			/* If the user clicks "Accept" to TOS, set the date and IP (we will only show the TOS once) */
 			const tosDate = Math.floor(Date.now() / 1000);
-			const dob = this.setDob(this.malformedDob); /* Split date into its three component */
 			var accToken = '';
 
-			this.tokeniseBankAccount(scope, this.forms.companyBankAccount)
-			.then((res) => {
+			/* Check if the required fields are set */
+			this.validateFields(scope)
+			.then(() => {
+				return this.tokeniseBankAccount(scope, this.forms.companyBankAccount);
+			}).then((res) => {
 
 				if(res.created) { accToken = res.token; }
+
+				const dob = {};
+				if(this.malformedDob != "") {
+					const dob = this.setDob(this.malformedDob); /* Split date into its three component */
+				}
+
 				const account = this.buildAccountObject(tosDate, accToken, dob);
 				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
 				console.log(account);
@@ -329,17 +328,30 @@ export default {
 				}
 
 			}).catch((err) => {
+				console.log('err catch: ' + JSON.stringify(err));
+				if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
+					return this.displayFlashMsg(err.error, 'error');
+				}
 				this.handleApiError(err);
 			});
 		},
 
-		setDob(malformedDob) {
-			const date = malformedDob.split('-'); /* e.g. ["1994", "07", "08"] */
-			return {
-				year: date[0], 
-				month: date[1], 
-				day: date[2]
-			}
+		validateFields(scope) {
+			return new Promise((resolve, reject) => {
+				this.$validator.validateAll(scope)
+				.then(() => {
+					if(this.errors.any(scope)) return reject({
+						fieldsInvalid: true, 
+						error: this.errors.all(scope)[0] 
+					});
+					return resolve({
+						fieldsInvalid: false,
+						error: null
+					});
+				}).catch((err) => {
+					return reject(err);
+				});
+			});
 		},
 
 		tokeniseBankAccount(scope, bankAcc) {
@@ -356,6 +368,15 @@ export default {
 					return reject(err);
 				});
 			});
+		},
+
+		setDob(malformedDob) {
+			const date = malformedDob.split('-'); /* e.g. ["1994", "07", "08"] */
+			return {
+				year: date[0], 
+				month: date[1], 
+				day: date[2]
+			}
 		},
 
 		buildAccountObject(tosDate='', accToken='', dob) {
@@ -383,9 +404,6 @@ export default {
 						postal_code: this.forms.companyRep.legal_entity_personal_address_postal_code
 					},
 					dob: {
-						day: dob.day,
-						month: dob.month,
-						year: dob.year
 					}
 				}
 			}
