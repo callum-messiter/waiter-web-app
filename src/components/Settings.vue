@@ -309,20 +309,19 @@ export default {
 
 				if(res.created) { accToken = res.token; }
 
-				const dob = {};
+				var dob = {};
 				if(this.malformedDob != "") {
-					const dob = this.setDob(this.malformedDob); /* Split date into its three component */
+					dob = this.setDob(this.malformedDob); /* Split date into its three component */
 				}
-
+				console.log('dob: ' + JSON.stringify(dob));
 				const account = this.buildAccountObject(tosDate, accToken, dob);
 				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-				console.log(account);
 				return this.$http.patch('payment/updateStripeAccount', account, {
 					headers: {Authorization: JSON.parse(localStorage.user).token}
 				});
 
 			}).then((res) => {
-
+				console.log(res);
 				if(res.status == 200 || res.status == 201) {
 					this.displayFlashMsg('Your details were successfully updated!', 'success');
 				}
@@ -404,6 +403,9 @@ export default {
 						postal_code: this.forms.companyRep.legal_entity_personal_address_postal_code
 					},
 					dob: {
+						day: dob.day || this.forms.companyRep.legal_entity_dob_day,
+						month: dob.month || this.forms.companyRep.legal_entity_dob_month,
+						year: dob.year || this.forms.companyRep.legal_entity_dob_year
 					}
 				}
 			}
