@@ -292,9 +292,23 @@ export default {
 	},
 
 	created () {
+		this.getRestaurantDetailsFromBackend();
 	},
 
 	methods: {
+
+		getRestaurantDetailsFromBackend() {
+			this.$http.get('restaurant/' + JSON.parse(localStorage.restaurant).restaurantId, {
+				headers: {Authorization: JSON.parse(localStorage.user).token}
+			}).then((res) => {
+				/* Set state */
+				/* Hide loading spinner */
+				// this.loading.still = false;
+				console.log(res);
+			}).catch((err) => {
+				this.handleApiError(err);
+			});
+		},
 
 		submit(scope) {
 			/* If the user clicks "Accept" to TOS, set the date and IP (we will only show the TOS once) */
@@ -324,17 +338,20 @@ export default {
 				});
 
 			}).then((res) => {
-				console.log(res);
+
 				if(res.status == 200 || res.status == 201) {
+					this.loading.still = false;
 					this.displayFlashMsg('Your details were successfully updated!', 'success');
 				}
 
 			}).catch((err) => {
-				console.log('err catch: ' + JSON.stringify(err));
+
 				if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
 					return this.displayFlashMsg(err.error, 'error');
 				}
+				this.loading.still = false;
 				this.handleApiError(err);
+			
 			});
 		},
 
@@ -342,14 +359,15 @@ export default {
 			return new Promise((resolve, reject) => {
 				this.$validator.validateAll(scope)
 				.then(() => {
-					if(this.errors.any(scope)) return reject({
-						fieldsInvalid: true, 
-						error: this.errors.all(scope)[0] 
-					});
-					return resolve({
-						fieldsInvalid: false,
-						error: null
-					});
+
+					var response = {fieldsInvalid: false, error: null};
+					if(this.errors.any(scope)) {
+						response.fieldsInvalid = true;
+						response.error = this.errors.all(scope)[0];
+						return reject(response);
+					}
+					return resolve(response);
+
 				}).catch((err) => {
 					return reject(err);
 				});
