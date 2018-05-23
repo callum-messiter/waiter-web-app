@@ -33,7 +33,7 @@ export default new Vuex.Store({
 			categories: []
 		},
 		orders: [],
-		details: {}
+		stripeAccount: {}
 	},
 	mutations: {
 		/**
@@ -132,8 +132,8 @@ export default new Vuex.Store({
 		/**
 			Restaurant details
 		**/
-		setRestaurantDetails(state, details) {
-			Object.assign(state.details, details);
+		setRestaurantStripeAccount(state, account) {
+			Object.assign(state.stripeAccount, account);
 		}
 
 	},
@@ -176,8 +176,8 @@ export default new Vuex.Store({
 		/**
 			Restaurant Details
 		**/
-		getRestaurantDetails(state) {
-			return state.details;
+		getRestaurantStripeAccount(state) {
+			return state.stripeAccount;
 		}
 	}
 });
