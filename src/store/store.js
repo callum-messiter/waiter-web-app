@@ -32,7 +32,8 @@ export default new Vuex.Store({
 			name: null,
 			categories: []
 		},
-		orders: []
+		orders: [],
+		details: {}
 	},
 	mutations: {
 		/**
@@ -126,6 +127,13 @@ export default new Vuex.Store({
 					orders[i].timeAgo = moment(orders[i].time).utc().fromNow();
 				}
 			}
+		},
+
+		/**
+			Restaurant details
+		**/
+		setRestaurantDetails(state, details) {
+			Object.assign(state.details, details);
 		}
 
 	},
@@ -163,6 +171,13 @@ export default new Vuex.Store({
 				orders: state.orders,
 				numOrders: {received: received, accepted: accepted}
 			}
+		},
+
+		/**
+			Restaurant Details
+		**/
+		getRestaurantDetails(state) {
+			return state.details;
 		}
 	}
 });

@@ -66,6 +66,7 @@
 			        <icon name="money-bill-alt"></icon>
 			        <input 
 			        	name="legal_entity_business_tax_id"
+			        	type="password"
 			        	v-model="forms['companyDetails'].legal_entity_business_tax_id"
 			        	placeholder="Companies House Reg Number"
 			        	v-validate="{ max: 200, required: true }"
@@ -113,7 +114,7 @@
 			        	placeholder="Date of Birth"
 			        	onfocus="(this.type='date')" 
 			        	onblur="(this.type='text')"
-			        	v-model="malformedDob"
+			        	v-model="dateString"
 			        	v-validate="{ required: true }"
 			        	data-vv-as="Date of Birth"
 			        />
@@ -178,6 +179,7 @@
 			        <icon name="credit-card"></icon>
 			        <input 
 			        	name="account_number"
+			        	type="password"
 			        	v-model="forms['companyBankAccount'].account_number"
 			        	placeholder="Account Number"
 			        	v-validate="{ numeric: true, required: true }"
@@ -189,6 +191,7 @@
 			        <icon name="credit-card"></icon>
 			        <input 
 			        	name="routing_number"
+			        	type="password"
 			        	v-model="forms['companyBankAccount'].routing_number"
 			        	placeholder="Sort Code"
 			        	v-validate="{ numeric: true, required: true }"
@@ -256,6 +259,8 @@ export default {
 			// We should also get these details from Stripe's API and populate the inputs with them
 			forms: {
 				companyDetails: {
+					legal_entity_type: 'company',
+					legal_entity_business_name: JSON.parse(localStorage.getItem('restaurant')).name || '',
 					legal_entity_address_line1: '',
 					legal_entity_address_city: '',
 					legal_entity_address_postal_code: '',
@@ -264,9 +269,8 @@ export default {
 				companyRep: {
 					tos_acceptance_date: '',
 					tos_acceptance_ip: '',
-					legal_entity_dob_day: '',
-					legal_entity_dob_month: '',
-					legal_entity_dob_year: '',
+					legal_entity_first_name: JSON.parse(localStorage.getItem('user')).firstName || '',
+					legal_entity_last_name: JSON.parse(localStorage.getItem('user')).lastName || '',
 					legal_entity_personal_address_line1: '',
 					legal_entity_personal_address_city: '',
 					legal_entity_personal_address_postal_code: ''
@@ -278,9 +282,12 @@ export default {
 					routing_number: '', // sort code
 					account_number: '',
 					account_holder_type: 'company',
+					account_holder_name: 
+						JSON.parse(localStorage.getItem('user')).firstName + ' ' + 
+						JSON.parse(localStorage.getItem('user')).lastName
 				}
 			},
-			malformedDob: '',
+			dateString: '',
 
 			loading: {
 				still: true,
@@ -301,10 +308,9 @@ export default {
 			this.$http.get('restaurant/' + JSON.parse(localStorage.restaurant).restaurantId, {
 				headers: {Authorization: JSON.parse(localStorage.user).token}
 			}).then((res) => {
-				/* Set state */
-				/* Hide loading spinner */
+				this.$store.commit('setRestaurantDetails', res.body);
 				// this.loading.still = false;
-				console.log(res);
+				this.autoFillFormsWithRestaurantDetails(this.restaurantDetails.stripe);
 			}).catch((err) => {
 				this.handleApiError(err);
 			});
@@ -323,15 +329,7 @@ export default {
 
 				if(res.created) { accToken = res.token; }
 
-				var dob = {};
-				if(this.malformedDob != "") {
-					if(!this.isValidDate(this.malformedDob)) {
-						throw {fieldsInvalid: true, error: 'Please provide a valid date of birth.'};
-					}
-					dob = this.setDob(this.malformedDob); /* Split date into its three component */
-				}
-
-				const account = this.buildAccountObject(tosDate, accToken, dob);
+				const account = this.buildAccountObject(tosDate, accToken);
 				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
 				return this.$http.patch('payment/updateStripeAccount', account, {
 					headers: {Authorization: JSON.parse(localStorage.user).token}
@@ -390,8 +388,8 @@ export default {
 			});
 		},
 
-		setDob(malformedDob) {
-			const date = malformedDob.split('-'); /* e.g. ["1994", "07", "08"] */
+		setDob(dateString) {
+			const date = dateString.split('-'); /* e.g. ["1994", "07", "08"] */
 			return {
 				year: date[0], 
 				month: date[1], 
@@ -407,18 +405,19 @@ export default {
 			return d.toISOString().slice(0,10) === dateString;
 		},
 
-		buildAccountObject(tosDate='', accToken='', dob) {
-			return {
+		buildAccountObject(tosDate='', accToken='') {
+			/* Go through each param and check: is it set/does it differ from current value; then set */
+			var acc = {
 				external_account: accToken,
 				tos_acceptance: {
 					date: tosDate,
 					ip: '' /* Set this on the server side: req.connection.remoteAddress */
 				},
 				legal_entity: {
-					first_name: this.defaults.comRep.firstName,
-					last_name: this.defaults.comRep.lastName,
+					first_name: this.forms.companyRep.legal_entity_first_name,
+					last_name: this.forms.companyRep.legal_entity_last_name,
 					type: 'company',
-					business_name: this.defaults.restaurantName,
+					business_name: this.forms.companyDetails.legal_entity_business_name,
 					business_tax_id: this.forms.companyDetails.legal_entity_business_tax_id,
 					additional_owners: '', /* Later, we may provide an option for user to provide this info */
 					address : {
@@ -430,20 +429,49 @@ export default {
 						line1: this.forms.companyRep.legal_entity_personal_address_line1,
 						city: this.forms.companyRep.legal_entity_personal_address_city,
 						postal_code: this.forms.companyRep.legal_entity_personal_address_postal_code
-					},
-					dob: {
-						day: dob.day || this.forms.companyRep.legal_entity_dob_day,
-						month: dob.month || this.forms.companyRep.legal_entity_dob_month,
-						year: dob.year || this.forms.companyRep.legal_entity_dob_year
 					}
 				}
 			}
+			/* If datestring is set, split into day, month, year and add it to acc obj (show validation error) */
+			if(this.isValidDate(this.dateString)) { acc.legal_entity.dob = this.setDob(this.dateString); }
 
+		},
+
+		autoFillFormsWithRestaurantDetails(rd) {
+			/* Check if TOS are accepted yet */
+			/* Check if Stripe account is verified */
+			const cd = this.forms.companyDetails;
+			const cr = this.forms.companyRep;
+			const cba = this.forms.companyBankAccount;
+
+			cd.legal_entity_business_name = rd.companyName || '';
+			cd.legal_entity_address_line1 = rd.companyAddress.line1 || '';
+			cd.legal_entity_address_city = rd.companyAddress.city || '';
+			cd.legal_entity_address_postal_code = rd.companyAddress.postcode || '';
+			cd.legal_entity_business_tax_id = (rd.taxIdProvided === true) ? '_cHRegNo' : '';
+
+			this.dateString = rd.companyRep.dob || ''; /* The date field requires a datestring 	*/
+			cr.legal_entity_first_name = rd.companyRep.firstName || '';
+			cr.legal_entity_last_name = rd.companyRep.lastName || '';
+			cr.legal_entity_personal_address_line1 = rd.companyRep.address.line1 || '';
+			cr.legal_entity_personal_address_city = rd.companyRep.address.city || '';
+			cr.legal_entity_personal_address_postal_code = rd.companyRep.address.postcode || '';
+
+			cba.country = rd.country || 'GB';
+			cba.currency = rd.currency || 'gbp';
+			cba.routing_number = (rd.companyBankAccount.isConnected === false) ? '_routNum' : '';
+			cba.account_number = (rd.companyBankAccount.isConnected === false) ? '_acctNum' : '';
+			cba.account_holder_type = rd.companyBankAccount.holderType || 'company';
+			cba.account_holder_name = rd.companyBankAccount.holderName || ''
 		}
 
 	},
 
 	computed: {
+		restaurantDetails() {
+			return this.$store.getters.getRestaurantDetails;
+		},
+
 		defaults() {
 			var full = '';
 			const fn = JSON.parse(localStorage.getItem('user')).firstName || '';
