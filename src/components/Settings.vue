@@ -331,6 +331,7 @@ export default {
 
 				const account = this.buildAccountObject(tosDate, accToken);
 				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
+				console.log(account);
 				return this.$http.patch('payment/updateStripeAccount', account, {
 					headers: {Authorization: JSON.parse(localStorage.user).token}
 				});
@@ -343,7 +344,7 @@ export default {
 				}
 
 			}).catch((err) => {
-
+				console.log(err);
 				if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
 					return this.displayFlashMsg(err.error, 'error');
 				}
@@ -407,34 +408,103 @@ export default {
 
 		buildAccountObject(tosDate='', accToken='') {
 			/* Go through each param and check: is it set/does it differ from current value; then set */
-			var acc = {
-				external_account: accToken,
-				tos_acceptance: {
-					date: tosDate,
-					ip: '' /* Set this on the server side: req.connection.remoteAddress */
-				},
-				legal_entity: {
-					first_name: this.forms.companyRep.legal_entity_first_name,
-					last_name: this.forms.companyRep.legal_entity_last_name,
-					type: 'company',
-					business_name: this.forms.companyDetails.legal_entity_business_name,
-					business_tax_id: this.forms.companyDetails.legal_entity_business_tax_id,
-					additional_owners: '', /* Later, we may provide an option for user to provide this info */
-					address : {
-						line1: this.forms.companyDetails.legal_entity_address_line1,
-						city: this.forms.companyDetails.legal_entity_address_city,
-						postal_code: this.forms.companyDetails.legal_entity_address_postal_code
-					},
-					personal_address: {
-						line1: this.forms.companyRep.legal_entity_personal_address_line1,
-						city: this.forms.companyRep.legal_entity_personal_address_city,
-						postal_code: this.forms.companyRep.legal_entity_personal_address_postal_code
-					}
-				}
+			const cd = this.forms.companyDetails;
+			const cr = this.forms.companyRep;
+			const cba = this.forms.companyBankAccount;
+			var acc = {};
+			
+			/* `tos` */
+			if(this.isSetAndNotEmpty(tosDate)) {
+				acc.tos_acceptance = { date: tosDate, ip: '' }; /* `ip` will be set by the server */
 			}
-			/* If datestring is set, split into day, month, year and add it to acc obj (show validation error) */
-			if(this.isValidDate(this.dateString)) { acc.legal_entity.dob = this.setDob(this.dateString); }
 
+			if(this.isSetAndNotEmpty(accToken)) {
+				acc.external_account = accToken;
+			}
+
+			/* `legal_entity` */
+			const le = {};
+			if(this.isSetAndNotEmpty(cr.legal_entity_first_name)) {
+				le.first_name = cr.legal_entity_first_name; /* Update the obj */
+				acc.legal_entity = le; /* Set this obj as a prop of the parent obj; overwrite if already set */
+			}
+
+			if(this.isSetAndNotEmpty(cr.legal_entity_last_name)) {
+				le.last_name = cr.legal_entity_last_name;
+				acc.legal_entity = le;
+			}
+
+			if(this.isSetAndNotEmpty(cd.legal_entity_type)) {
+				le.type = cd.legal_entity_type;
+				acc.legal_entity = le;
+			}
+
+			if(this.isSetAndNotEmpty(cd.legal_entity_business_name)) {
+				le.business_name = cd.legal_entity_business_name;
+				acc.legal_entity = le;
+			}
+
+			if(this.isSetAndNotEmpty(cd.legal_entity_business_tax_id)) {
+				le.business_tax_id = cd.legal_entity_business_tax_id;
+				acc.legal_entity = le;
+			}
+
+			if(this.isSetAndNotEmpty(cd.legal_entity_business_tax_id)) {
+				le.business_tax_id = cd.legal_entity_business_tax_id;
+				acc.legal_entity = le;
+			}
+
+			/* For now we don't collect this info; just tell Stripe there are none */
+			le.additional_owners = '';
+			acc.legal_entity = le;
+			
+			/* `legal_entity.address` */
+			var a = {};
+			if(this.isSetAndNotEmpty(cd.legal_entity_address_line1)) {
+				a.line1 = cd.legal_entity_address_line1;
+				le.address = a;
+				acc.legal_entity = le;
+			}
+
+			if(this.isSetAndNotEmpty(cd.legal_entity_address_city)) {
+				a.city = cd.legal_entity_address_city;
+				le.address = a;
+				acc.legal_entity = le;
+			}
+
+			if(this.isSetAndNotEmpty(cd.legal_entity_address_postal_code)) {
+				a.postal_code = cd.legal_entity_address_postal_code;
+				le.address = a;
+				acc.legal_entity = le;
+			}
+
+			/* `legal_entity.personal_address` */
+			var pa = {};
+			if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_line1)) {
+				pa.line1 = cr.legal_entity_personal_address_line1;
+				le.personal_address = pa;
+				acc.legal_entity = le;
+			}
+
+			if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_city)) {
+				pa.city = cr.legal_entity_personal_address_city;
+				le.personal_address = pa;
+				acc.legal_entity = le;
+			}
+
+			if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_postal_code)) {
+				pa.postal_code = cr.legal_entity_personal_address_postal_code;
+				le.personal_address = pa;
+				acc.legal_entity = le;
+			}
+
+			/* `legal_entity.dob`(split datestring into day, month, year) */
+			if(this.isValidDate(this.dateString)) {
+				le.dob = this.setDob(this.dateString);
+				acc.legal_entity = le;
+			}
+
+			return acc;
 		},
 
 		autoFillFormsWithRestaurantDetails(rd) {
@@ -463,6 +533,12 @@ export default {
 			cba.account_number = (rd.companyBankAccount.isConnected === false) ? '_acctNum' : '';
 			cba.account_holder_type = rd.companyBankAccount.holderType || 'company';
 			cba.account_holder_name = rd.companyBankAccount.holderName || ''
+		},
+
+		isSetAndNotEmpty(param) {
+			if(param === undefined) return false;
+			if(param.toString().replace(/\s+/g, '') == '') return false;
+			return true;
 		}
 
 	},
