@@ -21,7 +21,7 @@
 			        <icon name="building"></icon>
 			        <input 
 			        	name="legal_entity_business_name" 
-			        	v-model="defaults.restaurantName"
+			        	v-model="forms.companyDetails.legal_entity_business_name"
 			        	placeholder="Company Name"
 			        	v-validate="{ max: 200, required: true }"
 			        	data-vv-as="Company Name"
@@ -88,7 +88,7 @@
 			        <icon name="user"></icon>
 			        <input 
 			        	name="legal_entity_first_name"
-			        	v-model="defaults.comRep.firstName"
+			        	v-model="forms.companyRep.legal_entity_first_name"
 			        	placeholder="First Name"
 			        	v-validate="{ max: 100, required: true }"
 			        	data-vv-as="First Name"
@@ -99,7 +99,7 @@
 			        <icon name="user"></icon>
 			        <input 
 			        	name="legal_entity_last_name"
-			        	v-model="defaults.comRep.lastName"
+			        	v-model="forms.companyRep.legal_entity_last_name"
 			        	placeholder="Last Name"
 			        	v-validate="{ max: 100, required: true }"
 			        	data-vv-as="Last Name"
@@ -168,7 +168,7 @@
 			        <icon name="user"></icon>
 			        <input 
 			        	name="account_holder_name" 
-			        	v-model="defaults.comRep.fullName"
+			        	v-model="forms.companyBankAccount.account_holder_name"
 			        	placeholder="Account Holder Name"
 			        	v-validate="{ max: 205, required: true }"
 			        	data-vv-as="Account Holder Name"
@@ -234,16 +234,10 @@
 
 <script>
 
-// Components
 import RestaurantMenu from './RestaurantMenu';
 import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
-
-// Mixins
 import functions from '../mixins/functions';
-
-// Events bus
-import { bus } from '../main';
-
+import underscore from 'underscore';
 import settings from '../../config/settings';
 const stripe = Stripe(settings.stripePubKey);
 
@@ -282,9 +276,7 @@ export default {
 					routing_number: '', // sort code
 					account_number: '',
 					account_holder_type: 'company',
-					account_holder_name: 
-						JSON.parse(localStorage.getItem('user')).firstName + ' ' + 
-						JSON.parse(localStorage.getItem('user')).lastName
+					account_holder_name: JSON.parse(localStorage.getItem('user')).firstName + ' ' + JSON.parse(localStorage.getItem('user')).lastName
 				}
 			},
 			dateString: '',
@@ -299,6 +291,7 @@ export default {
 	},
 
 	created () {
+		/* TODO: use loading spinner; only show the form data once the API returns the payload */
 		this.getRestaurantDetailsFromBackend();
 	},
 
@@ -308,6 +301,7 @@ export default {
 			this.$http.get('restaurant/' + JSON.parse(localStorage.restaurant).restaurantId, {
 				headers: {Authorization: JSON.parse(localStorage.user).token}
 			}).then((res) => {
+				console.log(res.body);
 				this.$store.commit('setRestaurantDetails', res.body);
 				// this.loading.still = false;
 				this.autoFillFormsWithRestaurantDetails(this.restaurantDetails.stripe);
@@ -318,7 +312,6 @@ export default {
 
 		submit(scope) {
 			/* If the user clicks "Accept" to TOS, set the date and IP (we will only show the TOS once) */
-			const tosDate = Math.floor(Date.now() / 1000);
 			var accToken = '';
 
 			/* Check if the required fields are set */
@@ -329,22 +322,26 @@ export default {
 
 				if(res.created) { accToken = res.token; }
 
-				const account = this.buildAccountObject(tosDate, accToken);
+				const account = this.buildAccountObject(accToken);
+				if(_.isEmpty(account)) return true; /* Check if there is anything to sent to the API */
+				
+				/* For now we don't collect this info; just tell Stripe there are none */
+				account.legal_entity.le.additional_owners = '';
 				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-				console.log(account);
 				return this.$http.patch('payment/updateStripeAccount', account, {
 					headers: {Authorization: JSON.parse(localStorage.user).token}
 				});
 
 			}).then((res) => {
-
+				
+				if(!res.hasOwnProperty('status')) return true;
 				if(res.status == 200 || res.status == 201) {
 					this.loading.still = false;
 					this.displayFlashMsg('Your details were successfully updated!', 'success');
 				}
 
 			}).catch((err) => {
-				console.log(err);
+
 				if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
 					return this.displayFlashMsg(err.error, 'error');
 				}
@@ -406,102 +403,127 @@ export default {
 			return d.toISOString().slice(0,10) === dateString;
 		},
 
-		buildAccountObject(tosDate='', accToken='') {
-			/* Go through each param and check: is it set/does it differ from current value; then set */
+		buildAccountObject(accToken='') {
+			/* All the current form data */
 			const cd = this.forms.companyDetails;
 			const cr = this.forms.companyRep;
 			const cba = this.forms.companyBankAccount;
+			const rd = this.restaurantDetails.stripe; /* The current details state which we get from the backend */
 			var acc = {};
 			
 			/* `tos` */
-			if(this.isSetAndNotEmpty(tosDate)) {
-				acc.tos_acceptance = { date: tosDate, ip: '' }; /* `ip` will be set by the server */
+			if(!rd.tosAccepted) {
+				/* We will only show the tos if this is false */
+				acc.tos_acceptance = { 
+					date: Math.floor(Date.now() / 1000), 
+					ip: '' /* Set by the server */
+				};
 			}
 
+			/* TODO: think about how to edit the sensitive fields */
 			if(this.isSetAndNotEmpty(accToken)) {
 				acc.external_account = accToken;
+				/* We will only store on the backend the account holder name and type */
+				acc.bankAccountHolderName = cba.account_holder_name;
+				acc.bankAccountHolderType = cba.account_holder_type;
 			}
 
 			/* `legal_entity` */
 			const le = {};
-			if(this.isSetAndNotEmpty(cr.legal_entity_first_name)) {
-				le.first_name = cr.legal_entity_first_name; /* Update the obj */
-				acc.legal_entity = le; /* Set this obj as a prop of the parent obj; overwrite if already set */
+			if(cr.legal_entity_first_name != rd.companyRep.firstName) {
+				if(this.isSetAndNotEmpty(cr.legal_entity_first_name)) {
+					le.first_name = cr.legal_entity_first_name; /* Update the obj */
+					acc.legal_entity = le; /* Set this obj as a prop of the parent obj; overwrite if already set */
+				}
 			}
 
-			if(this.isSetAndNotEmpty(cr.legal_entity_last_name)) {
-				le.last_name = cr.legal_entity_last_name;
-				acc.legal_entity = le;
+			if(cr.legal_entity_last_name != rd.companyRep.lastName) {
+				if(this.isSetAndNotEmpty(cr.legal_entity_last_name)) {
+					le.last_name = cr.legal_entity_last_name;
+					acc.legal_entity = le;
+				}
 			}
 
-			if(this.isSetAndNotEmpty(cd.legal_entity_type)) {
-				le.type = cd.legal_entity_type;
-				acc.legal_entity = le;
+			if(cd.legal_entity_type != rd.legalEntityType) {
+				if(this.isSetAndNotEmpty(cd.legal_entity_type)) {
+					le.type = cd.legal_entity_type;
+					acc.legal_entity = le;
+				}
 			}
 
-			if(this.isSetAndNotEmpty(cd.legal_entity_business_name)) {
-				le.business_name = cd.legal_entity_business_name;
-				acc.legal_entity = le;
+			if(cd.legal_entity_business_name != rd.companyName) {
+				if(this.isSetAndNotEmpty(cd.legal_entity_business_name)) {
+					le.business_name = cd.legal_entity_business_name;
+					acc.legal_entity = le;
+				}
 			}
 
-			if(this.isSetAndNotEmpty(cd.legal_entity_business_tax_id)) {
-				le.business_tax_id = cd.legal_entity_business_tax_id;
-				acc.legal_entity = le;
+			/* We don't store this on backend, so we check if it was set by user, then show a masked default string*/
+			if(cd.legal_entity_business_tax_id != '_cHRegNo') {
+				if(this.isSetAndNotEmpty(cd.legal_entity_business_tax_id)) {
+					le.business_tax_id = cd.legal_entity_business_tax_id;
+					acc.legal_entity = le;
+				}
 			}
-
-			if(this.isSetAndNotEmpty(cd.legal_entity_business_tax_id)) {
-				le.business_tax_id = cd.legal_entity_business_tax_id;
-				acc.legal_entity = le;
-			}
-
-			/* For now we don't collect this info; just tell Stripe there are none */
-			le.additional_owners = '';
-			acc.legal_entity = le;
 			
 			/* `legal_entity.address` */
 			var a = {};
-			if(this.isSetAndNotEmpty(cd.legal_entity_address_line1)) {
-				a.line1 = cd.legal_entity_address_line1;
-				le.address = a;
-				acc.legal_entity = le;
+			if(cd.legal_entity_address_line1 != rd.companyAddress.line1) {
+				if(this.isSetAndNotEmpty(cd.legal_entity_address_line1)) {
+					a.line1 = cd.legal_entity_address_line1;
+					le.address = a;
+					acc.legal_entity = le;
+				}
 			}
 
-			if(this.isSetAndNotEmpty(cd.legal_entity_address_city)) {
-				a.city = cd.legal_entity_address_city;
-				le.address = a;
-				acc.legal_entity = le;
+			if(cd.legal_entity_address_city != rd.companyAddress.city) {
+				if(this.isSetAndNotEmpty(cd.legal_entity_address_city)) {
+					a.city = cd.legal_entity_address_city;
+					le.address = a;
+					acc.legal_entity = le;
+				}
 			}
 
-			if(this.isSetAndNotEmpty(cd.legal_entity_address_postal_code)) {
-				a.postal_code = cd.legal_entity_address_postal_code;
-				le.address = a;
-				acc.legal_entity = le;
+			if(cd.legal_entity_address_postal_code != rd.companyAddress.postcode) {
+				if(this.isSetAndNotEmpty(cd.legal_entity_address_postal_code)) {
+					a.postal_code = cd.legal_entity_address_postal_code;
+					le.address = a;
+					acc.legal_entity = le;
+				}
 			}
 
 			/* `legal_entity.personal_address` */
 			var pa = {};
-			if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_line1)) {
-				pa.line1 = cr.legal_entity_personal_address_line1;
-				le.personal_address = pa;
-				acc.legal_entity = le;
+			if(cr.legal_entity_personal_address_line1 != rd.companyRep.address.line1) {
+				if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_line1)) {
+					pa.line1 = cr.legal_entity_personal_address_line1;
+					le.personal_address = pa;
+					acc.legal_entity = le;
+				}
 			}
 
-			if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_city)) {
-				pa.city = cr.legal_entity_personal_address_city;
-				le.personal_address = pa;
-				acc.legal_entity = le;
+			if(cr.legal_entity_personal_address_city != rd.companyRep.address.city) {
+				if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_city)) {
+					pa.city = cr.legal_entity_personal_address_city;
+					le.personal_address = pa;
+					acc.legal_entity = le;
+				}
 			}
 
-			if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_postal_code)) {
-				pa.postal_code = cr.legal_entity_personal_address_postal_code;
-				le.personal_address = pa;
-				acc.legal_entity = le;
+			if(cr.legal_entity_personal_address_postal_code != rd.companyRep.address.postcode) {
+				if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_postal_code)) {
+					pa.postal_code = cr.legal_entity_personal_address_postal_code;
+					le.personal_address = pa;
+					acc.legal_entity = le;
+				}
 			}
 
-			/* `legal_entity.dob`(split datestring into day, month, year) */
-			if(this.isValidDate(this.dateString)) {
-				le.dob = this.setDob(this.dateString);
-				acc.legal_entity = le;
+			/* `legal_entity.dob` */
+			if(this.dateString != rd.companyRep.dob) {
+				if(this.isValidDate(this.dateString)) {
+					le.dob = this.setDob(this.dateString); /* Split datestring into day, month, year */
+					acc.legal_entity = le;
+				}
 			}
 
 			return acc;
