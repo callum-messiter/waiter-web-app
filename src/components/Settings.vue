@@ -11,13 +11,42 @@
         </div>
 
         <div class="container" v-else>
-            <div class="row">
+            <div class="row verifiedStatus">
                 
-                <div class="col-xs-12 text-left">
+                <div class="col-xs-6 text-left">
                     <h3 style="color: white">
                         <img src="../assets/shield.png" class="header-img"> 
                         Account Verification
+                        <!-- Show if account is verified already
+                        <img src="../assets/shield.png" class="header-img"> 
+                        Account Details
+                        -->
                     </h3>
+                    <!-- Only show the TOS prompt if the user has not already accepted the TOS -->
+                    <div class="tos" v-if="isNaN(restaurantStripeAccount.tos_acceptance.date)">
+                        <p>Please fill in the details below so we can verify your restaurant and allow you to accept payments from your customers.</p>
+                        <p>By saving your account details, you agree to the 
+                            <a href="https://stripe.com/gb/connect-account/legal" id="tosLink">
+                                Stripe Connected Account Agreement.
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-xs-2 col-xs-offset-4 text-right">
+                    <!-- TODO: check if account is verified -->
+                    <figure v-if="restaurantStripeAccount.id === undefined">
+                        <img class="switchImg" src="../assets/switch-on.png">
+                        <figcaption style="color: #46ba4e">
+                            {{forms.companyDetails.legal_entity_business_name}} is verified! You are ready to start accepting payments.
+                        </figcaption>
+                    </figure>
+                    <figure v-else>
+                        <img class="switchImg" src="../assets/switch-off.png">
+                        <figcaption style="color: #f22409">
+                            {{forms.companyDetails.legal_entity_business_name}} is not verified and cannot accept payments.
+                        </figcaption>
+                    </figure>
                 </div>
             </div>
 
@@ -491,7 +520,6 @@ export default {
             
             /* `tos` */
             if(isNaN(stripe.tos_acceptance.date)) {
-                /* We will only show the tos if this is false */
                 acc.tos_acceptance = { 
                     date: Math.floor(Date.now() / 1000), 
                     ip: '' /* Set by the server */
@@ -752,6 +780,14 @@ stripeParams: {
   margin-top: 30px;
   margin-bottom: 30px;
 }
+
+.switchImg {
+  height: 100px;
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 30px;
+}
   
 #signinForm {
   display: flex;
@@ -839,7 +875,7 @@ h4 {
 }
 
 .header-icon {
-    color: #8bd9ed ;
+    color: #8bd9ed;
 }
 
 .requiredMarker {
@@ -860,6 +896,19 @@ input[type=date]::-webkit-inner-spin-button {
 
 input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0 30px white inset;
+}
+
+.tos {
+    color: white;
+    padding-bottom: 25px;
+}
+
+#tosLink {
+    color: #8bd9ed;
+}
+
+.verifiedStatus {
+    margin-bottom: 30px;
 }
 
 </style>
