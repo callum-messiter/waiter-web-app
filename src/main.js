@@ -31,8 +31,19 @@ if(localStorage.getItem('user') !== null) {
 Vue.use(vueResource);
 Vue.http.options.root = settings.apiBaseUrl;
 
+const dictionary = {
+  en: {
+    messages: {
+      before: () => { 
+        return 'The Date of Birth must be in the past.'
+      }
+    }
+  }
+};
 
+VeeValidate.Validator.updateDictionary(dictionary);
 Vue.use(VeeValidate);
+
 Vue.use(money, {precision: 2});
 
 Vue.use(VueFlashMessage, {

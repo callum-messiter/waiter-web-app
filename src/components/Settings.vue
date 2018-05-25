@@ -110,12 +110,14 @@
 			      <div class="input-row">
 			        <icon name="calendar"></icon>
 			        <input 
-			        	type="text" 
+			        	type="text"
+			        	name="dob"
 			        	placeholder="Date of Birth"
 			        	onfocus="(this.type='date')" 
 			        	onblur="(this.type='text')"
 			        	v-model="dateString"
-			        	v-validate="{ required: true }"
+			        	v-validate="{ required: true, date_format: 'YYYY-MM-DD', 
+			        	before: today, after: '2018-01-01' }"
 			        	data-vv-as="Date of Birth"
 			        />
 			      </div>
@@ -238,6 +240,7 @@ import RestaurantMenu from './RestaurantMenu';
 import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
 import functions from '../mixins/functions';
 import underscore from 'underscore';
+import moment from 'moment';
 import settings from '../../config/settings';
 const stripe = Stripe(settings.stripePubKey);
 
@@ -280,7 +283,8 @@ export default {
 				}
 			},
 			dateString: '',
-
+			today: moment(new Date()).format('YYYY-MM-DD'),
+			
 			tosAccepted: '',
 			loading: {
 				still: true,
@@ -292,6 +296,7 @@ export default {
 	},
 
 	created () {
+		console.log(moment(new Date()).format('YYYY-MM-DD'));
 		/* TODO: use loading spinner; only show the form data once the API returns the payload */
 		this.getRestaurantStripeAccount();
 
@@ -346,14 +351,14 @@ export default {
 				
 				/* If Stripe acct exists, just update details */
 				if(this.isSetAndNotEmpty(this.restaurantStripeAccount.id)) {
-					endpoint = 'payment/updateStripeAccount';
+					endpoint = 'payment/stripeAccount';
 				} else {
 					/* For now, we don't allow the user to set these details */
 					account.legal_entity.le.additional_owners = '';
 					account.country = 'GB';
 					account.currency = 'gbp';
 					account.email = JSON.parse(localStorage.user).email;
-					endpoint = 'payment/createStripeAccount';
+					endpoint = 'payment/stripeAccount';
 				}
 				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
 				
