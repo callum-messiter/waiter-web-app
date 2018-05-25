@@ -11,6 +11,8 @@
 			</div>
 		</div>
 
+		<!-- Show TOS, v-if="restaurantStripeAccount.id !== undefined" -->
+
 	  <div class="row">
 
 		  <div class="col-sm-4">
@@ -76,7 +78,13 @@
 			      </div>
 			    </div>
 			    
-			    <button type="button" v-on:click="submit('companyDetails')">Update</button>
+			    <button 
+			    	type="button" 
+			    	v-on:click="submit('companyDetails')"
+			    	v-if="restaurantStripeAccount.id !== undefined"
+			    >
+					Update
+				</button>
 			  </form>
 			</div>
 
@@ -116,8 +124,7 @@
 			        	onfocus="(this.type='date')" 
 			        	onblur="(this.type='text')"
 			        	v-model="dateString"
-			        	v-validate="{ required: true, date_format: 'YYYY-MM-DD', 
-			        	before: today, after: '2018-01-01' }"
+			        	v-validate="{ required: true, date_format: 'YYYY-MM-DD', before: today }"
 			        	data-vv-as="Date of Birth"
 			        />
 			      </div>
@@ -158,7 +165,13 @@
 			      </div>
 			    </div>
 			    
-			    <button type="button" v-on:click="submit('companyRep')">Update</button>
+			    <button 
+			    	type="button" 
+			    	v-on:click="submit('companyRep')"
+			    	v-if="restaurantStripeAccount.id !== undefined"
+			    >
+					Update
+				</button>
 			  </form>
 			</div>
 
@@ -227,9 +240,22 @@
 			      </div>
 			    </div>
 			    
-			    <button type="button" v-on:click="submit('companyBankAccount')">Update</button>
+			    <button 
+			    	type="button" 
+			    	v-on:click="submit('companyBankAccount')"
+			    	v-if="restaurantStripeAccount.id !== undefined"
+			    >
+					Update
+				</button>
 			  </form>
 			</div>
+			<button 
+				type="button" 
+				v-on:click="submit('')"
+				v-if="restaurantStripeAccount.id === undefined"
+			>
+				Save All
+			</button>
 		</div>
 	</div>
 </template>
@@ -296,100 +322,102 @@ export default {
 	},
 
 	created () {
-		console.log(moment(new Date()).format('YYYY-MM-DD'));
-		/* TODO: use loading spinner; only show the form data once the API returns the payload */
 		this.getRestaurantStripeAccount();
-
-		/* We should only show the ToS to the user  */
-		if(!this.restaurantDetails.stripe.tosAccepted) {
-			// TODO: show ToS
-		}
 	},
 
 	methods: {
-
-		createStripeAccount() {
-			/* Submit all three forms simultaneously (one submit button) */
-			/* Validate all fields */
-			/* Show TOS */
-			/* Build accont object */
-			/* Set default values */
-		},
-		updateStripeAccount() {
-			/* Submit a single form at once */
-			/* Validate only the relevant form */
-			/* Build account object */
-		},
 
 		getRestaurantStripeAccount() {
 			this.$http.get('payment/stripeAccount/' + JSON.parse(localStorage.restaurant).restaurantId, {
 				headers: {Authorization: JSON.parse(localStorage.user).token}
 			}).then((res) => {
+				console.log(res.body);
 				this.$store.commit('setRestaurantStripeAccount', res.body);
 				this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
 				// this.loading.still = false;
 			}).catch((err) => {
-				console.log(err);
 				this.handleApiError(err);
 			});
 		},
 
-		submit(scope) {
-			/* Check if the required fields are set */
-			this.validateFields(scope)
+		createStripeAccount() {
+			/* Submit all three forms simultaneously (one submit button) */
+			this.validateAllFields()
 			.then(() => {
-				return this.tokeniseBankAccount(scope, this.forms.companyBankAccount);
-			}).then((res) => {
-				var accToken, endpoint = '';
-
-				/* The token is only set if the user has submitted the bankAccountDetails form */
-				if(res.created) { accToken = res.token; }
-
-				const account = this.buildAccountObject(accToken);
-				console.log(account);
-				if(_.isEmpty(account)) return true; /* Check if there is anything to sent to the API */
-				
-				/* If Stripe acct exists, just update details */
-				if(this.isSetAndNotEmpty(this.restaurantStripeAccount.id)) {
-					endpoint = 'payment/stripeAccount';
-				} else {
-					/* For now, we don't allow the user to set these details */
-					account.legal_entity.le.additional_owners = '';
-					account.country = 'GB';
-					account.currency = 'gbp';
-					account.email = JSON.parse(localStorage.user).email;
-					endpoint = 'payment/stripeAccount';
+				return this.tokeniseBankAccount('companyBankAccount', this.forms.companyBankAccount);
+			}).then(() => {
+				if(!res.created) {
+					throw 'There was an error saving your bank account details. Please check your details and try again.'
 				}
+				const account = this.buildAccountObject(res.token);
+				if(_.isEmpty(account)) throw 'There was an error saving your details. Please try again.';
+				/* For now, we don't allow the user to set these details */
+				account.legal_entity.le.additional_owners = '';
+				account.country = 'GB';
+				account.currency = 'gbp';
+				account.email = JSON.parse(localStorage.user).email;
 				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-				
-				return this.$http.patch(endpoint, account, {
+				return this.$http.post('payment/stripeAccount' , account, {
 					headers: {Authorization: JSON.parse(localStorage.user).token}
 				});
-
 			}).then((res) => {
-				
 				if(!res.hasOwnProperty('status')) return true;
 				if(res.status == 200 || res.status == 201) {
 					this.loading.still = false;
+					/* Check if account is verified */
 					this.displayFlashMsg('Your details were successfully updated!', 'success');
 				}
-
 			}).catch((err) => {
-				console.log(err);
 				if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
 					return this.displayFlashMsg(err.error, 'error');
 				}
 				this.loading.still = false;
 				this.handleApiError(err);
-			
 			});
+		},
+
+		updateStripeAccount(scope) {
+			this.validateFields(scope)
+			.then(() => {
+				return this.tokeniseBankAccount(scope, this.forms.companyBankAccount);
+			}).then((res) => {
+				/* The token is only set if the user has submitted the bankAccountDetails form */
+				var accToken = '';
+				if(res.created) { accToken = res.token; }
+				const account = this.buildAccountObject(accToken);
+				if(_.isEmpty(account)) return true; /* Check if there is anything to sent to the API */
+				account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
+				return this.$http.patch('payment/stripeAccount', account, {
+					headers: {Authorization: JSON.parse(localStorage.user).token}
+				});
+
+			}).then((res) => {
+				if(!res.hasOwnProperty('status')) return true;
+				if(res.status == 200 || res.status == 201) {
+					this.loading.still = false;
+					this.displayFlashMsg('Your details were successfully updated!', 'success');
+				}
+			}).catch((err) => {
+				if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
+					return this.displayFlashMsg(err.error, 'error');
+				}
+				this.loading.still = false;
+				this.handleApiError(err);
+			});
+		},
+
+		submit(scope="") {
+			if(this.restaurantStripeAccount.id === undefined) {
+				return this.createStripeAccount();
+			} else {
+				return this.updateStripeAccount(scope);
+			}
 		},
 
 		validateFields(scope) {
 			return new Promise((resolve, reject) => {
 				this.$validator.validateAll(scope)
 				.then(() => {
-
 					var response = {fieldsInvalid: false, error: null};
 					if(this.errors.any(scope)) {
 						response.fieldsInvalid = true;
@@ -397,7 +425,23 @@ export default {
 						return reject(response);
 					}
 					return resolve(response);
+				}).catch((err) => {
+					return reject(err);
+				});
+			});
+		},
 
+		validateAllFields() {
+			return new Promise((resolve, reject) => {
+				this.$validator.validateAll()
+				.then(() => {
+					var response = {fieldsInvalid: false, error: null};
+					if(this.errors.any()) {
+						response.fieldsInvalid = true;
+						response.error = this.errors.all()[0];
+						return reject(response);
+					}
+					return resolve(response);
 				}).catch((err) => {
 					return reject(err);
 				});
@@ -441,9 +485,6 @@ export default {
 			/* TODO: think about how to edit the sensitive fields */
 			if(this.isSetAndNotEmpty(accToken)) {
 				acc.external_account = accToken;
-				/* We will only store on the backend the account holder name and type */
-				// acc.bankAccountHolderName = cba.account_holder_name;
-				// acc.bankAccountHolderType = cba.account_holder_type;
 			}
 
 			/* `legal_entity` */
@@ -538,12 +579,10 @@ export default {
 			}
 
 			/* `legal_entity.dob` */
-			if(this.isValidDate(this.dateString)) {
-				const stripeDateString = this.generateDateString(stripe_le.dob);
-				if(this.dateString != stripeDateString) {
-					le.dob = this.setDob(this.dateString); /* Split datestring into day, month, year */
-					acc.legal_entity = le;
-				}
+			const stripeDateString = this.generateDateString(stripe_le.dob);
+			if(this.dateString != stripeDateString) {
+				le.dob = this.setDob(this.dateString); /* Split datestring into day, month, year */
+				acc.legal_entity = le;
 			}
 
 			return acc;
@@ -621,15 +660,7 @@ export default {
 				month: Number(date[1]), 
 				day: Number(date[2])
 			}
-		},
-
-		isValidDate(dateString) {
-			const regEx = /^\d{4}-\d{2}-\d{2}$/;
-			if(!dateString.match(regEx)) return false;  /* Invalid format */
-			const d = new Date(dateString);
-			if(!d.getTime() && d.getTime() !== 0) return false; /* Invalid date */
-			return d.toISOString().slice(0,10) === dateString;
-		},
+		}
 
 	},
 
