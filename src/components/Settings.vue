@@ -2,21 +2,18 @@
     <div class="container">
 
         <div class="loading" v-if="loading.still">
-          <clip-loader  
-            :color="loading.spinnerColor" 
-            :size="loading.spinnerSize"
-          >
-          </clip-loader>
-          <p class="loadingMsg">{{loading.msg}}</p>
+            <clip-loader :color="loading.spinnerColor" :size="loading.spinnerSize">
+            </clip-loader>
+            <p class="loadingMsg">{{loading.msg}}</p>
         </div>
 
         <div class="container" v-else>
-            <div class="row verifiedStatus">
-                
+            <div class="row">
+
                 <div class="col-xs-6 text-left">
-                    <h3 style="color: white">
+                    <h3 style="color: white; padding-top: 1 0px">
                         <img src="../assets/shield.png" class="header-img"> 
-                        Account Verification
+                        Account Details
                         <!-- Show if account is verified already
                         <img src="../assets/shield.png" class="header-img"> 
                         Account Details
@@ -25,7 +22,7 @@
                     <!-- Only show the TOS prompt if the user has not already accepted the TOS -->
                     <div class="tos" v-if="isNaN(restaurantStripeAccount.tos_acceptance.date)">
                         <p>Please fill in the details below so we can verify your restaurant and allow you to accept payments from your customers.</p>
-                        <p>By saving your account details, you agree to the 
+                        <p>By saving your account details, you agree to the
                             <a href="https://stripe.com/gb/connect-account/legal" id="tosLink">
                                 Stripe Connected Account Agreement.
                             </a>
@@ -35,7 +32,7 @@
 
                 <div class="col-xs-2 col-xs-offset-4 text-right">
                     <!-- TODO: check if account is verified -->
-                    <figure v-if="restaurantStripeAccount.id === undefined">
+                    <figure v-if="restaurantStripeAccount.chargesEnabled && restaurantStripeAccount.payoutsEnabled">
                         <img class="switchImg" src="../assets/switch-on.png">
                         <figcaption style="color: #46ba4e">
                             {{forms.companyDetails.legal_entity_business_name}} is verified! You are ready to start accepting payments.
@@ -52,247 +49,173 @@
 
             <!-- Show TOS, v-if="restaurantStripeAccount.id !== undefined" -->
 
-            <div class="row">
+            <div class="row forms">
 
-              <div class="col-sm-4">
+                <div class="col-sm-4">
                     <form id="companyDetails" v-on:keyup.enter="submit('companyDetails')" data-vv-scope="companyDetails">
                         <h4 class="formTitle">Company Details <icon class="header-icon " name="info"></icon></h4>
-                    <div class="input-group">
-                      <div class="input-row">
-                        <icon name="building"></icon>
-                        <input 
-                            name="legal_entity_business_name" 
-                            v-model="forms.companyDetails.legal_entity_business_name"
-                            placeholder="Company Name"
-                            v-validate="{ max: 200, required: true }"
-                            data-vv-as="Company Name"
-                        />  
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="map-marker-alt"></icon>
-                        <input 
-                            name="legal_entity_address_line1"
-                            v-model="forms['companyDetails'].legal_entity_address_line1"
-                            placeholder="Address Line 1"
-                            v-validate="{ required: true }"
-                            data-vv-as="Address Line 1"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="map-marker-alt"></icon>
-                        <input 
-                            name="legal_entity_address_city"
-                            v-model="forms['companyDetails'].legal_entity_address_city" 
-                            placeholder="City"
-                            v-validate="{ required: true }"
-                            data-vv-as="City"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="map-marker-alt"></icon>
-                        <!-- Dropdown list with country codes -->
-                        <input 
-                            name="legal_entity_address_postal_code"
-                            v-model="forms['companyDetails'].legal_entity_address_postal_code" 
-                            placeholder="Postcode"
-                            v-validate="{ required: true }"
-                            data-vv-as="Postcode"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="money-bill-alt"></icon>
-                        <input 
-                            name="legal_entity_business_tax_id"
-                            type="password"
-                            v-model="forms['companyDetails'].legal_entity_business_tax_id"
-                            placeholder="Companies House Reg Number"
-                            v-validate="{ max: 200, required: true }"
-                            data-vv-as="Companies House Reg Number"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                    </div>
-                    
-                    <button 
-                        type="button" 
-                        v-on:click="submit('companyDetails')"
-                        v-if="restaurantStripeAccount.id !== undefined"
-                    >
-                        Update
-                    </button>
-                  </form>
+                        <div class="input-group" v-on:click="companyDetails.inEditMode = true" :class="{ faded: !companyDetails.inEditMode || companyDetails.isUpdating }">
+                            <fieldset :disabled="!companyDetails.inEditMode || companyDetails.isUpdating">
+                                <div class="input-row">
+                                    <icon name="building"></icon>
+                                    <input name="legal_entity_business_name" v-model="forms.companyDetails.legal_entity_business_name" placeholder="Company Name" v-validate="{ max: 200, required: true }" data-vv-as="Company Name" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="map-marker-alt"></icon>
+                                    <input name="legal_entity_address_line1" v-model="forms['companyDetails'].legal_entity_address_line1" placeholder="Address Line 1" v-validate="{ required: true }" data-vv-as="Address Line 1" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="map-marker-alt"></icon>
+                                    <input name="legal_entity_address_city" v-model="forms['companyDetails'].legal_entity_address_city" placeholder="City" v-validate="{ required: true }" data-vv-as="City" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="map-marker-alt"></icon>
+                                    <!-- Dropdown list with country codes -->
+                                    <input name="legal_entity_address_postal_code" v-model="forms['companyDetails'].legal_entity_address_postal_code" placeholder="Postcode" v-validate="{ required: true }" data-vv-as="Postcode" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="money-bill-alt"></icon>
+                                    <input name="legal_entity_business_tax_id" type="password" v-model="forms['companyDetails'].legal_entity_business_tax_id" placeholder="Companies House Reg Number" v-validate="{ max: 200, required: true }" data-vv-as="Companies House Reg Number" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <button type="button" v-on:click="companyDetails.inEditMode = true" v-if="!companyDetails.inEditMode">
+                            Edit
+                        </button>
+                        <div class="row editModeBtns" v-else>
+                            <div class="col-xs-6 btnColLeft">
+                                <button class="editModeBtn saveBtn" type="button" v-on:click="submit('companyDetails')">
+                                    Save
+                                </button>
+                            </div>
+                            <div class="col-xs-6 btnColRight">
+                                <button class="editModeBtn cancelBtn" type="button" v-on:click="resetForm('companyDetails')">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="col-sm-4">
                     <form id="companyRep" v-on:keyup.enter="submit('companyRep')" data-vv-scope="companyRep">
                         <h4 class="formTitle">Company Representative <icon class="header-icon" name="user"></icon></h4>
-                    <div class="input-group">
-                      <div class="input-row">
-                        <icon name="user"></icon>
-                        <input 
-                            name="legal_entity_first_name"
-                            v-model="forms.companyRep.legal_entity_first_name"
-                            placeholder="First Name"
-                            v-validate="{ max: 100, required: true }"
-                            data-vv-as="First Name"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="user"></icon>
-                        <input 
-                            name="legal_entity_last_name"
-                            v-model="forms.companyRep.legal_entity_last_name"
-                            placeholder="Last Name"
-                            v-validate="{ max: 100, required: true }"
-                            data-vv-as="Last Name"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <!-- v-model="forms['companyRep'].legal_entity_dob_month" -->
-                      <div class="input-row">
-                        <icon name="calendar"></icon>
-                        <input 
-                            type="text"
-                            name="dob"
-                            placeholder="Date of Birth"
-                            onfocus="(this.type='date')" 
-                            onblur="(this.type='text')"
-                            v-model="dateString"
-                            v-validate="{ required: true, date_format: 'YYYY-MM-DD', before: today }"
-                            data-vv-as="Date of Birth"
-                        />
-                      </div>
-                        <!-- <span class="requiredMarker">*</span> -->
-                      <div class="input-row">
-                        <icon name="address-book"></icon>
-                        <input 
-                            name="legal_entity_personal_address_line1"
-                            v-model="forms['companyRep'].legal_entity_personal_address_line1" 
-                            placeholder="Line 1"
-                            v-validate="{ required: true }"
-                            data-vv-as="Personal Address (Line 1)"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="address-book"></icon>
-                        <input 
-                            name="legal_entity_personal_address_city"
-                            v-model="forms['companyRep'].legal_entity_personal_address_city" 
-                            placeholder="City"
-                            v-validate="{ required: true }"
-                            data-vv-as="Personal Address (City)"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="address-book"></icon>
-                        <!-- Dropdown list with country codes -->
-                        <input 
-                            name="legal_entity_personal_address_postal_code"
-                            v-model="forms['companyRep'].legal_entity_personal_address_postal_code" 
-                            placeholder="Postcode"
-                            v-validate="{ required: true }"
-                            data-vv-as="Personal Address (Postcode)"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                    </div>
-                    
-                    <button 
-                        type="button" 
-                        v-on:click="submit('companyRep')"
-                        v-if="restaurantStripeAccount.id !== undefined"
-                    >
-                        Update
-                    </button>
-                  </form>
+                        <div class="input-group" v-on:click="companyRep.inEditMode = true" :class="{ faded: !companyRep.inEditMode || companyRep.isUpdating }">
+                            <fieldset :disabled="!companyRep.inEditMode || companyRep.isUpdating">
+                                <div class="input-row">
+                                    <icon name="user"></icon>
+                                    <input name="legal_entity_first_name" v-model="forms.companyRep.legal_entity_first_name" placeholder="First Name" v-validate="{ max: 100, required: true }" data-vv-as="First Name" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="user"></icon>
+                                    <input name="legal_entity_last_name" v-model="forms.companyRep.legal_entity_last_name" placeholder="Last Name" v-validate="{ max: 100, required: true }" data-vv-as="Last Name" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <!-- v-model="forms['companyRep'].legal_entity_dob_month" -->
+                                <div class="input-row">
+                                    <icon name="calendar"></icon>
+                                    <input type="text" name="dob" placeholder="Date of Birth" onfocus="(this.type='date')" onblur="(this.type='text')" v-model="dateString" v-validate="{ required: true, date_format: 'YYYY-MM-DD', before: today }" data-vv-as="Date of Birth" />
+                                </div>
+                                <!-- <span class="requiredMarker">*</span> -->
+                                <div class="input-row">
+                                    <icon name="address-book"></icon>
+                                    <input name="legal_entity_personal_address_line1" v-model="forms['companyRep'].legal_entity_personal_address_line1" placeholder="Line 1" v-validate="{ required: true }" data-vv-as="Personal Address (Line 1)" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="address-book"></icon>
+                                    <input name="legal_entity_personal_address_city" v-model="forms['companyRep'].legal_entity_personal_address_city" placeholder="City" v-validate="{ required: true }" data-vv-as="Personal Address (City)" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="address-book"></icon>
+                                    <!-- Dropdown list with country codes -->
+                                    <input name="legal_entity_personal_address_postal_code" v-model="forms['companyRep'].legal_entity_personal_address_postal_code" placeholder="Postcode" v-validate="{ required: true }" data-vv-as="Personal Address (Postcode)" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <button type="button" v-on:click="companyRep.inEditMode = true" v-if="!companyRep.inEditMode">
+                            Edit
+                        </button>
+                        <div class="row editModeBtns" v-else>
+                            <div class="col-xs-6 btnColLeft">
+                                <button class="editModeBtn saveBtn" type="button" v-on:click="submit('companyRep')">
+                                    Save
+                                </button>
+                            </div>
+                            <div class="col-xs-6 btnColRight">
+                                <button class="editModeBtn cancelBtn" type="button" v-on:click="resetForm('companyRep')">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
                 </div>
 
                 <div class="col-sm-4">
                     <form id="companyBankAccount" v-on:keyup.enter="submit('companyBankAccount')" data-vv-scope="companyBankAccount">
                         <h4 class="formTitle">Company Bank Account <icon class="header-icon" name="credit-card"></icon></h4>
-                    <div class="input-group">
-                      <div class="input-row">
-                        <icon name="user"></icon>
-                        <input 
-                            name="account_holder_name" 
-                            v-model="forms.companyBankAccount.account_holder_name"
-                            placeholder="Account Holder Name"
-                            v-validate="{ max: 205, required: true }"
-                            data-vv-as="Account Holder Name"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="credit-card"></icon>
-                        <input 
-                            name="account_number"
-                            type="password"
-                            v-model="forms['companyBankAccount'].account_number"
-                            placeholder="Account Number"
-                            v-validate="{ numeric: true, required: true }"
-                            data-vv-as="Account Number"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="credit-card"></icon>
-                        <input 
-                            name="routing_number"
-                            type="password"
-                            v-model="forms['companyBankAccount'].routing_number"
-                            placeholder="Sort Code"
-                            v-validate="{ numeric: true, required: true }"
-                            data-vv-as="Sort Code"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="globe"></icon>
-                        <!-- Dropdown list with country codes -->
-                        <input
-                            readonly 
-                            name="country"
-                            v-model="forms['companyBankAccount'].country"
-                            placeholder="Country"
-                            v-validate="{ required: true }"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                      <div class="input-row">
-                        <icon name="pound-sign"></icon>
-                        <!-- Dropdown list with country codes -->
-                        <input 
-                            readonly
-                            name="currency"
-                            v-model="forms['companyBankAccount'].currency"
-                            placeholder="Currency"
-                            v-validate="{ required: true }"
-                        />
-                        <!-- <span class="requiredMarker">*</span> -->
-                      </div>
-                    </div>
-                    
-                    <button 
-                        type="button" 
-                        v-on:click="submit('companyBankAccount')"
-                        v-if="restaurantStripeAccount.id !== undefined"
-                    >
-                        Update
-                    </button>
-                  </form>
+                        <div class="input-group" v-on:click="companyBankAccount.inEditMode = true" :class="{ faded: !companyBankAccount.inEditMode || companyBankAccount.isUpdating }">
+                            <fieldset :disabled="!companyBankAccount.inEditMode || companyBankAccount.isUpdating">
+                                <div class="input-row">
+                                    <icon name="user"></icon>
+                                    <input name="account_holder_name" v-model="forms.companyBankAccount.account_holder_name" placeholder="Account Holder Name" v-validate="{ max: 205, required: true }" data-vv-as="Account Holder Name" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="credit-card"></icon>
+                                    <input name="account_number" type="password" v-model="forms['companyBankAccount'].account_number" placeholder="Account Number" v-validate="{ numeric: true, required: true }" data-vv-as="Account Number" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="credit-card"></icon>
+                                    <input name="routing_number" type="password" v-model="forms['companyBankAccount'].routing_number" placeholder="Sort Code" v-validate="{ numeric: true, required: true }" data-vv-as="Sort Code" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="globe"></icon>
+                                    <!-- Dropdown list with country codes -->
+                                    <input readonly name="country" v-model="forms['companyBankAccount'].country" placeholder="Country" v-validate="{ required: true }" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                                <div class="input-row">
+                                    <icon name="pound-sign"></icon>
+                                    <!-- Dropdown list with country codes -->
+                                    <input readonly name="currency" v-model="forms['companyBankAccount'].currency" placeholder="Currency" v-validate="{ required: true }" />
+                                    <!-- <span class="requiredMarker">*</span> -->
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <button type="button" v-on:click="companyBankAccount.inEditMode = true" v-if="!companyBankAccount.inEditMode">
+                            Edit
+                        </button>
+                        <div class="row editModeBtns" v-else>
+                            <div class="col-xs-6 btnColLeft">
+                                <button class="editModeBtn saveBtn" type="button" v-on:click="submit('companyBankAccount')">
+                                    Save
+                                </button>
+                            </div>
+                            <div class="col-xs-6 btnColRight">
+                                <button class="editModeBtn cancelBtn" type="button" v-on:click="resetForm('companyBankAccount')">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
                 </div>
-                <button 
-                    type="button" 
-                    v-on:click="submit('')"
-                    v-if="restaurantStripeAccount.id === undefined"
-                >
+                <button type="button" v-on:click="submit('')" v-if="restaurantStripeAccount.id === undefined">
                     Save All
                 </button>
             </div>
@@ -352,9 +275,22 @@ export default {
             today: moment(new Date()).format('YYYY-MM-DD'),
             
             tosAccepted: '',
+            companyDetails: {
+                inEditMode: false,
+                isUpdating: false
+            },
+            companyRep: {
+                inEditMode: false,
+                isUpdating: false
+            },
+            companyBankAccount: {
+                inEditMode: false,
+                isUpdating: false
+            },
+
             loading: {
-                    still: true,
-                    spinnerColor: '#469ada',
+                still: true,
+                spinnerColor: '#469ada',
                 spinnerSize: '70px',
                 msg: 'Loading your settings...'
             }
@@ -371,6 +307,7 @@ export default {
             this.$http.get('payment/stripeAccount/' + JSON.parse(localStorage.restaurant).restaurantId, {
                 headers: {Authorization: JSON.parse(localStorage.user).token}
             }).then((res) => {
+                console.log(res);
                 this.$store.commit('setRestaurantStripeAccount', res.body);
                 this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
                 this.loading.still = false;
@@ -428,7 +365,8 @@ export default {
                 var accToken = '';
                 if(res.created) { accToken = res.token; }
                 const account = this.buildAccountObject(accToken);
-                if(_.isEmpty(account)) return true; /* Check if there is anything to sent to the API */
+                if(_.isEmpty(account)) return this[scope].inEditMode = false; /* Check if there is anything to sent to the API */
+                this[scope].inEditMode = false;
                 account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
                 this.loading.msg = 'Updating your details...';
                 this.loading.still = true;
@@ -507,6 +445,11 @@ export default {
                     return reject(err);
                 });
             });
+        },
+
+        resetForm(form) {
+            this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
+            this[form].inEditMode = false;
         },
 
         /* lodash _.merge(dest, src) will do what we need */
@@ -807,7 +750,7 @@ stripeParams: {
 .input-row {
   display: flex;
   align-items: center;
-  background-color: white;
+  background-color: white !important;
   padding-left: 8px;
   padding-right: 8px;
   border-bottom: 1px solid #eee;
@@ -820,6 +763,7 @@ input {
   border: none;
   font-size: 16px;
   outline: none;
+  background-color: white !important;
 }
   
 button {
@@ -907,8 +851,45 @@ input:-webkit-autofill {
     color: #8bd9ed;
 }
 
-.verifiedStatus {
-    margin-bottom: 30px;
+.forms {
+    margin-top: 30px;
+}
+
+.faded {
+    opacity: 0.4;
+}
+
+.row.editModeBtns {
+    width: 100%;
+    margin: 0 !important;
+}
+
+.editModeBtn {
+    width: 100%;
+}
+
+.col-xs-6.btnCol {
+    padding:  !important;
+}
+
+.col-xs-6.btnColLeft {
+    padding-left: 0;
+    padding-right: 5px;
+}
+
+.col-xs-6.btnColRight {
+    padding-right: 0;
+    padding-left: 5px;
+}
+
+.cancelBtn {
+    background-color: red;
+    border: 1px solid red;
+}
+
+.btn:focus,.btn:active:focus,.btn.active:focus,
+.btn.focus,.btn:active.focus,.btn.active.focus {
+    outline: none;
 }
 
 </style>
