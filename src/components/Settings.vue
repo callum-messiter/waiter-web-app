@@ -1,10 +1,10 @@
 <template>
     <div class="container">
 
-        <div class="loading" v-if="loading.still">
-            <clip-loader :color="loading.spinnerColor" :size="loading.spinnerSize">
+        <div class="loading" v-if="loading.main.still">
+            <clip-loader :color="loading.main.spinnerColor" :size="loading.main.spinnerSize">
             </clip-loader>
-            <p class="loadingMsg">{{loading.msg}}</p>
+            <p class="loadingMsg">{{loading.main.msg}}</p>
         </div>
 
         <div class="container" v-else>
@@ -52,6 +52,12 @@
             <div class="row forms">
 
                 <div class="col-sm-4">
+
+                    <div class="loadingStripe" v-if="loading.stripe.still">
+                        <clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
+                        <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
+                    </div>
+
                     <form id="companyDetails" v-on:keyup.enter="submit('companyDetails')" data-vv-scope="companyDetails">
                         <h4 class="formTitle">Company Details <icon class="header-icon " name="info"></icon></h4>
                         <div class="input-group" v-on:click="companyDetails.inEditMode = true" :class="{ faded: !companyDetails.inEditMode || companyDetails.isUpdating }">
@@ -95,7 +101,7 @@
                                 </button>
                             </div>
                             <div class="col-xs-6 btnColRight">
-                                <button class="editModeBtn cancelBtn" type="button" v-on:click="resetForm('companyDetails')">
+                                <button class="editModeBtn cancelBtn" type="button" v-on:click="discardEdits('companyDetails')">
                                     Cancel
                                 </button>
                             </div>
@@ -104,6 +110,12 @@
                 </div>
 
                 <div class="col-sm-4">
+
+                    <div class="loadingStripe" v-if="loading.stripe.still == true">
+                        <clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
+                        <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
+                    </div>
+
                     <form id="companyRep" v-on:keyup.enter="submit('companyRep')" data-vv-scope="companyRep">
                         <h4 class="formTitle">Company Representative <icon class="header-icon" name="user"></icon></h4>
                         <div class="input-group" v-on:click="companyRep.inEditMode = true" :class="{ faded: !companyRep.inEditMode || companyRep.isUpdating }">
@@ -153,7 +165,7 @@
                                 </button>
                             </div>
                             <div class="col-xs-6 btnColRight">
-                                <button class="editModeBtn cancelBtn" type="button" v-on:click="resetForm('companyRep')">
+                                <button class="editModeBtn cancelBtn" type="button" v-on:click="discardEdits('companyRep')">
                                     Cancel
                                 </button>
                             </div>
@@ -163,6 +175,12 @@
                 </div>
 
                 <div class="col-sm-4">
+
+                    <div class="loadingStripe" v-if="loading.stripe.still == true">
+                        <clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
+                        <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
+                    </div>
+
                     <form id="companyBankAccount" v-on:keyup.enter="submit('companyBankAccount')" data-vv-scope="companyBankAccount">
                         <h4 class="formTitle">Company Bank Account <icon class="header-icon" name="credit-card"></icon></h4>
                         <div class="input-group" v-on:click="companyBankAccount.inEditMode = true" :class="{ faded: !companyBankAccount.inEditMode || companyBankAccount.isUpdating }">
@@ -207,7 +225,7 @@
                                 </button>
                             </div>
                             <div class="col-xs-6 btnColRight">
-                                <button class="editModeBtn cancelBtn" type="button" v-on:click="resetForm('companyBankAccount')">
+                                <button class="editModeBtn cancelBtn" type="button" v-on:click="discardEdits('companyBankAccount')">
                                     Cancel
                                 </button>
                             </div>
@@ -289,10 +307,18 @@ export default {
             },
 
             loading: {
-                still: true,
-                spinnerColor: '#469ada',
-                spinnerSize: '70px',
-                msg: 'Loading your settings...'
+                main: {
+                    still: true,
+                    spinnerColor: '#469ada',
+                    spinnerSize: '70px',
+                    msg: 'Loading your settings...'
+                },
+                stripe: {
+                    still: false,
+                    color: '#ffffff',
+                    size: '50px',
+                    msg: 'Updating your settings...'
+                }
             }
         }
     },
@@ -311,7 +337,7 @@ export default {
                 if(res.status == 200 || res.status == 201) {
                     this.$store.commit('setRestaurantStripeAccount', res.body);
                     this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
-                    this.loading.still = false;
+                    this.loading.main.still = false;
                 }
             }).catch((err) => {
                 this.handleApiError(err);
@@ -336,9 +362,6 @@ export default {
                 account.email = JSON.parse(localStorage.user).email;
                 account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
                 
-                this.loading.msg = 'Saving your details...';
-                this.loading.still = true;
-                
                 return this.$http.post('payment/stripeAccount' , account, {
                     headers: {Authorization: JSON.parse(localStorage.user).token}
                 });
@@ -346,14 +369,12 @@ export default {
                 if(!res.hasOwnProperty('status')) return true;
                 if(res.status == 200 || res.status == 201) {
                     this.$store.commit('setRestaurantStripeAccount', res.body);
-                    this.loading.still = false;
                     this.displayFlashMsg('Your details were successfully updated!', 'success');
                 }
             }).catch((err) => {
                 if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
                     return this.displayFlashMsg(err.error, 'error');
                 }
-                this.loading.still = false;
                 this.handleApiError(err);
             });
         },
@@ -370,8 +391,7 @@ export default {
                 if(_.isEmpty(account)) return this[scope].inEditMode = false; /* Check if there is anything to sent to the API */
                 this[scope].inEditMode = false;
                 account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-                this.loading.msg = 'Updating your details...';
-                this.loading.still = true;
+                this.loading[scope].still = true;
                 return this.$http.patch('payment/stripeAccount', account, {
                     headers: {Authorization: JSON.parse(localStorage.user).token}
                 });
@@ -380,14 +400,14 @@ export default {
                 if(!res.hasOwnProperty('status')) return true;
                 if(res.status == 200 || res.status == 201) {
                     this.$store.commit('setRestaurantStripeAccount', res.body);
-                    this.loading.still = false;
+                    this.loading[scope].still = false;
                     this.displayFlashMsg('Your details were successfully updated!', 'success');
                 }
             }).catch((err) => {
                 if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
                     return this.displayFlashMsg(err.error, 'error');
                 }
-                this.loading.still = false;
+                this.loading[scope].still = false;
                 this.handleApiError(err);
             });
         },
@@ -475,9 +495,11 @@ export default {
                     break;
             }
             this[form].inEditMode = true;
+            /* If any other form is currently in edit mode, cancel the edits and deactivate edit mode */
         },
 
-        resetForm(form) {
+        discardEdits(form) {
+            /* Reset form values to match StripeAccount state */
             this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
             this[form].inEditMode = false;
         },
@@ -850,9 +872,21 @@ span {
     transform: translate(-50%, -50%);
 }
 
+.loadingStripe {
+    position: absolute;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+}
+
 .loadingMsg {
     font-size: 16px;
-    color: #469ada;;
+    color: #469ada;
+}
+
+.detailsLoadingMsg {
+    font-size: 14px;
+    color: white;
 }
 
 h4 {
@@ -906,7 +940,7 @@ input:-webkit-autofill {
 }
 
 .faded {
-    opacity: 0.4;
+    opacity: 0.2;
 }
 
 .row.editModeBtns {
