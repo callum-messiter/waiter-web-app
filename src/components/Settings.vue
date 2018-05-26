@@ -53,15 +53,15 @@
 
                 <div class="col-sm-4">
 
-                    <div class="loadingStripe" v-if="loading.stripe.still">
+                    <div class="loadingStripe" v-if="loading.stripe['companyDetails']">
                         <clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
                         <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
                     </div>
 
                     <form id="companyDetails" v-on:keyup.enter="submit('companyDetails')" data-vv-scope="companyDetails">
                         <h4 class="formTitle">Company Details <icon class="header-icon " name="info"></icon></h4>
-                        <div class="input-group" v-on:click="companyDetails.inEditMode = true" :class="{ faded: !companyDetails.inEditMode || companyDetails.isUpdating }">
-                            <fieldset :disabled="!companyDetails.inEditMode || companyDetails.isUpdating">
+                        <div class="input-group" v-on:dblclick="activateEditMode('companyDetails')" :class="{ faded: !editMode['companyDetails'] }">
+                            <fieldset :disabled="!editMode['companyDetails']">
                                 <div class="input-row">
                                     <icon name="building"></icon>
                                     <input name="legal_entity_business_name" v-model="forms.companyDetails.legal_entity_business_name" placeholder="Company Name" v-validate="{ max: 200, required: true }" data-vv-as="Company Name" />
@@ -91,7 +91,7 @@
                             </fieldset>
                         </div>
 
-                        <button type="button" v-on:click="activateEditMode('companyDetails')" v-if="!companyDetails.inEditMode">
+                        <button type="button" v-on:click="activateEditMode('companyDetails')" v-if="!editMode['companyDetails']">
                             Edit
                         </button>
                         <div class="row editModeBtns" v-else>
@@ -111,15 +111,15 @@
 
                 <div class="col-sm-4">
 
-                    <div class="loadingStripe" v-if="loading.stripe.still == true">
+                    <div class="loadingStripe" v-if="loading.stripe['companyRep']">
                         <clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
                         <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
                     </div>
 
                     <form id="companyRep" v-on:keyup.enter="submit('companyRep')" data-vv-scope="companyRep">
                         <h4 class="formTitle">Company Representative <icon class="header-icon" name="user"></icon></h4>
-                        <div class="input-group" v-on:click="companyRep.inEditMode = true" :class="{ faded: !companyRep.inEditMode || companyRep.isUpdating }">
-                            <fieldset :disabled="!companyRep.inEditMode || companyRep.isUpdating">
+                        <div class="input-group" v-on:dblclick="activateEditMode('companyRep')" :class="{ faded: !editMode['companyRep'] }">
+                            <fieldset :disabled="!editMode['companyRep']">
                                 <div class="input-row">
                                     <icon name="user"></icon>
                                     <input name="legal_entity_first_name" v-model="forms.companyRep.legal_entity_first_name" placeholder="First Name" v-validate="{ max: 100, required: true }" data-vv-as="First Name" />
@@ -155,7 +155,7 @@
                             </fieldset>
                         </div>
 
-                        <button type="button" v-on:click="activateEditMode('companyRep')" v-if="!companyRep.inEditMode">
+                        <button type="button" v-on:click="activateEditMode('companyRep')" v-if="!editMode['companyRep']">
                             Edit
                         </button>
                         <div class="row editModeBtns" v-else>
@@ -176,15 +176,15 @@
 
                 <div class="col-sm-4">
 
-                    <div class="loadingStripe" v-if="loading.stripe.still == true">
+                    <div class="loadingStripe" v-if="loading.stripe['companyBankAccount']">
                         <clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
                         <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
                     </div>
 
                     <form id="companyBankAccount" v-on:keyup.enter="submit('companyBankAccount')" data-vv-scope="companyBankAccount">
                         <h4 class="formTitle">Company Bank Account <icon class="header-icon" name="credit-card"></icon></h4>
-                        <div class="input-group" v-on:click="companyBankAccount.inEditMode = true" :class="{ faded: !companyBankAccount.inEditMode || companyBankAccount.isUpdating }">
-                            <fieldset :disabled="!companyBankAccount.inEditMode || companyBankAccount.isUpdating">
+                        <div class="input-group" v-on:dblclick="activateEditMode('companyBankAccount')" :class="{ faded: !editMode['companyBankAccount'] }">
+                            <fieldset :disabled="!editMode['companyBankAccount']">
                                 <div class="input-row">
                                     <icon name="user"></icon>
                                     <input name="account_holder_name" v-model="forms.companyBankAccount.account_holder_name" placeholder="Account Holder Name" v-validate="{ max: 205, required: true }" data-vv-as="Account Holder Name" />
@@ -215,7 +215,7 @@
                             </fieldset>
                         </div>
 
-                        <button type="button" v-on:click="activateEditMode('companyBankAccount')" v-if="!companyBankAccount.inEditMode">
+                        <button type="button" v-on:click="activateEditMode('companyBankAccount')" v-if="!editMode['companyBankAccount']">
                             Edit
                         </button>
                         <div class="row editModeBtns" v-else>
@@ -293,17 +293,11 @@ export default {
             today: moment(new Date()).format('YYYY-MM-DD'),
             
             tosAccepted: '',
-            companyDetails: {
-                inEditMode: false,
-                isUpdating: false
-            },
-            companyRep: {
-                inEditMode: false,
-                isUpdating: false
-            },
-            companyBankAccount: {
-                inEditMode: false,
-                isUpdating: false
+            
+            editMode: {
+                companyDetails: false,
+                companyRep: false,
+                companyBankAccount: false
             },
 
             loading: {
@@ -314,7 +308,9 @@ export default {
                     msg: 'Loading your settings...'
                 },
                 stripe: {
-                    still: false,
+                    companyDetails: false,
+                    companyRep: false,
+                    companyBankAccount: false,
                     color: '#ffffff',
                     size: '50px',
                     msg: 'Updating your settings...'
@@ -388,10 +384,10 @@ export default {
                 var accToken = '';
                 if(res.created) { accToken = res.token; }
                 const account = this.buildAccountObject(accToken);
-                if(_.isEmpty(account)) return this[scope].inEditMode = false; /* Check if there is anything to sent to the API */
-                this[scope].inEditMode = false;
+                if(_.isEmpty(account)) return this.editMode[scope] = false; /* Check if there is anything to sent to the API */
+                this.editMode[scope] = false;
                 account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-                this.loading[scope].still = true;
+                this.loading.stripe[scope] = true;
                 return this.$http.patch('payment/stripeAccount', account, {
                     headers: {Authorization: JSON.parse(localStorage.user).token}
                 });
@@ -400,14 +396,14 @@ export default {
                 if(!res.hasOwnProperty('status')) return true;
                 if(res.status == 200 || res.status == 201) {
                     this.$store.commit('setRestaurantStripeAccount', res.body);
-                    this.loading[scope].still = false;
+                    this.loading.stripe[scope] = false;
                     this.displayFlashMsg('Your details were successfully updated!', 'success');
                 }
             }).catch((err) => {
                 if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
                     return this.displayFlashMsg(err.error, 'error');
                 }
-                this.loading[scope].still = false;
+                this.loading.stripe[scope] = false;
                 this.handleApiError(err);
             });
         },
@@ -494,14 +490,24 @@ export default {
                 default: 
                     break;
             }
-            this[form].inEditMode = true;
+            
             /* If any other form is currently in edit mode, cancel the edits and deactivate edit mode */
+            for(var key in this.editMode) {
+                if(key == form) {
+                    this.editMode[form] = true;
+                } else {
+                    if(this.editMode[key]) {
+                        this.editMode[key] = false;
+                        this.discardEdits(key);
+                    }
+                }
+            }
         },
 
         discardEdits(form) {
             /* Reset form values to match StripeAccount state */
             this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
-            this[form].inEditMode = false;
+            this.editMode[form] = false;
         },
 
         /* lodash _.merge(dest, src) will do what we need */
