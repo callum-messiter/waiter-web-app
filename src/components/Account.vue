@@ -340,42 +340,6 @@ export default {
             });
         },
 
-        createStripeAccount(scope) {
-            /* Submit all three forms simultaneously (one submit button) */
-            this.validateFields(scope)
-            .then(() => {
-                return this.tokeniseBankAccount(scope, this.forms.companyBankAccount);
-            }).then(() => {
-                if(!res.created) {
-                    throw 'There was an error saving your bank account details. Please check your details and try again.'
-                }
-                const account = this.buildAccountObject(res.token);
-                if(_.isEmpty(account)) throw 'There was an error saving your details. Please try again.';
-                /* For now, we don't allow the user to set these details */
-                account.legal_entity.le.additional_owners = '';
-                account.country = 'GB';
-                account.currency = 'gbp';
-                account.email = JSON.parse(localStorage.user).email;
-                account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
-                
-                return this.$http.post('payment/stripeAccount' , account, {
-                    headers: {Authorization: JSON.parse(localStorage.user).token}
-                });
-            }).then((res) => {
-                if(!res.hasOwnProperty('status')) return true;
-                if(res.status == 200 || res.status == 201) {
-                    this.$store.commit('setRestaurantStripeAccount', res.body);
-                    console.log(this.restaurantStripeAccount);
-                    this.displayFlashMsg('Your details were successfully updated!', 'success');
-                }
-            }).catch((err) => {
-                if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
-                    return this.displayFlashMsg(err.error, 'error');
-                }
-                this.handleApiError(err);
-            });
-        },
-
         updateStripeAccount(scope) {
             this.validateFields(scope)
             .then(() => {
@@ -416,6 +380,7 @@ export default {
                 if(!res.hasOwnProperty('status')) return true;
                 if(res.status == 200 || res.status == 201) {
                     this.$store.commit('setRestaurantStripeAccount', res.body);
+                    console.log('updated state: ' + JSON.stringify(this.restaurantStripeAccount));
                     this.loading.stripe[scope] = false;
                     this.displayFlashMsg('Your details were successfully updated!', 'success');
                 }
@@ -427,14 +392,6 @@ export default {
                 this.loading.stripe[scope] = false;
                 this.handleApiError(err);
             });
-        },
-
-        submit(scope='') {
-            if(this.restaurantStripeAccount.id === '') {
-                return this.createStripeAccount();
-            } else {
-                return this.updateStripeAccount(scope);
-            }
         },
 
         validateFields(scope) {
