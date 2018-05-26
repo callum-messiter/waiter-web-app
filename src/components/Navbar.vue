@@ -9,22 +9,22 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li v-bind:class="{'active': $route.path == '/dashboard'}">
-          <router-link to="/dashboard">Dashboard</router-link>
+          <router-link to="/dashboard">My Menu</router-link>
         </li>
         <li v-bind:class="{'active': $route.path == '/kitchen'}">
-          <router-link to="/kitchen">LiveKitchen</router-link>
+          <router-link to="/kitchen">Live Orders</router-link>
         </li>
-        <!--
-        <li v-bind:class="{'active': $route.path == '/settings'}">
-          <router-link to="/settings">Settings</router-link>
-        </li>
-        -->
+
       </ul>
       <ul class="nav navbar-nav navbar-right">
+        <li v-bind:class="{'active': $route.path == '/account'}">
+          <router-link to="/account">Account</router-link>
+        </li>
         <li class="logout">
             <a v-on:click="logUserOut">Log out</a>
         </li>
       </ul>
+
     </div><!--/.nav-collapse -->
   </div><!--/.container-fluid -->
 </nav>
@@ -92,10 +92,6 @@ export default {
 
   .navbar-right {
     padding-right: 15px;
-  }
-
-  .navbar-right a {
-    font-size: 12px !important;
   }
 
   .navbar {

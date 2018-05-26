@@ -252,7 +252,7 @@ import settings from '../../config/settings';
 const stripe = Stripe(settings.stripePubKey);
 
 export default {
-    name: 'Settings',
+    name: 'Account',
     components: {
     'clip-loader': ClipLoader
   },
@@ -490,7 +490,7 @@ export default {
                 default: 
                     break;
             }
-            
+
             /* If any other form is currently in edit mode, cancel the edits and deactivate edit mode */
             for(var key in this.editMode) {
                 if(key == form) {
