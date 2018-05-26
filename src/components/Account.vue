@@ -32,7 +32,7 @@
 
                 <div class="col-xs-2 col-xs-offset-4 text-right">
                     <!-- TODO: check if account is verified -->
-                    <figure v-if="restaurantStripeAccount.chargesEnabled && restaurantStripeAccount.payoutsEnabled">
+                    <figure v-if="restaurantStripeAccount.charges_enabled && restaurantStripeAccount.payouts_enabled">
                         <img class="switchImg" src="../assets/switch-on.png">
                         <figcaption style="color: #46ba4e">
                             {{forms.companyDetails.legal_entity_business_name}} is verified! You are ready to start accepting payments.
