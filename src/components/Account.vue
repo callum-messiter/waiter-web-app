@@ -40,7 +40,7 @@
                     </figure>
                     <figure v-else>
                         <img class="switchImg" src="../assets/switch-off.png">
-                        <figcaption style="color: #f22409">
+                        <figcaption style="color: red">
                             {{forms.companyDetails.legal_entity_business_name}} is not verified and cannot accept payments.
                         </figcaption>
                     </figure>
