@@ -85,7 +85,7 @@
                             </fieldset>
                         </div>
 
-                        <button type="button" v-on:click="companyDetails.inEditMode = true" v-if="!companyDetails.inEditMode">
+                        <button type="button" v-on:click="activateEditMode('companyDetails')" v-if="!companyDetails.inEditMode">
                             Edit
                         </button>
                         <div class="row editModeBtns" v-else>
@@ -143,7 +143,7 @@
                             </fieldset>
                         </div>
 
-                        <button type="button" v-on:click="companyRep.inEditMode = true" v-if="!companyRep.inEditMode">
+                        <button type="button" v-on:click="activateEditMode('companyRep')" v-if="!companyRep.inEditMode">
                             Edit
                         </button>
                         <div class="row editModeBtns" v-else>
@@ -197,7 +197,7 @@
                             </fieldset>
                         </div>
 
-                        <button type="button" v-on:click="companyBankAccount.inEditMode = true" v-if="!companyBankAccount.inEditMode">
+                        <button type="button" v-on:click="activateEditMode('companyBankAccount')" v-if="!companyBankAccount.inEditMode">
                             Edit
                         </button>
                         <div class="row editModeBtns" v-else>
@@ -308,9 +308,11 @@ export default {
                 headers: {Authorization: JSON.parse(localStorage.user).token}
             }).then((res) => {
                 console.log(res);
-                this.$store.commit('setRestaurantStripeAccount', res.body);
-                this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
-                this.loading.still = false;
+                if(res.status == 200 || res.status == 201) {
+                    this.$store.commit('setRestaurantStripeAccount', res.body);
+                    this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
+                    this.loading.still = false;
+                }
             }).catch((err) => {
                 this.handleApiError(err);
             });
@@ -343,8 +345,8 @@ export default {
             }).then((res) => {
                 if(!res.hasOwnProperty('status')) return true;
                 if(res.status == 200 || res.status == 201) {
+                    this.$store.commit('setRestaurantStripeAccount', res.body);
                     this.loading.still = false;
-                    /* Check if account is verified */
                     this.displayFlashMsg('Your details were successfully updated!', 'success');
                 }
             }).catch((err) => {
@@ -377,6 +379,7 @@ export default {
             }).then((res) => {
                 if(!res.hasOwnProperty('status')) return true;
                 if(res.status == 200 || res.status == 201) {
+                    this.$store.commit('setRestaurantStripeAccount', res.body);
                     this.loading.still = false;
                     this.displayFlashMsg('Your details were successfully updated!', 'success');
                 }
@@ -389,7 +392,7 @@ export default {
             });
         },
 
-        submit(scope="") {
+        submit(scope='') {
             if(this.restaurantStripeAccount.id === undefined) {
                 return this.createStripeAccount();
             } else {
@@ -445,6 +448,33 @@ export default {
                     return reject(err);
                 });
             });
+        },
+
+        activateEditMode(form) {
+            /*
+                We autofill the forms with the details in the Stripe accout object returned by Stripe.
+                But for the sensitive fields below, Stripe does not return them - only (implicitly or explicitly) 
+                whether or not they are set.
+
+                So in order to indicate to the user that they have already set these details, we need to set
+                default values and mask them (so it looks like their, e.g., bank account number is written in the form).
+
+                This means that when the user starts editing a form with a sensitive field, we need to set the value to an 
+                empty string. Otherwise, if they click edit, and then click save without changing anything, Stripe will
+                throw an error, because the value is our (invalid) placeholder one and not a real bank account number.
+            */
+            switch(form) {
+                case 'companyDetails':
+                    this.forms.companyDetails.legal_entity_business_tax_id = '';
+                    break;
+                case 'companyBankAccount':
+                    this.forms.companyBankAccount.account_number = '';
+                    this.forms.companyBankAccount.routing_number = '';
+                    break;
+                default: 
+                    break;
+            }
+            this[form].inEditMode = true;
         },
 
         resetForm(form) {
@@ -575,6 +605,7 @@ export default {
             return acc;
         },
 
+        /* We do this when we first retrieve the account details, but also when a user resets a form */
         autoFillFormsWithRestaurantDetails(stripe) {
             const cd = this.forms.companyDetails;
             const cr = this.forms.companyRep;
@@ -590,31 +621,50 @@ export default {
             cba.country = stripe.country  || '';
             cba.currency = stripe.default_currency  || '';
 
-            /* Convert sections to datestring */
+            /* If is not set, use the default value from the data props */
             const dob = stripe_le.dob;
             if(!isNaN(dob.year) && !isNaN(dob.month) && !isNaN(dob.day)) {
                 this.dateString = this.generateDateString(dob);
+            } else {
+                this.dateString = '';
             }
             
-            /* If is not set, use the default value from the data props */
             if(this.isSetAndNotEmpty(stripe_le.business_name)) {
                 cd.legal_entity_business_name = stripe_le.business_name;
+            } else {
+                cd.legal_entity_business_name = JSON.parse(localStorage.getItem('restaurant')).name || '';
             }
+
             if(this.isSetAndNotEmpty(stripe_le.first_name)) {
                 cr.legal_entity_first_name = stripe_le.first_name;
+            } else {
+                cd.legal_entity_first_name = JSON.parse(localStorage.getItem('user')).firstName || '';
             }
+
             if(this.isSetAndNotEmpty(stripe_le.last_name)) {
                 cr.legal_entity_last_name = stripe_le.last_name;
+            } else {
+                cd.legal_entity_last_name = JSON.parse(localStorage.getItem('user')).lastName || '';
             }
+
             if(stripe.external_accounts.data.length > 0) {
                 cba.account_holder_name = stripe.external_accounts.data[0].account_holder_name;
                 cba.account_holder_type = stripe.external_accounts.data[0].account_holder_type;
                 /* These values will be masked just to indicate to the user that they have been set */
                 cba.account_number = '_acctNum';
                 cba.routing_number = '_routNum';
+            } else {
+                cba.account_holder_name = JSON.parse(localStorage.getItem('user')).firstName + ' ' + 
+                                          JSON.parse(localStorage.getItem('user')).lastName;
+                cba.account_holder_type = 'company';
+                cba.account_number = '';
+                cba.routing_number = '';
             }
+
             if(stripe_le.business_tax_id_provided == true) {
                 cd.legal_entity_business_tax_id = '_cHRegNo';
+            } else {
+                cd.legal_entity_business_tax_id = '';
             }
         },
 
