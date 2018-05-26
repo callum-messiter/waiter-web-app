@@ -30,7 +30,7 @@
                     </div>
                 </div>
 
-                <div class="col-xs-2 col-xs-offset-4 text-right">
+                <div class="col-xs-3 col-xs-offset-3 text-right">
                     <!-- TODO: check if account is verified -->
                     <figure v-if="restaurantStripeAccount.charges_enabled && restaurantStripeAccount.payouts_enabled">
                         <img class="switchImg" src="../assets/switch-on.png">
@@ -42,6 +42,7 @@
                         <img class="switchImg" src="../assets/switch-off.png">
                         <figcaption style="color: red">
                             {{forms.companyDetails.legal_entity_business_name}} is not verified and cannot accept payments.
+                            Please fill in the details below to continue using Waitr.
                         </figcaption>
                     </figure>
                 </div>
@@ -386,6 +387,7 @@ export default {
                 }
             }).catch((err) => {
                 console.log(err);
+                this.editMode[scope] = true;
                 if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
                     return this.displayFlashMsg(err.error, 'error');
                 }

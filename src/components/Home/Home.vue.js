@@ -66,7 +66,7 @@ export default {
       const queryString = '?email='+email+'&password='+pass;
       this.$http.get('auth/login'+queryString, {
       }).then((res) => {
-
+        console.log(res.body.data);
         if(res.status == 200 || res.status == 201) {
           // Add data to local storage
           localStorage.setItem('user', JSON.stringify(res.body.data.user));
@@ -75,6 +75,8 @@ export default {
           localStorage.setItem('menu', JSON.stringify(res.body.data.menu)); // menuId and name
           this.$store.commit('authenticateUser');
           this.connectToWebSocketsServer();
+          /* TODO: once stable and tested, only connect to WS server if stripe account is verified */
+          if(!res.body.data.restaurant.isStripeAccountVerified) { targetRoute = '/account'; }
           this.$router.push(targetRoute);
         }
 
