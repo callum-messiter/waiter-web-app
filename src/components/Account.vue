@@ -20,7 +20,7 @@
                         -->
                     </h3>
                     <!-- Only show the TOS prompt if the user has not already accepted the TOS -->
-                    <div class="tos" v-if="isNaN(restaurantStripeAccount.tos_acceptance.date)">
+                    <div class="tos" v-if="restaurantStripeAccount.tos_acceptance.date == '' ">
                         <p>Please fill in the details below so we can verify your restaurant and allow you to accept payments from your customers.</p>
                         <p>By saving your account details, you agree to the
                             <a href="https://stripe.com/gb/connect-account/legal" id="tosLink">
@@ -58,7 +58,7 @@
                         <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
                     </div>
 
-                    <form id="companyDetails" v-on:keyup.enter="submit('companyDetails')" data-vv-scope="companyDetails">
+                    <form id="companyDetails" v-on:keyup.enter="updateStripeAccount('companyDetails')" data-vv-scope="companyDetails">
                         <h4 class="formTitle">Company Details <icon class="header-icon " name="info"></icon></h4>
                         <div class="input-group" v-on:dblclick="activateEditMode('companyDetails')" :class="{ faded: !editMode['companyDetails'] }">
                             <fieldset :disabled="!editMode['companyDetails']">
@@ -96,7 +96,7 @@
                         </button>
                         <div class="row editModeBtns" v-else>
                             <div class="col-xs-6 btnColLeft">
-                                <button class="editModeBtn saveBtn" type="button" v-on:click="submit('companyDetails')">
+                                <button class="editModeBtn saveBtn" type="button" v-on:click="updateStripeAccount('companyDetails')">
                                     Save
                                 </button>
                             </div>
@@ -116,7 +116,7 @@
                         <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
                     </div>
 
-                    <form id="companyRep" v-on:keyup.enter="submit('companyRep')" data-vv-scope="companyRep">
+                    <form id="companyRep" v-on:keyup.enter="updateStripeAccount('companyRep')" data-vv-scope="companyRep">
                         <h4 class="formTitle">Company Representative <icon class="header-icon" name="user"></icon></h4>
                         <div class="input-group" v-on:dblclick="activateEditMode('companyRep')" :class="{ faded: !editMode['companyRep'] }">
                             <fieldset :disabled="!editMode['companyRep']">
@@ -160,7 +160,7 @@
                         </button>
                         <div class="row editModeBtns" v-else>
                             <div class="col-xs-6 btnColLeft">
-                                <button class="editModeBtn saveBtn" type="button" v-on:click="submit('companyRep')">
+                                <button class="editModeBtn saveBtn" type="button" v-on:click="updateStripeAccount('companyRep')">
                                     Save
                                 </button>
                             </div>
@@ -181,7 +181,7 @@
                         <p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
                     </div>
 
-                    <form id="companyBankAccount" v-on:keyup.enter="submit('companyBankAccount')" data-vv-scope="companyBankAccount">
+                    <form id="companyBankAccount" v-on:keyup.enter="updateStripeAccount('companyBankAccount')" data-vv-scope="companyBankAccount">
                         <h4 class="formTitle">Company Bank Account <icon class="header-icon" name="credit-card"></icon></h4>
                         <div class="input-group" v-on:dblclick="activateEditMode('companyBankAccount')" :class="{ faded: !editMode['companyBankAccount'] }">
                             <fieldset :disabled="!editMode['companyBankAccount']">
@@ -220,7 +220,7 @@
                         </button>
                         <div class="row editModeBtns" v-else>
                             <div class="col-xs-6 btnColLeft">
-                                <button class="editModeBtn saveBtn" type="button" v-on:click="submit('companyBankAccount')">
+                                <button class="editModeBtn saveBtn" type="button" v-on:click="updateStripeAccount('companyBankAccount')">
                                     Save
                                 </button>
                             </div>
@@ -233,9 +233,6 @@
 
                     </form>
                 </div>
-                <button type="button" v-on:click="submit('')" v-if="restaurantStripeAccount.id === undefined">
-                    Save All
-                </button>
             </div>
         </div>
     </div>
@@ -331,20 +328,23 @@ export default {
             }).then((res) => {
                 console.log(res);
                 if(res.status == 200 || res.status == 201) {
-                    this.$store.commit('setRestaurantStripeAccount', res.body);
-                    this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
+                    if(!_.isEmpty(res.body)) {
+                        this.$store.commit('setRestaurantStripeAccount', res.body);
+                        this.autoFillFormsWithRestaurantDetails(this.restaurantStripeAccount);
+                    }
                     this.loading.main.still = false;
                 }
             }).catch((err) => {
+                console.log(err);
                 this.handleApiError(err);
             });
         },
 
-        createStripeAccount() {
+        createStripeAccount(scope) {
             /* Submit all three forms simultaneously (one submit button) */
-            this.validateAllFields()
+            this.validateFields(scope)
             .then(() => {
-                return this.tokeniseBankAccount('companyBankAccount', this.forms.companyBankAccount);
+                return this.tokeniseBankAccount(scope, this.forms.companyBankAccount);
             }).then(() => {
                 if(!res.created) {
                     throw 'There was an error saving your bank account details. Please check your details and try again.'
@@ -365,6 +365,7 @@ export default {
                 if(!res.hasOwnProperty('status')) return true;
                 if(res.status == 200 || res.status == 201) {
                     this.$store.commit('setRestaurantStripeAccount', res.body);
+                    console.log(this.restaurantStripeAccount);
                     this.displayFlashMsg('Your details were successfully updated!', 'success');
                 }
             }).catch((err) => {
@@ -384,10 +385,29 @@ export default {
                 var accToken = '';
                 if(res.created) { accToken = res.token; }
                 const account = this.buildAccountObject(accToken);
+                console.log(account);
                 if(_.isEmpty(account)) return this.editMode[scope] = false; /* Check if there is anything to sent to the API */
                 this.editMode[scope] = false;
-                account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
                 this.loading.stripe[scope] = true;
+                account.restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
+                if(this.restaurantStripeAccount.id == '') {
+                    /* `tos` */
+                    if(!this.isSetAndNotEmpty(this.restaurantStripeAccount.tos_acceptance.date)) {
+                        account.tos_acceptance = { 
+                            date: Math.floor(Date.now() / 1000), 
+                            ip: '' /* Set by the server */
+                        };
+                    }
+                    /* For now, we don't allow the user to set these details */
+                    account.legal_entity.additional_owners = '';
+                    account.type = 'custom';
+                    account.country = 'GB';
+                    account.email = JSON.parse(localStorage.user).email;
+                    return this.$http.post('payment/stripeAccount' , account, {
+                        headers: {Authorization: JSON.parse(localStorage.user).token}
+                    });
+                }
+
                 return this.$http.patch('payment/stripeAccount', account, {
                     headers: {Authorization: JSON.parse(localStorage.user).token}
                 });
@@ -400,6 +420,7 @@ export default {
                     this.displayFlashMsg('Your details were successfully updated!', 'success');
                 }
             }).catch((err) => {
+                console.log(err);
                 if(err !== undefined && err.hasOwnProperty('fieldsInvalid')) {
                     return this.displayFlashMsg(err.error, 'error');
                 }
@@ -409,7 +430,7 @@ export default {
         },
 
         submit(scope='') {
-            if(this.restaurantStripeAccount.id === undefined) {
+            if(this.restaurantStripeAccount.id === '') {
                 return this.createStripeAccount();
             } else {
                 return this.updateStripeAccount(scope);
@@ -467,18 +488,6 @@ export default {
         },
 
         activateEditMode(form) {
-            /*
-                We autofill the forms with the details in the Stripe accout object returned by Stripe.
-                But for the sensitive fields below, Stripe does not return them - only (implicitly or explicitly) 
-                whether or not they are set.
-
-                So in order to indicate to the user that they have already set these details, we need to set
-                default values and mask them (so it looks like their, e.g., bank account number is written in the form).
-
-                This means that when the user starts editing a form with a sensitive field, we need to set the value to an 
-                empty string. Otherwise, if they click edit, and then click save without changing anything, Stripe will
-                throw an error, because the value is our (invalid) placeholder one and not a real bank account number.
-            */
             switch(form) {
                 case 'companyDetails':
                     this.forms.companyDetails.legal_entity_business_tax_id = '';
@@ -518,14 +527,6 @@ export default {
             const cba = this.forms.companyBankAccount;
             const stripe = this.restaurantStripeAccount;
             const acc = {};
-            
-            /* `tos` */
-            if(isNaN(stripe.tos_acceptance.date)) {
-                acc.tos_acceptance = { 
-                    date: Math.floor(Date.now() / 1000), 
-                    ip: '' /* Set by the server */
-                };
-            }
 
             /* TODO: think about how to edit the sensitive fields */
             if(this.isSetAndNotEmpty(accToken)) {
@@ -535,32 +536,24 @@ export default {
             /* `legal_entity` */
             const le = {};
             const stripe_le = stripe.legal_entity;
-            if(this.isSetAndNotEmpty(cr.legal_entity_first_name)) {
-                if(cr.legal_entity_first_name.trim() != stripe_le.first_name.trim()) {
-                    le.first_name = cr.legal_entity_first_name; /* Update the obj */
-                    acc.legal_entity = le; /* Set this obj as a prop of the parent obj; overwrite if already set */
-                }
+            if(this.paramSetAndHasChanged(cr.legal_entity_first_name, stripe_le.first_name)) {
+                le.first_name = cr.legal_entity_first_name; /* Update the obj */
+                acc.legal_entity = le; /* Set this obj as a prop of the parent obj; overwrite if already set */
             }
 
-            if(this.isSetAndNotEmpty(cr.legal_entity_last_name)) {
-                if(cr.legal_entity_last_name.trim() != stripe_le.last_name.trim()) {
-                    le.last_name = cr.legal_entity_last_name;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cr.legal_entity_last_name, stripe_le.last_name)) {
+                le.last_name = cr.legal_entity_last_name;
+                acc.legal_entity = le;
             }
 
-            if(this.isSetAndNotEmpty(cd.legal_entity_type)) {
-                if(cd.legal_entity_type.trim() != stripe_le.type.trim()) {
-                    le.type = cd.legal_entity_type;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cd.legal_entity_type, stripe_le.type)) {
+                le.type = cd.legal_entity_type;
+                acc.legal_entity = le;
             }
 
-            if(this.isSetAndNotEmpty(cd.legal_entity_business_name)) {
-                if(cd.legal_entity_business_name.trim() != stripe_le.business_name.trim()) {
-                    le.business_name = cd.legal_entity_business_name;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cd.legal_entity_business_name, stripe_le.business_name)) {
+                le.business_name = cd.legal_entity_business_name;
+                acc.legal_entity = le;
             }
 
             /* Show a masked default string */
@@ -573,61 +566,51 @@ export default {
             
             /* `legal_entity.address` */
             var a = {};
-            if(this.isSetAndNotEmpty(cd.legal_entity_address_line1)) {
-                if(cd.legal_entity_address_line1.trim() != stripe_le.address.line1.trim()) {
-                    a.line1 = cd.legal_entity_address_line1;
-                    le.address = a;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cd.legal_entity_address_line1, stripe_le.address.line1)) {
+                a.line1 = cd.legal_entity_address_line1;
+                le.address = a;
+                acc.legal_entity = le;
             }
 
-            if(this.isSetAndNotEmpty(cd.legal_entity_address_city)) {
-                if(cd.legal_entity_address_city.trim() != stripe_le.address.city.trim()) {
-                    a.city = cd.legal_entity_address_city;
-                    le.address = a;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cd.legal_entity_address_city, stripe_le.address.city)) {
+                a.city = cd.legal_entity_address_city;
+                le.address = a;
+                acc.legal_entity = le;
             }
 
-            if(this.isSetAndNotEmpty(cd.legal_entity_address_postal_code)) {
-                if(cd.legal_entity_address_postal_code.trim() != stripe_le.address.postal_code.trim()) {
-                    a.postal_code = cd.legal_entity_address_postal_code;
-                    le.address = a;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cd.legal_entity_address_postal_code, stripe_le.address.postal_code)) {
+                a.postal_code = cd.legal_entity_address_postal_code;
+                le.address = a;
+                acc.legal_entity = le;
             }
 
             /* `legal_entity.personal_address` */
             var pa = {};
-            if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_line1)) {
-                if(cr.legal_entity_personal_address_line1.trim() != stripe_le.personal_address.line1.trim()) {
-                    pa.line1 = cr.legal_entity_personal_address_line1;
-                    le.personal_address = pa;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cr.legal_entity_personal_address_line1, stripe_le.personal_address.line1)) {
+                pa.line1 = cr.legal_entity_personal_address_line1;
+                le.personal_address = pa;
+                acc.legal_entity = le;
             }
 
-            if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_city)) {
-                if(cr.legal_entity_personal_address_city.trim() != stripe_le.personal_address.city.trim()) {
-                    pa.city = cr.legal_entity_personal_address_city;
-                    le.personal_address = pa;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cr.legal_entity_personal_address_city, stripe_le.personal_address.city)) {
+                pa.city = cr.legal_entity_personal_address_city;
+                le.personal_address = pa;
+                acc.legal_entity = le;
             }
 
-            if(this.isSetAndNotEmpty(cr.legal_entity_personal_address_postal_code)) {
-                if(cr.legal_entity_personal_address_postal_code.trim() != stripe_le.personal_address.postal_code.trim()) {
-                    pa.postal_code = cr.legal_entity_personal_address_postal_code;
-                    le.personal_address = pa;
-                    acc.legal_entity = le;
-                }
+            if(this.paramSetAndHasChanged(cr.legal_entity_personal_address_postal_code, stripe_le.personal_address.postal_code)) {
+                pa.postal_code = cr.legal_entity_personal_address_postal_code;
+                le.personal_address = pa;
+                acc.legal_entity = le;
             }
 
             /* `legal_entity.dob` */
-            const stripeDateString = this.generateDateString(stripe_le.dob);
-            if(this.dateString != stripeDateString) {
-                le.dob = this.setDob(this.dateString); /* Split datestring into day, month, year */
-                acc.legal_entity = le;
+            if(this.dateString != '') {
+                const stripeDateString = this.generateDateString(stripe_le.dob);
+                if(this.dateString != stripeDateString) {
+                    le.dob = this.setDob(this.dateString); /* Split datestring into day, month, year */
+                    acc.legal_entity = le;
+                }
             }
 
             return acc;
@@ -651,7 +634,7 @@ export default {
 
             /* If is not set, use the default value from the data props */
             const dob = stripe_le.dob;
-            if(!isNaN(dob.year) && !isNaN(dob.month) && !isNaN(dob.day)) {
+            if(this.isSetAndNotEmpty(dob.year) && this.isSetAndNotEmpty(dob.month) && this.isSetAndNotEmpty(dob.day)) {
                 this.dateString = this.generateDateString(dob);
             } else {
                 this.dateString = '';
@@ -698,12 +681,29 @@ export default {
 
         isSetAndNotEmpty(param) {
             if(param === undefined) return false;
+            if(param === null) return false;
             if(param.toString().replace(/\s+/g, '') == '') return false;
+            return true;
+        },
+
+        paramSetAndHasChanged(formVal, stripeState) {
+            if(!this.isSetAndNotEmpty(formVal)) return false;
+            formVal = formVal.toString().trim();
+            if(this.isSetAndNotEmpty(stripeState)) { stripeState = stripeState.toString().trim(); }
+            if(formVal == stripeState) return false;
             return true;
         },
 
         /* Convert `{year: 1994, month: 7, day: 8}` to "1994-07-08" */
         generateDateString(dob) {
+            if(!dob.hasOwnProperty('year') || !dob.hasOwnProperty('month') || !dob.hasOwnProperty('day')) {
+                return '';
+            }
+
+            if(!this.isSetAndNotEmpty(dob.year) || !this.isSetAndNotEmpty(dob.month) || !this.isSetAndNotEmpty(dob.day)) {
+                return '';
+            }
+
             dob.year = dob.year.toString();
             dob.month = dob.month.toString();
             dob.day = dob.day.toString();

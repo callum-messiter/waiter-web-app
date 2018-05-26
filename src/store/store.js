@@ -33,7 +33,79 @@ export default new Vuex.Store({
 			categories: []
 		},
 		orders: [],
-		stripeAccount: {}
+		stripeAccount: {
+		  id: '',
+		  object: '',
+		  business_name: '',
+		  business_url: '',
+		  charges_enabled: false,
+		  country: '',
+		  created: '',
+		  debit_negative_balances: true,
+		  decline_charge_on: {
+		    avs_failure: false,
+		    cvc_failure: false
+		  },
+		  default_currency: '',
+		  details_submitted: false,
+		  display_name: '',
+		  email: '',
+		  external_accounts: {
+		    object: 'list',
+		    data: [],
+		    has_more: false,
+		    total_count: 0,
+		    url: ''
+		  },
+		  legal_entity: {
+		    additional_owners: [],
+		    address: {
+		      city: '',
+		      country: '',
+		      line1: '',
+		      line2: '',
+		      postal_code: '',
+		      state: ''
+		    },
+		    business_name: '',
+		    business_tax_id_provided: false,
+		    dob: {
+		      day: '',
+		      month: '',
+		      year: ''
+		    },
+		    first_name: '',
+		    last_name: '',
+		    personal_address: {
+		      city: '',
+		      country: '',
+		      line1: '',
+		      line2: '',
+		      postal_code: '',
+		      state: ''
+		    },
+		    type: '',
+		   	verification: {
+		      details: '',
+		      details_code: '',
+		      document: '',
+		      document_back: '',
+		      status: ''
+		    }
+		  },
+		  tos_acceptance: {
+		    date: '',
+		    iovation_blackbox: '',
+		    ip: '',
+		    user_agent: ''
+		  },
+		  type: '',
+		  verification: {
+		    disabled_reason: '',
+		    due_by: '',
+		    fields_needed: []
+		  }
+		}
 	},
 	mutations: {
 		/**
