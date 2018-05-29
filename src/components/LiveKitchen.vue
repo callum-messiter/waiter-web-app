@@ -25,12 +25,11 @@
         <div v-for="table in orders.received" class="table">
           <h4 style="color: white">Table {{table.tableNo}} <icon name="users"></icon></h4>
 
-          <!-- 
-          <div class="orderIncoming row" v-if="key == 10">
+          <div class="orderIncoming row" v-if="tableBreakdown[table.tableNo] > 0">
             <pacman-loader :color="orderIncoming.color" :size="orderIncoming.size"></pacman-loader>
-            <p class="orderIncomingMsg">Hold on - someone else from table {{key}} is currently placing an order</p>
+            <p class="orderIncomingMsg">Hold on - someone else from table {{table.tableNo}} is currently placing an order</p>
           </div>
-          -->
+
           <div 
             v-for="order in table.orders"
             class="panel panel-default"
@@ -206,12 +205,15 @@ export default {
 
   created() {
     this.getAllLiveOrdersForRestaurant();
+    this.getUpToDateTableBreakdown();
     this.listenForNewOrdersFromServer();
+    this.listenForTableUpdatesFromServer();
     this.listenForServerConfirmationOfOrderStatusUpdate();
     this.intermittentlyUpdateTimeSinceOrdersWerePlaced();
   },
 
   methods: {
+
     intermittentlyUpdateTimeSinceOrdersWerePlaced() {
       // Intermittently update each order's "time ago" property
       window.setInterval(() => {
@@ -250,6 +252,16 @@ export default {
       The server finds all sockets which represent the restaurant who is the intended recipient of the order. It then
       emits the 'neworder' event to these sockets; here we handle this event
     **/
+    listenForTableUpdatesFromServer() {
+      this.$options.sockets['userJoinedTable'] = (data) => {  
+        this.$store.commit('incrementActiveUsersAtTable', data.tableNo);
+      };
+
+      this.$options.sockets['userLeftTable'] = (data) => {
+        this.$store.commit('decrementActiveUsersAtTable', data.tableNo);
+      };
+    },
+
     listenForNewOrdersFromServer() {
       this.$options.sockets['newOrder'] = (order) => {
         // order.time is a utc timestamp (milliseconds); since 
@@ -304,6 +316,23 @@ export default {
 
       }).catch((res) => {
         this.handleApiError(res);
+      });
+    },
+
+    getUpToDateTableBreakdown() {
+      const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
+
+      this.$http.get('table/users/'+restaurantId, {
+        headers: {Authorization: JSON.parse(localStorage.user).token}
+      }).then((res) => {
+
+        const tblUsers = res.body.data;
+        for(var i = 0; i < tblUsers.length; i++) {
+          this.$store.commit('incrementActiveUsersAtTable', tblUsers[0].tableNo);
+        }
+
+      }).catch((err) => {
+        this.handleApiError(err);
       });
     },
 
@@ -417,12 +446,8 @@ export default {
       return this.$store.getters.getLiveOrders.numOrders
     },
 
-    statusesVisibleToKitchen() {
-      return [
-        this.statuses.sentToKitchen,
-        this.statuses.receivedByKitchen,
-        this.statuses.acceptedByKitchen
-      ]
+    tableBreakdown() {
+      return this.$store.getters.getLiveTableBreakdown;
     }
   }
 }
