@@ -25,7 +25,10 @@
         <div v-for="table in orders.received" class="table">
           <h4 style="color: white">Table {{table.tableNo}} <icon name="users"></icon></h4>
 
-          <div class="orderIncoming row" v-if="tableBreakdown[table.tableNo] > 0">
+          <div 
+            class="orderIncoming row"
+            v-if="tableBreakdown.hasOwnProperty(table.tableNo) && tableBreakdown[table.tableNo].length > 0"
+          >
             <pacman-loader :color="orderIncoming.color" :size="orderIncoming.size"></pacman-loader>
             <p class="orderIncomingMsg">Hold on - someone else from table {{table.tableNo}} is currently placing an order</p>
           </div>
@@ -104,7 +107,7 @@
               :color="loading.spinnerColor"
             >
             </clip-loader>
-
+ 
             <!-- Main order-card content -->
             <div class="panel-heading orderCardHeader container-fluid">
               <div class="row">
@@ -253,11 +256,13 @@ export default {
       emits the 'neworder' event to these sockets; here we handle this event
     **/
     listenForTableUpdatesFromServer() {
-      this.$options.sockets['userJoinedTable'] = (data) => {  
-        this.$store.commit('incrementActiveUsersAtTable', data.tableNo);
+      this.$options.sockets['userJoinedTable'] = (data) => {
+        this.$store.commit('addUserToTable', data);
+        //this.$store.commit('incrementActiveUsersAtTable', data.tableNo);
       };
 
       this.$options.sockets['userLeftTable'] = (data) => {
+        // this.$store.commit('removeUserFromTable', data);
         this.$store.commit('decrementActiveUsersAtTable', data.tableNo);
       };
     },
@@ -326,12 +331,14 @@ export default {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
 
-        const tblUsers = res.body.data;
-        for(var i = 0; i < tblUsers.length; i++) {
-          this.$store.commit('incrementActiveUsersAtTable', tblUsers[0].tableNo);
+        const tableUsers = res.body.data;
+        for(var user of tableUsers) {
+          this.$store.commit('addUserToTable', user);
+          // this.$store.commit('incrementActiveUsersAtTable', user.tableNo);
         }
-
+        console.log('TABLE BREAKDOWN: ' + JSON.stringify(this.tableBreakdown));
       }).catch((err) => {
+        console.log(err);
         this.handleApiError(err);
       });
     },
@@ -438,7 +445,7 @@ export default {
         }
 
       }
-
+      console.log(JSON.stringify(orderObj));
       return orderObj;
     },
 

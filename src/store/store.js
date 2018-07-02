@@ -34,6 +34,7 @@ export default new Vuex.Store({
 		},
 		orders: [],
 		tableBreakdown: {},
+		tableUsers: {},
 		stripeAccount: {
 		  id: '',
 		  object: '',
@@ -223,6 +224,29 @@ export default new Vuex.Store({
 			}
 		},
 
+		addUserToTable(state, tableData) {
+			const tableUsers = state.tableUsers;
+			/* If user is already assigned to another table... */
+			for(var table in tableUsers) {
+		        if(table.includes(tableData.customerId)) {
+		        	/* Unassign the user from the table */
+		        	Vue.delete(tableUsers[table], tableData.customerId);
+		        }
+			}
+			/* Assign user to new table */
+			if(tableUsers.hasOwnProperty(tableData.tableNo)) {
+				tableUsers[tableData.tableNo].push(tableData.customerId);
+			}
+			Vue.set(tableUsers, tableData.tableNo, [tableData.customerId]);
+		},
+
+		removeUserFromTable(state, tableData) {
+			const tableUsers = state.tableUsers;
+			if(tb.hasOwnProperty(tableData.tableNo)) {
+				tb[tableData.tableNo].push(tableData.customerId);
+			}
+		},
+
 		/**
 			Restaurant details
 		**/
@@ -271,7 +295,8 @@ export default new Vuex.Store({
 			Tables
 		**/
 		getLiveTableBreakdown(state) {
-			return state.tableBreakdown;
+			// return state.tableBreakdown;
+			return state.tableUsers;
 		},
 
 		/**
