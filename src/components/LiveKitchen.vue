@@ -262,8 +262,10 @@ export default {
       };
 
       this.$options.sockets['userLeftTable'] = (data) => {
-        // this.$store.commit('removeUserFromTable', data);
-        this.$store.commit('decrementActiveUsersAtTable', data.tableNo);
+        console.log('Before: ' + JSON.stringify(this.tableBreakdown));
+        this.$store.commit('removeUserFromTable', data);
+        console.log('After: ' + JSON.stringify(this.tableBreakdown));
+        // this.$store.commit('decrementActiveUsersAtTable', data.tableNo);
       };
     },
 
@@ -336,7 +338,6 @@ export default {
           this.$store.commit('addUserToTable', user);
           // this.$store.commit('incrementActiveUsersAtTable', user.tableNo);
         }
-        console.log('TABLE BREAKDOWN: ' + JSON.stringify(this.tableBreakdown));
       }).catch((err) => {
         console.log(err);
         this.handleApiError(err);
@@ -445,7 +446,6 @@ export default {
         }
 
       }
-      console.log(JSON.stringify(orderObj));
       return orderObj;
     },
 

@@ -33,8 +33,7 @@ export default new Vuex.Store({
 			categories: []
 		},
 		orders: [],
-		tableBreakdown: {},
-		tableUsers: {},
+		tables: {},
 		stripeAccount: {
 		  id: '',
 		  object: '',
@@ -210,6 +209,7 @@ export default new Vuex.Store({
 			state.tableBreakdown = tableInfo;
 		},
 
+		/**
 		incrementActiveUsersAtTable(state, tableNo) {
 			const tb = state.tableBreakdown;
 			if(tb.hasOwnProperty(tableNo)) return tb[tableNo]++;
@@ -223,27 +223,37 @@ export default new Vuex.Store({
 				Vue.delete(tb, tableNo);
 			}
 		},
+		**/
 
-		addUserToTable(state, tableData) {
-			const tableUsers = state.tableUsers;
+		addUserToTable(state, data) {
+			const tables = state.tables;
+			const tableNo = data.tableNo;
+			const customerId = data.customerId;
+			
 			/* If user is already assigned to another table... */
-			for(var table in tableUsers) {
-		        if(table.includes(tableData.customerId)) {
-		        	/* Unassign the user from the table */
-		        	Vue.delete(tableUsers[table], tableData.customerId);
+			for(var table in tables) {
+		        if(tables[table].includes(customerId)) {
+		        	/* ...remove the user from this table */
+		        	const tableWithoutUser = tables[table].filter(customerId => customerId != customerId);
+		        	Vue.set(tables, table, tableWithoutUser);
 		        }
 			}
-			/* Assign user to new table */
-			if(tableUsers.hasOwnProperty(tableData.tableNo)) {
-				tableUsers[tableData.tableNo].push(tableData.customerId);
+			
+			/* Assign user to new table; if table already exists, add user */
+			if(tables.hasOwnProperty(tableNo)) {
+				const tableWithUser = tables[tableNo].push(customerId);
+				Vue.set(tables, tableNo, tableWithUser);
 			}
-			Vue.set(tableUsers, tableData.tableNo, [tableData.customerId]);
+			/* If table doesn't exist yet, create it containing user */
+			Vue.set(tables, tableNo, [customerId]);
 		},
 
-		removeUserFromTable(state, tableData) {
-			const tableUsers = state.tableUsers;
-			if(tb.hasOwnProperty(tableData.tableNo)) {
-				tb[tableData.tableNo].push(tableData.customerId);
+		removeUserFromTable(state, data) {
+			const tables = state.tables;
+			const tableNo = data.tableNo;
+			if(tables.hasOwnProperty(tableNo)) {
+				const tableWithoutUser = tables[tableNo].filter(customerId => customerId !== data.customerId);
+	        	Vue.set(tables, tableNo, tableWithoutUser);
 			}
 		},
 
@@ -296,7 +306,7 @@ export default new Vuex.Store({
 		**/
 		getLiveTableBreakdown(state) {
 			// return state.tableBreakdown;
-			return state.tableUsers;
+			return state.tables;
 		},
 
 		/**
