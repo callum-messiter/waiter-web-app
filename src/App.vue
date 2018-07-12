@@ -47,6 +47,12 @@ export default {
         Vue.use(VueSocketio, settings.webSocketsUrl+'?restaurantId='+r.restaurantId);
       }
     }
+
+    // Redirect user if route is invalid
+    for(var route of this.$router.options.routes) {
+      if(this.$route.path == route.path) return;
+    }
+    this.$router.push('/');
     
   },
 
@@ -67,7 +73,6 @@ export default {
           }
         }
       }
-
     }
   }
 }

@@ -159,7 +159,7 @@ import moment from 'moment';
 import underscore from 'underscore';
 
 export default {
-  name: 'LiveKitchen',
+  name: 'LiveOrders',
   components: {
     'clip-loader': ClipLoader,
     'pacman-loader': PacmanLoader

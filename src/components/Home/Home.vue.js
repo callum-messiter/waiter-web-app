@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueSocketio from 'vue-socket.io';
 import settings from '../../../config/settings';
 import functions from '../../mixins/functions';
+import routes from '../../router/routes';
 
 export default {
   name: 'Landing',
@@ -37,7 +38,7 @@ export default {
   created () {
     // If the user is logged in, redirect them to...
     if(this.userIsAuthenticated) {
-      this.$router.push('/kitchen');
+      this.$router.push(routes.liveOrders);
     }
   },
 
@@ -76,7 +77,7 @@ export default {
           this.$store.commit('authenticateUser');
           this.connectToWebSocketsServer();
           /* TODO: once stable and tested, only connect to WS server if stripe account is verified */
-          if(!res.body.data.restaurant.isStripeAccountVerified) { targetRoute = '/account'; }
+          if(!res.body.data.restaurant.isStripeAccountVerified) { targetRoute = routes.account; }
           this.$router.push(targetRoute);
         }
 
