@@ -207,7 +207,7 @@ export default {
   },
 
   created() {
-    this.getAllLiveOrdersForRestaurant();
+    this.getAllOrdersForRestaurant();
     this.getUpToDateTableBreakdown();
     this.listenForNewOrdersFromServer();
     this.listenForTableUpdatesFromServer();
@@ -262,9 +262,7 @@ export default {
       };
 
       this.$options.sockets['userLeftTable'] = (data) => {
-        console.log('Before: ' + JSON.stringify(this.tableBreakdown));
         this.$store.commit('removeUserFromTable', data);
-        console.log('After: ' + JSON.stringify(this.tableBreakdown));
         // this.$store.commit('decrementActiveUsersAtTable', data.tableNo);
       };
     },
@@ -286,7 +284,7 @@ export default {
     /**
       On refresh, get the up-to-date live order state for the restaurant, according to the backend
     **/
-    getAllLiveOrdersForRestaurant() {
+    getAllOrdersForRestaurant() {
 
       const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
       // Get the live-orders object and add it to the store
@@ -294,7 +292,6 @@ export default {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
 
-        console.log(res);
         if(_.size(res.body) < 1) {
           this.loading.still = false; // Stop loading spinner once server responds
           return true; // If there are no orders, we need not do anything
@@ -340,7 +337,6 @@ export default {
           // this.$store.commit('incrementActiveUsersAtTable', user.tableNo);
         }
       }).catch((err) => {
-        console.log(err);
         this.handleApiError(err);
       });
     },
@@ -378,6 +374,7 @@ export default {
       But the following is a messy collection of hacks that hurts my eyes - IMRPROVE
     **/
     orders() {
+      /* If there is a problem with the ordering of the orders, do not ORDER BY in api method for getting restaurant's orders */
       const orders = _.sortBy(this.$store.getters.getLiveOrders.orders, 'time').reverse();
 
       var orderObj = {

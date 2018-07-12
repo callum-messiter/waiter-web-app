@@ -301,6 +301,22 @@ export default new Vuex.Store({
 			}
 		},
 
+		getResolvedOrders(state) {
+			var resolvedOrders = [];
+			for(var order of state.orders) {
+				if( 
+					order.status == statuses.rejectedByKitchen ||
+					order.status == statuses.acceptedByKitchen ||
+					order.status == statuses.paymentFailed ||
+					order.status == statuses.paymentSuccessful ||
+					order.status == statuses.enRouteToCustomer
+				) {
+					resolvedOrders.push(order);
+				}
+			}
+			return resolvedOrders;
+		},
+
 		/**
 			Tables
 		**/
