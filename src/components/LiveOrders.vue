@@ -290,16 +290,17 @@ export default {
 
       const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
       // Get the live-orders object and add it to the store
-      this.$http.get('order/getAllLive/'+restaurantId, {
+      this.$http.get('order/list/'+restaurantId, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
 
-        if(_.size(res.body.data) < 1) {
+        console.log(res);
+        if(_.size(res.body) < 1) {
           this.loading.still = false; // Stop loading spinner once server responds
           return true; // If there are no orders, we need not do anything
         }
 
-        const orders = res.body.data;
+        const orders = res.body;
 
         // Set the timeAgo properties of all live orders
         for(var i = 0; i < orders.length; i++) {
