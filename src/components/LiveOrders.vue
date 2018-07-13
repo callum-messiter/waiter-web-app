@@ -305,7 +305,7 @@ export default {
         }
 
         // Push the updated orders to the store
-        this.$store.commit('setLiveOrders', orders);
+        this.$store.commit('setOrders', orders);
 
         // Check if there are any orders with "erroeous" statuses
         for(var i = 0; i < orders.length; i++) {

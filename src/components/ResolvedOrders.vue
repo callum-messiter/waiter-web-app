@@ -8,10 +8,83 @@
 			</clip-loader>
 			<p class="loadingMsg">{{loading.msg}}</p>
 		</div>
-		<div class="container" v-else>
-			<h1>Previous Orders</h1>
-			<div v-for="order in orders">
-				<p style="color: white">{{order.orderId}} ({{order.status}}) - {{order.timeAgo}}</p>
+		<div class="wrapper" v-else>
+			<div class="row filterOptions">
+				<h1>Previous Orders</h1>
+				<button v-on:click="filterOrders('today')">Today</button>
+				<button v-on:click="filterOrders('thisWeek')">This Week</button>
+				<button v-on:click="filterOrders('thisMonth')">This Month</button>
+				<input
+					v-model="orderIdSearch" 
+					v-on:keyup="filterOrders('orderId', orderIdSearch)"
+					placeholder="Search by orderId"
+				></input>
+			</div>
+			<div class="container">
+				
+				<div 
+          v-for="order in orders"
+          class="panel panel-default"
+        >
+
+					<div class="panel-heading orderCardHeader container-fluid">
+            <div class="row">
+            	<div class="col-xs-4">
+            		<h3 class="panel-title text-center">{{order.timeAgo}}</h3>
+              	<p class="panel-title text-center">£{{parseFloat(order.price).toFixed(2)}}</p>
+            	</div>
+              <div class="col-xs-4">
+              	<h3 style="color: white" class="panel-title text-center orderTitle">Order
+              		<span style="text-decoration: underline">{{order.orderId}}</span>
+              	</h3>
+              	<p class="panel-title">{{statuses[order.status]}}
+              		<div>
+              				<span class="glyphicon glyphicon-ok" v-if="order.status == 400"></span>
+              		</div>
+              		<div>
+	              		<span class="glyphicon glyphicon-remove" v-if="order.status == 999"></span>
+	              	</div>
+              		<div v-if="order.status == 998">
+              			<span class="glyphicon glyphicon-credit-cart"></span>
+              			<span class="glyphicon glyphicon-exclamation-sign"></span>
+              		</div>
+              		<div v-if="order.status == 500">
+              			<span class="glyphicon glyphicon-ok"></span>
+              			<span class="glyphicon glyphicon-gbp"></span>
+              		</div>
+              		<div v-if="order.status == 1000">
+              			<span class="glyphicon glyphicon-send"></span>
+              		</div>
+              	</p>
+            	</div>
+              <!-- <h3 class="panel-title text-center col-xs-4">{{order.customerId}} (Table {{order.tableNo}})</h3> -->
+              <div class="col-xs-4 customerAndTable">
+              	<h3 class="panel-title text-center">John Smith</h3>
+              	<h3 class="panel-title text-center">Table {{order.tableNo}}</h3>
+            	</div>
+              <!-- <button
+							  class="refundBtn"
+								v-if="order.status == 500 || order.status == 1000"
+								v-on:click="">Refund
+							</button>
+							-->
+            </div>
+          </div>
+
+          <div class="panel-body text-left">
+            <div class="row">
+              <div class="item-container">
+                <div class="pairWrapper" v-for="pair in order.itemPairs">
+                  <ul class="items">
+                    <li class="item-name" v-for="item in pair">{{item.name}}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
 			</div>
 		</div>
 	</div>
@@ -38,9 +111,30 @@ export default {
 				spinnerColor: '#469ada',
 				spinnerSize: '70px',
 				msg: 'Loading your previous orders...'
+			},
+			orders: [],
+			orderIdSearch: '',
+			statuses: {
+				50: 'In progress',
+				100: 'In progress',
+				200: 'In progress',
+				300: 'In progress',
+				999: 'Rejected', // cross
+				400: 'Accepted',
+				998: 'User payment failed',
+				500: 'Accepted and paid',
+				1000: 'Sent to customer',
 			}
 		}
 	},
+
+
+	/**
+		The core of this component is filtering. We get a list of orders, and the user can filter that list
+		by a number parameters (e.g. orderId).
+
+
+	**/
 
 	created () {
 		this.getAllOrdersForRestaurant();
@@ -62,25 +156,85 @@ export default {
         }
 
         // Set the timeAgo properties of all live orders
-        const orders = res.body;
-        for(var i = 0; i < orders.length; i++) {
-          orders[i].timeAgo = moment(orders[i].time).fromNow();
-        }
-
-        // Push the updated orders to the store
-        this.$store.commit('setLiveOrders', orders);
+        var orders = res.body;
+        orders = this.groupItemsIntoPairs(orders);
+        orders = this.addTimeAgoPropToItems(orders);
+        this.orders = orders; /* Set the local data prop first, since this is what is being rendered (not the computed prop) */
+        this.$store.commit('setOrders', orders); // Push the updated orders to the store
+        console.log(this.ordersState);
         this.loading.still = false; // Stop loading spinner once server responds
         return true;
 
       }).catch((res) => {
         this.handleApiError(res);
       });
+    },
+
+    groupItemsIntoPairs(orders) {
+    	for(var i = 0; i < orders.length; i++) {
+        const items = orders[i].items;
+        var itemPairs = [];
+        for(var j = 0 ; j < items.length; j+=2) {
+          if(items[j+1] !== undefined) {
+              itemPairs.push([items[j], items[j+1]]);
+          } else {
+              itemPairs.push([items[j]]);
+          }
+          orders[i].itemPairs = itemPairs;
+        }
+      }
+      return orders;
+    },
+
+    addTimeAgoPropToItems(orders) {
+  	  for(var i = 0; i < orders.length; i++) {
+        orders[i].timeAgo = moment(orders[i].time).fromNow();
+      }
+      return orders;
+    },
+
+    /* We filter the orders state, and we assign the result to the local data prop, which is rendered to the UI */
+    filterOrders(type, value=null) {
+    	if(type != 'orderId') {
+    		this.orderIdSearch = '';
+    	}
+    	switch(type) {
+    		case 'status':
+    			this.orders = this.ordersState.filter(order => order.status == value);
+    			break;
+    		case 'orderId':
+    			if(value.trim() == '') return this.orders = this.ordersState;
+    			this.orders = this.ordersState.filter((order) => {
+    				const orderIdLower = order.orderId.toLowerCase();
+    				const valueLower = value.toLowerCase();
+    				return orderIdLower.indexOf(valueLower) >= 0;
+    			});
+    			break;
+    		case 'today':
+    			this.orders = this.ordersState.filter((order) => {
+    				return moment(order.time).isSame(moment(), 'day');
+    			});
+    			break;
+    		case 'thisWeek':
+    			this.orders = this.ordersState.filter((order) => {
+    				return moment(order.time).isSame(moment(), 'week');
+    			});
+    			break;
+    		case 'thisMonth':
+    			this.orders = this.ordersState.filter((order) => {
+    				return moment(order.time).isSame(moment(), 'month');
+    			});
+    			break;
+    		default:
+    			this.orders = this.ordersState;
+    	}
     }
 
 	},
 
 	computed: {
-		orders() {
+		/* We use the state as the source of truth when filtering the orders */
+		ordersState() {
 			return this.$store.getters.getResolvedOrders;
 		}
 	}
@@ -95,6 +249,7 @@ export default {
 	}
 
 	.container {
+		width: 80%;
 		padding-top: 10px;
 		padding-bottom: 20px;
 		margin-top: 10px;
@@ -113,5 +268,242 @@ export default {
 		font-size: 16px;
 		color: #469ada;;
 	}
+
+	button {
+	  height: 45px;
+	  margin-top: 10px;
+	  margin-bottom: 10px;
+	  padding-left: 20px;
+	  padding-right: 20px;
+	  background-color: #343959;
+	  border: 1px solid #343959;
+	  border-radius: 3px;
+	  color: #ffffff;
+	  font-size: 16px;
+	  font-weight: 500;
+	}
+
+	.refundBtn {
+		background-color: red;
+    border: 1px solid red;
+	}
+
+	input {
+		width: 30%;
+	  height: 44px;
+	  padding-left: 8px;
+	  margin-top: 2px;
+	  margin-left: 10px;
+	  border: 1px;
+	  font-size: 16px;
+	  outline: none;
+	  background-color: white !important;
+	  border-radius: 3px;
+	}
+
+	.order {
+		border: 1px solid white;
+	}
+
+  @font-face {
+    font-family: 'grotesque';
+    src: url("../fonts/grotesque.otf");
+  }
+
+  .container-fluid {
+    font-family: 'grotesque';
+    margin: 0;
+    padding: 0;
+  }
+
+  .price {
+    cursor: pointer;
+    color: #469ada;
+    margin-right: 10px;
+  }
+
+  .panel-title {
+    font-size: 14px;
+    color: #469ada;
+    padding-bottom: 3px;
+  }
+
+  .panel-body {
+    padding-top: 10px !important;
+    padding-bottom: 3px !important;
+    padding-left: 15px !important;
+    font-size: 12px;
+    background-color: #3a3a3a;
+    color: #fff;
+  }
+
+  /**
+    There is a panel-heading class in the Dashboard component, causing conflicts here.
+    We should add two new distinct class name and reference them in the CSS, instead.
+  **/
+
+  .orderCardHeader {
+    background-color: #262626 !important;
+    border: 1px solid #262626 !important;
+    min-height: 35px;
+    padding: 5px !important;
+  }
+
+  .panel-body img {
+    float: left;
+    height: 60px;
+    width: 60px;
+    margin-top: 1	0px;
+  }
+
+  .panel-body ul {
+    margin-left: 0px;
+    margin-top: 10px;
+  }
+
+  .panel {
+    margin: 20px auto;
+    position: relative;
+  }
+
+  .panel-loading {
+    opacity: 0.4 !important;
+  }
+
+  .panel-default {
+    border: none;
+  }
+
+  .inner {
+    padding: 20px;
+  }
+
+  .item-name {
+    font-weight: bold;
+    margin-bottom: 3px;
+  }
+
+  .timeAgo {
+    font-size: 12px !important;
+  }
+
+  ul.items {
+    list-style: none;
+    padding-left: 0;
+    float: right;
+  }
+
+  ul.items > li {
+      margin-left: 15px;
+      font-size: 14px;
+  }
+
+  /* Prevent nested li's from getting messed up */
+  ul.items > li::before {
+      content: "- ";
+      margin-left: -15px;
+  }
+
+  h3 {
+    color: #fff;
+  }
+
+  img {
+    width: 70px;
+    height: 70px;
+  }
+
+  /**
+    Icons display when there are zero orders
+  **/
+  .zeroOrdersIcon {
+    height: 150px;
+    width: auto;
+  }
+
+  .zeroOrders {
+    padding-top: 140px; /** In order to vertically center; is there a more robust way? **/
+    color: white;
+  }
+
+  .pairWrapper {
+    display: table-cell;
+    padding: 10px 7px;
+  }
+
+  .item-container {
+  	width: 75%;
+  	overflow-x: scroll;
+  	white-space: nowrap;
+    margin: 0 auto;
+  }
+
+  ::-webkit-scrollbar {
+  -webkit-appearance: none;
+  /*width: 0px;*/
+  height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: #262626;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 1);
+    -webkit-box-shadow: none;
+  }
+
+  .loading {
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+  }
+
+  .loadingMsg {
+    font-size: 16px;
+    color: #469ada;;
+  }
+
+  .orderCard_loading {
+    opacity: 0.4;
+  }
+
+  .orderLoadingSpinner {
+    position: absolute;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+  }
+
+  .table {
+    padding-top: 20px !important;
+  }
+
+  .orderIncomingMsg {
+    color: #ff6a00;
+  }
+
+  .mainOrderDetails {
+  	padding-bottom: 3px;
+  }
+
+  .orderTitle {
+  	font-size: ;
+  }
+
+  .glyphicon-ok, .glyphicon-gbp, .acceptedPaid {
+  	color: green;
+  }
+
+  .glyphicon-remove, .glyphicon-credit-card, .rejected {
+  	color: red;
+  }
+
+  .glyphicon-send, .sent {
+  	color: green;
+  }
 
 </style>

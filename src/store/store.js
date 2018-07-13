@@ -161,7 +161,7 @@ export default new Vuex.Store({
 		/**
 			Orders
 		**/
-		setLiveOrders(state, orders) {
+		setOrders(state, orders) {
 			state.orders = orders;
 		},
 
