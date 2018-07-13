@@ -10,14 +10,22 @@
 		</div>
 		<div class="wrapper" v-else>
 			<div class="row filterOptions">
-				<h1>Previous Orders</h1>
+				<h3>Previous Orders <img src="../assets/waiter-icon.png"/></h3>
+				<button v-on:click="filterOrders('all')">All</button>
 				<button v-on:click="filterOrders('today')">Today</button>
 				<button v-on:click="filterOrders('thisWeek')">This Week</button>
 				<button v-on:click="filterOrders('thisMonth')">This Month</button>
 				<input
 					v-model="orderIdSearch" 
 					v-on:keyup="filterOrders('orderId', orderIdSearch)"
+					v-on:blur="resetOrderList()"
 					placeholder="Search by orderId"
+				></input>
+				<input 
+					v-model="customerNameSearch" 
+					v-on:keyup="filterOrders('customerName', customerNameSearch)"
+					v-on:blur="resetOrderList()"
+					placeholder="Search by customer"
 				></input>
 			</div>
 			<div class="container">
@@ -29,36 +37,18 @@
 
 					<div class="panel-heading orderCardHeader container-fluid">
             <div class="row">
-            	<div class="col-xs-4">
+            	<div class="col-xs-2">
             		<h3 class="panel-title text-center">{{order.timeAgo}}</h3>
               	<p class="panel-title text-center">£{{parseFloat(order.price).toFixed(2)}}</p>
             	</div>
-              <div class="col-xs-4">
+              <div class="col-xs-8">
               	<h3 style="color: white" class="panel-title text-center orderTitle">Order
               		<span style="text-decoration: underline">{{order.orderId}}</span>
               	</h3>
-              	<p class="panel-title">{{statuses[order.status]}}
-              		<div>
-              				<span class="glyphicon glyphicon-ok" v-if="order.status == 400"></span>
-              		</div>
-              		<div>
-	              		<span class="glyphicon glyphicon-remove" v-if="order.status == 999"></span>
-	              	</div>
-              		<div v-if="order.status == 998">
-              			<span class="glyphicon glyphicon-credit-cart"></span>
-              			<span class="glyphicon glyphicon-exclamation-sign"></span>
-              		</div>
-              		<div v-if="order.status == 500">
-              			<span class="glyphicon glyphicon-ok"></span>
-              			<span class="glyphicon glyphicon-gbp"></span>
-              		</div>
-              		<div v-if="order.status == 1000">
-              			<span class="glyphicon glyphicon-send"></span>
-              		</div>
-              	</p>
+              	<p class="panel-title">{{statuses[order.status]}}</p>
             	</div>
               <!-- <h3 class="panel-title text-center col-xs-4">{{order.customerId}} (Table {{order.tableNo}})</h3> -->
-              <div class="col-xs-4 customerAndTable">
+              <div class="col-xs-2 customerAndTable">
               	<h3 class="panel-title text-center">John Smith</h3>
               	<h3 class="panel-title text-center">Table {{order.tableNo}}</h3>
             	</div>
@@ -73,13 +63,22 @@
 
           <div class="panel-body text-left">
             <div class="row">
-              <div class="item-container">
-                <div class="pairWrapper" v-for="pair in order.itemPairs">
-                  <ul class="items">
-                    <li class="item-name" v-for="item in pair">{{item.name}}</li>
-                  </ul>
-                </div>
-              </div>
+            	<div class="col-xs-10">
+	              <div class="item-container">
+	                <div class="pairWrapper" v-for="pair in order.itemPairs">
+	                  <ul class="items">
+	                    <li class="item-name" v-for="item in pair">{{item.name}}</li>
+	                  </ul>
+	                </div>
+	              </div>
+	            </div>
+	            <div class="col-xs-2">
+            		<button
+								  class="refundBtn"
+									v-if="order.status == 500 || order.status == 1000"
+									v-on:click="">Refund
+								</button>
+            	</div>
             </div>
           </div>
 
@@ -114,6 +113,7 @@ export default {
 			},
 			orders: [],
 			orderIdSearch: '',
+			customerNameSearch: '',
 			statuses: {
 				50: 'In progress',
 				100: 'In progress',
@@ -161,7 +161,6 @@ export default {
         orders = this.addTimeAgoPropToItems(orders);
         this.orders = orders; /* Set the local data prop first, since this is what is being rendered (not the computed prop) */
         this.$store.commit('setOrders', orders); // Push the updated orders to the store
-        console.log(this.ordersState);
         this.loading.still = false; // Stop loading spinner once server responds
         return true;
 
@@ -193,23 +192,21 @@ export default {
       return orders;
     },
 
+    resetOrderList() {
+    	this.orderIdSearch = '';
+    	this.customerNameSearch = '';
+    	this.orders = this.ordersState;
+    },
+
     /* We filter the orders state, and we assign the result to the local data prop, which is rendered to the UI */
     filterOrders(type, value=null) {
     	if(type != 'orderId') {
     		this.orderIdSearch = '';
     	}
     	switch(type) {
-    		case 'status':
-    			this.orders = this.ordersState.filter(order => order.status == value);
-    			break;
-    		case 'orderId':
-    			if(value.trim() == '') return this.orders = this.ordersState;
-    			this.orders = this.ordersState.filter((order) => {
-    				const orderIdLower = order.orderId.toLowerCase();
-    				const valueLower = value.toLowerCase();
-    				return orderIdLower.indexOf(valueLower) >= 0;
-    			});
-    			break;
+    		case 'all':
+    		 this.orders = this.ordersState;
+    		 break;
     		case 'today':
     			this.orders = this.ordersState.filter((order) => {
     				return moment(order.time).isSame(moment(), 'day');
@@ -223,6 +220,22 @@ export default {
     		case 'thisMonth':
     			this.orders = this.ordersState.filter((order) => {
     				return moment(order.time).isSame(moment(), 'month');
+    			});
+    			break;
+    		case 'orderId':
+    			if(value.trim() == '') return this.orders = this.ordersState;
+    			this.orders = this.ordersState.filter((order) => {
+    				const orderIdLower = order.orderId.toLowerCase();
+    				const valueLower = value.toLowerCase();
+    				return orderIdLower.indexOf(valueLower) >= 0;
+    			});
+    			break;
+    		case 'customerName':
+    			if(value.trim() == '') return this.orders = this.ordersState;
+    			this.orders = this.ordersState.filter((order) => {
+    				const nameLower = order.customerName.toLowerCase();
+    				const valueLower = value.toLowerCase();
+    				return nameLower.indexOf(valueLower) >= 0;
     			});
     			break;
     		default:
@@ -270,7 +283,7 @@ export default {
 	}
 
 	button {
-	  height: 45px;
+	  height: 30px;
 	  margin-top: 10px;
 	  margin-bottom: 10px;
 	  padding-left: 20px;
@@ -279,23 +292,24 @@ export default {
 	  border: 1px solid #343959;
 	  border-radius: 3px;
 	  color: #ffffff;
-	  font-size: 16px;
+	  font-size: 12px;
 	  font-weight: 500;
 	}
 
 	.refundBtn {
+		height: 30px;
+		font-size: 14px;
 		background-color: red;
     border: 1px solid red;
 	}
 
 	input {
-		width: 30%;
-	  height: 44px;
+	  height: 30px;
 	  padding-left: 8px;
 	  margin-top: 2px;
 	  margin-left: 10px;
 	  border: 1px;
-	  font-size: 16px;
+	  font-size: 12px;
 	  outline: none;
 	  background-color: white !important;
 	  border-radius: 3px;
@@ -346,7 +360,7 @@ export default {
     background-color: #262626 !important;
     border: 1px solid #262626 !important;
     min-height: 35px;
-    padding: 5px !important;
+    padding-top: 10px !important;
   }
 
   .panel-body img {
@@ -495,7 +509,7 @@ export default {
   }
 
   .glyphicon-ok, .glyphicon-gbp, .acceptedPaid {
-  	color: green;
+  	color: #4edd1a;
   }
 
   .glyphicon-remove, .glyphicon-credit-card, .rejected {
@@ -503,7 +517,7 @@ export default {
   }
 
   .glyphicon-send, .sent {
-  	color: green;
+  	color: #4edd1a;
   }
 
 </style>
