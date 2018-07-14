@@ -88,6 +88,7 @@ import ClipLoader from 'vue-spinner/src/ClipLoader.vue';
 import functions from '../mixins/functions';
 import moment from 'moment';
 import underscore from 'underscore';
+import statuses from '../mixins/orderStatuses';
 
 export default {
 	name: 'ResolvedOrders',
@@ -152,7 +153,8 @@ export default {
         var orders = res.body;
         orders = this.groupItemsIntoPairs(orders);
         orders = this.addTimeAgoPropToItems(orders);
-        this.orders = orders; /* Set the local data prop first, since this is what is being rendered (not the computed prop) */
+        /* Set the local data prop first, since this is what is being rendered (not the computed prop) */
+        this.orders = orders.filter(order => statuses.resolved.hasOwnProperty(order.status));
         this.$store.commit('setOrders', orders); // Push the updated orders to the store
         this.loading.still = false; // Stop loading spinner once server responds
         return true;
