@@ -1,24 +1,27 @@
 <template>
 <nav v-if="userIsSignedIn" class="navbar navbar-default navbar-fixed-top">
   <div class="container-fluid">
-    <div v-bind:class="{'active': $route.path == '/'}" class="navbar-header">
-      <router-link class="navbar-brand" to="/">
+    <div v-bind:class="{'active': $route.path == routes.home}" class="navbar-header">
+      <router-link class="navbar-brand" :to="routes.home">
         <span class="glyphicon glyphicon-cutlery"></span>
       </router-link>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li v-bind:class="{'active': $route.path == '/dashboard'}">
-          <router-link to="/dashboard">My Menu</router-link>
+        <li v-bind:class="{'active': $route.path == routes.dashboard}">
+          <router-link :to="routes.dashboard">My Menu</router-link>
         </li>
-        <li v-bind:class="{'active': $route.path == '/kitchen'}">
-          <router-link to="/kitchen">Live Orders</router-link>
+        <li v-bind:class="{'active': $route.path == routes.liveOrders}">
+          <router-link :to="routes.liveOrders">Live Orders</router-link>
+        </li>
+        <li v-bind:class="{'active': $route.path == routes.resolvedOrders}">
+          <router-link :to="routes.resolvedOrders">Resolved Orders</router-link>
         </li>
 
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li v-bind:class="{'active': $route.path == '/account'}">
-          <router-link to="/account">Account</router-link>
+        <li v-bind:class="{'active': $route.path == routes.account}">
+          <router-link :to="routes.account">Account</router-link>
         </li>
         <li class="logout">
             <a v-on:click="logUserOut">Log out</a>
@@ -32,6 +35,8 @@
 
 <script>
 
+import routes from '../router/routes';
+
 export default {
   name: 'Navbar',
   components: {},
@@ -40,7 +45,8 @@ export default {
       user: {
         firstName: 'Callum',
         lastName: 'Messiter'
-      }
+      },
+      routes: routes
     }
   },
 
@@ -55,7 +61,7 @@ export default {
       localStorage.removeItem('menu');
       this.$store.commit('deauthenticateUser');
       localStorage.isAuth = false;
-      this.$router.push({ path: '/', query: {logout: true} });
+      this.$router.push({ path: routes.home, query: {logout: true} });
     }
   },
 

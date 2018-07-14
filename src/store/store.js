@@ -3,9 +3,11 @@ import Vuex from 'vuex';
 import cloneDeep from 'clone-deep';
 import moment from 'moment';
 import underscore from 'underscore';
+import orderStatuses from '../mixins/orderStatuses';
 
 Vue.use(Vuex);
 
+/* TODO: use the statuses object from mixins/orderStatuses.js */
 const statuses = {
 	sentToServer: 50,
 	receivedByServer: 100,
@@ -161,7 +163,7 @@ export default new Vuex.Store({
 		/**
 			Orders
 		**/
-		setLiveOrders(state, orders) {
+		setOrders(state, orders) {
 			state.orders = orders;
 		},
 
@@ -299,6 +301,10 @@ export default new Vuex.Store({
 				orders: state.orders,
 				numOrders: {received: received, accepted: accepted}
 			}
+		},
+
+		getResolvedOrders(state) {
+			return state.orders.filter(order => orderStatuses.resolved.hasOwnProperty(order.status));
 		},
 
 		/**

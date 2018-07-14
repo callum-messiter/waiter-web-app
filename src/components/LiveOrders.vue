@@ -159,7 +159,7 @@ import moment from 'moment';
 import underscore from 'underscore';
 
 export default {
-  name: 'LiveKitchen',
+  name: 'LiveOrders',
   components: {
     'clip-loader': ClipLoader,
     'pacman-loader': PacmanLoader
@@ -207,7 +207,7 @@ export default {
   },
 
   created() {
-    this.getAllLiveOrdersForRestaurant();
+    this.getAllOrdersForRestaurant();
     this.getUpToDateTableBreakdown();
     this.listenForNewOrdersFromServer();
     this.listenForTableUpdatesFromServer();
@@ -262,9 +262,7 @@ export default {
       };
 
       this.$options.sockets['userLeftTable'] = (data) => {
-        console.log('Before: ' + JSON.stringify(this.tableBreakdown));
         this.$store.commit('removeUserFromTable', data);
-        console.log('After: ' + JSON.stringify(this.tableBreakdown));
         // this.$store.commit('decrementActiveUsersAtTable', data.tableNo);
       };
     },
@@ -286,20 +284,20 @@ export default {
     /**
       On refresh, get the up-to-date live order state for the restaurant, according to the backend
     **/
-    getAllLiveOrdersForRestaurant() {
+    getAllOrdersForRestaurant() {
 
       const restaurantId = JSON.parse(localStorage.restaurant).restaurantId;
       // Get the live-orders object and add it to the store
-      this.$http.get('order/getAllLive/'+restaurantId, {
+      this.$http.get('order/list/'+restaurantId, {
         headers: {Authorization: JSON.parse(localStorage.user).token}
       }).then((res) => {
 
-        if(_.size(res.body.data) < 1) {
+        if(_.size(res.body) < 1) {
           this.loading.still = false; // Stop loading spinner once server responds
           return true; // If there are no orders, we need not do anything
         }
 
-        const orders = res.body.data;
+        const orders = res.body;
 
         // Set the timeAgo properties of all live orders
         for(var i = 0; i < orders.length; i++) {
@@ -307,7 +305,7 @@ export default {
         }
 
         // Push the updated orders to the store
-        this.$store.commit('setLiveOrders', orders);
+        this.$store.commit('setOrders', orders);
 
         // Check if there are any orders with "erroeous" statuses
         for(var i = 0; i < orders.length; i++) {
@@ -339,13 +337,16 @@ export default {
           // this.$store.commit('incrementActiveUsersAtTable', user.tableNo);
         }
       }).catch((err) => {
-        console.log(err);
         this.handleApiError(err);
       });
     },
 
     sendUpdatedOrderStatusToBackend(order, status) {
-      this.$socket.emit('orderStatusUpdate', {
+      var eventName = 'orderStatusUpdate';
+      if(status == this.statuses.acceptedByKitchen) {
+          eventName = 'restaurantAcceptedOrder';
+      }
+      this.$socket.emit(eventName, {
         headers: {
           token: JSON.parse(localStorage.user).token
         },
@@ -377,6 +378,7 @@ export default {
       But the following is a messy collection of hacks that hurts my eyes - IMRPROVE
     **/
     orders() {
+      /* If there is a problem with the ordering of the orders, do not ORDER BY in api method for getting restaurant's orders */
       const orders = _.sortBy(this.$store.getters.getLiveOrders.orders, 'time').reverse();
 
       var orderObj = {
