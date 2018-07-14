@@ -10,7 +10,7 @@
 		</div>
 		<div class="wrapper" v-else>
 			<div class="row filterOptions">
-				<h3>Previous Orders <img src="../assets/waiter-icon.png"/></h3>
+				<h3>Previous Orders <img src="../assets/menu-icon.png"/></h3>
 				<button v-on:click="filterOrders('all')">All</button>
 				<button v-on:click="filterOrders('today')">Today</button>
 				<button v-on:click="filterOrders('thisWeek')">This Week</button>
@@ -37,27 +37,20 @@
 
 					<div class="panel-heading orderCardHeader container-fluid">
             <div class="row">
-            	<div class="col-xs-2">
+            	<div class="col-xs-3">
             		<h3 class="panel-title text-center">{{order.timeAgo}}</h3>
               	<p class="panel-title text-center">£{{parseFloat(order.price).toFixed(2)}}</p>
             	</div>
-              <div class="col-xs-8">
+              <div class="col-xs-6">
               	<h3 style="color: white" class="panel-title text-center orderTitle">Order
               		<span style="text-decoration: underline">{{order.orderId}}</span>
               	</h3>
               	<p class="panel-title">{{statuses[order.status]}}</p>
             	</div>
-              <!-- <h3 class="panel-title text-center col-xs-4">{{order.customerId}} (Table {{order.tableNo}})</h3> -->
-              <div class="col-xs-2 customerAndTable">
-              	<h3 class="panel-title text-center">John Smith</h3>
+              <div class="col-xs-3 customerAndTable">
+              	<h3 class="panel-title text-center">{{order.customerFName}} {{order.customerLName}}</h3>
               	<h3 class="panel-title text-center">Table {{order.tableNo}}</h3>
             	</div>
-              <!-- <button
-							  class="refundBtn"
-								v-if="order.status == 500 || order.status == 1000"
-								v-on:click="">Refund
-							</button>
-							-->
             </div>
           </div>
 
@@ -226,16 +219,14 @@ export default {
     			if(value.trim() == '') return this.orders = this.ordersState;
     			this.orders = this.ordersState.filter((order) => {
     				const orderIdLower = order.orderId.toLowerCase();
-    				const valueLower = value.toLowerCase();
-    				return orderIdLower.indexOf(valueLower) >= 0;
+    				return orderIdLower.indexOf( value.toLowerCase() ) >= 0;
     			});
     			break;
     		case 'customerName':
     			if(value.trim() == '') return this.orders = this.ordersState;
     			this.orders = this.ordersState.filter((order) => {
-    				const nameLower = order.customerName.toLowerCase();
-    				const valueLower = value.toLowerCase();
-    				return nameLower.indexOf(valueLower) >= 0;
+            const nameLower = order.customerFName.concat(' ' + order.customerLName).toLowerCase();
+    				return nameLower.indexOf( value.toLowerCase() ) >= 0;
     			});
     			break;
     		default:
