@@ -342,7 +342,11 @@ export default {
     },
 
     sendUpdatedOrderStatusToBackend(order, status) {
-      this.$socket.emit('orderStatusUpdate', {
+      var eventName = 'orderStatusUpdate';
+      if(status == this.statuses.acceptedByKitchen) {
+          eventName = 'restaurantAcceptedOrder';
+      }
+      this.$socket.emit(eventName, {
         headers: {
           token: JSON.parse(localStorage.user).token
         },
