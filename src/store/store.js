@@ -17,6 +17,7 @@ const statuses = {
 	acceptedByKitchen: 400,
 	paymentFailed: 998,
 	paymentSuccessful: 500,
+	refunded: 600,
 	enRouteToCustomer: 1000,
 	// receivedByCustomer: 2000 // would be set by deliverer of food
 	// returnedByCustomer: 666,
@@ -179,6 +180,7 @@ export default new Vuex.Store({
 				case statuses.receivedByKitchen:
 				case statuses.acceptedByKitchen:
 				case statuses.paymentSuccessful:
+				case statuses.refunded:
 					// Set the status of the order to the updated status received from the server
 					state.orders[index].status = order.status;
 					break;

@@ -10,6 +10,7 @@ export default {
     400: 'acceptedByKitchen',
     998: 'paymentFailed',
     500: 'paymentSuccessful',
+    600: 'refunded',
     1000: 'enRouteToCustomer'
   }
 }

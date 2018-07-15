@@ -69,7 +69,7 @@
             		<button
 								  class="refundBtn"
 									v-if="order.status == 500 || order.status == 1000"
-									v-on:click="">Refund
+									v-on:click="emitRefundRequestToServer(order)">Refund
 								</button>
             	</div>
             </div>
@@ -117,6 +117,7 @@ export default {
 				400: 'Accepted',
 				998: 'User payment failed',
 				500: 'Accepted and paid',
+        600: 'Refunded',
 				1000: 'Sent to customer',
 			}
 		}
@@ -132,6 +133,7 @@ export default {
 
 	created () {
 		this.getAllOrdersForRestaurant();
+    this.listenForServerConfirmationOfOrderStatusUpdate();
 	},
 
 	methods: {
@@ -162,6 +164,30 @@ export default {
       }).catch((res) => {
         this.handleApiError(res);
       });
+    },
+
+    emitRefundRequestToServer(order) {
+      /* Once we request a refund, we must start the loading spinner, then listen for the update order status (600) */
+      this.$socket.emit('processRefund', {
+        headers: {
+          token: JSON.parse(localStorage.user).token
+        },
+        metaData: {
+          orderId: order.orderId,
+          restaurantId: order.restaurantId,
+          customerId: order.customerId
+        }
+      });
+    },
+
+    /* Listen also for the error event (should the refund fail) */
+    listenForServerConfirmationOfOrderStatusUpdate() {
+      this.$options.sockets['orderStatusUpdated'] = (order) => {
+        console.log('order status updated');
+        if(order.status != 600) return;
+        this.$store.commit('updateOrderStatus', order);
+        this.displayFlashMsg('The order was successfully refunded!', 'success');
+      }
     },
 
     groupItemsIntoPairs(orders) {
