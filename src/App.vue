@@ -18,6 +18,7 @@
 import Vue from 'vue';
 import VueSocketio from 'vue-socket.io';
 import settings from '../config/settings';
+import roles from './mixins/userRoles';
 
 // Global components
 import Navbar from './components/Navbar';
@@ -43,8 +44,10 @@ export default {
     if(localStorage.getItem('restaurant') !== null) {
       const r = JSON.parse(localStorage.restaurant);
       if(r.hasOwnProperty('restaurantId')) {
-        // http://host?restaurantId={restaurantId}
-        Vue.use(VueSocketio, settings.webSocketsUrl+'?restaurantId='+r.restaurantId);
+        const userObj = JSON.stringify({ role: roles.restaurateur, id: r.restaurantId });
+        const query = '?user='.concat(userObj);
+        const route = settings.webSocketsUrl.concat(query);
+        Vue.use(VueSocketio, route);
       }
     }
 

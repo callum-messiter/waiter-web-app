@@ -177,6 +177,7 @@ export default {
         acceptedByKitchen: 400,
         paymentFailed: 998,
         paymentSuccessful: 500,
+        refunded: 600,
         enRouteToCustomer: 1000,
         // returnedByCustomer: 666,
         // eaten: 500 // May be set once the user has sent feedback
