@@ -1,0 +1,179 @@
+@font-face {
+	font-family: 'grotesque';
+	src: url("../../fonts/grotesque.otf");
+}
+
+.container-fluid {
+	font-family: 'grotesque';
+	margin: 0;
+	padding: 0;
+}
+
+.glyphicon {
+	margin-right: 10px;
+	cursor: pointer;
+	color: #469ada;
+}
+
+.panel-title {
+	font-size: 14px;
+	color: #469ada
+}
+
+.panel-body {
+	padding-top: 10px !important;
+	padding-bottom: 3px !important;
+	padding-left: 15px !important;
+	font-size: 12px;
+	background-color: #3a3a3a;
+	color: #fff;
+}
+
+/**
+	There is a panel-heading class in the Dashboard component, causing conflicts here.
+	We should add two new distinct class name and reference them in the CSS, instead.
+**/
+
+.orderCardHeader {
+	background-color: #262626 !important;
+	border: 1px solid #262626 !important;
+	min-height: 35px;
+	padding: 10px !important;
+}
+
+.panel-body img {
+	float: left;
+	height: 60px;
+	width: 60px;
+	margin-top: 10px;
+}
+
+.panel-body ul {
+	margin-left: 0px;
+	margin-top: 10px;
+}
+
+.panel {
+	margin: 20px auto;
+	position: relative;
+}
+
+.panel-loading {
+	opacity: 0.4 !important;
+}
+
+.panel-default {
+	border: none;
+}
+
+.inner {
+	padding: 20px;
+}
+
+.item-name {
+	font-weight: bold;
+	margin-bottom: 3px;
+}
+
+.timeAgo {
+	font-size: 12px !important;
+}
+
+ul.items {
+	list-style: none;
+	padding-left: 0;
+	float: right;
+}
+
+ul.items > li {
+		margin-left: 15px;
+		font-size: 14px;
+}
+
+/* Prevent nested li's from getting messed up */
+ul.items > li::before {
+		content: "- ";
+		margin-left: -15px;
+}
+
+h3 {
+	color: #fff;
+}
+
+img {
+	width: 70px;
+	height: 70px;
+}
+
+/**
+	Icons display when there are zero orders
+**/
+.zeroOrdersIcon {
+	height: 150px;
+	width: auto;
+}
+
+.zeroOrders {
+	padding-top: 140px; /** In order to vertically center; is there a more robust way? **/
+	color: white;
+}
+
+.pairWrapper {
+	display: table-cell;
+	padding: 10px 7px;
+}
+
+.item-container {
+	width: 75%;
+	overflow-x: scroll;
+	white-space: nowrap;
+	margin: 0 auto;
+}
+
+::-webkit-scrollbar {
+-webkit-appearance: none;
+/*width: 0px;*/
+height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background-color: #262626;
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	background-color: rgba(0, 0, 0, 1);
+	-webkit-box-shadow: none;
+}
+
+.loading {
+	position: fixed;
+	top: 50% !important;
+	left: 50% !important;
+	transform: translate(-50%, -50%);
+}
+
+.loadingMsg {
+	font-size: 16px;
+	color: #469ada;;
+}
+
+.orderCard_loading {
+	opacity: 0.4;
+}
+
+.orderLoadingSpinner {
+	position: absolute;
+	top: 50% !important;
+	left: 50% !important;
+	transform: translate(-50%, -50%);
+}
+
+.table {
+	padding-top: 20px !important;
+}
+
+.orderIncomingMsg {
+	color: #ff6a00;
+}

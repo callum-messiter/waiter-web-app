@@ -1,0 +1,56 @@
+@font-face {
+	font-family: 'grotesque';
+	src: url("../../fonts/grotesque.otf");
+}
+
+tbody {
+	background-color: #3a3a3a;
+}
+
+tr {
+	cursor: pointer;
+}
+
+td {
+	padding: 0 !important;
+	border: none !important;
+	cursor: pointer;
+}
+
+.item-name {
+	background-color: #3a3a3a !important;
+}
+
+input {
+	border: 0 !important;
+	cursor: pointer;
+}
+
+input.form-control {
+	background-color: #3a3a3a !important;
+	color: #fff;
+	font-family: 'grotesque';
+}
+
+input[readonly] input[readonly]:focus {
+	background-color: #f5f5f0;
+	/** Readonly inputs should not glow upon click **/
+	outline: none;
+	border: none !important;
+	-webkit-box-shadow: none !important;
+	-moz-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+/** Prevent text highlighting when double clicking an input, in order to edit an item **/
+::selection { background: transparent; }
+::-moz-selection { background: transparent; }
+
+/** Prevent blue input glow upon click **/
+input {
+	outline: none;
+	border: none !important;
+	-webkit-box-shadow: none !important;
+	-moz-box-shadow: none !important;
+	box-shadow: none !important;
+}

@@ -1,0 +1,24 @@
+<div class="menu-wrapper col-md-10 col-md-offset-1">
+	
+	<!-- Menu name/title, other information -->
+	<div class="row">
+		<div class="col-md-12">
+			<!-- Category Settings Icon -->
+			<h2 class="text-center restaurantName">
+				{{restaurant.name}}
+				<span
+					class="glyphicon glyphicon-cog pull-right"
+					v-on:click="showAddCategoryModal()">
+				</span>
+			</h2>
+		</div>
+	</div>
+
+	<div class="row">
+		<!-- The menu content -->
+		<div class="categories-accordion">
+			<category></category>
+		</div>
+	</div>
+
+</div>

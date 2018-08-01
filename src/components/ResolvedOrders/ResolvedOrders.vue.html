@@ -1,0 +1,85 @@
+<div class="container">
+	
+	<div class="loading" v-if="loading.still">
+		<clip-loader  
+			:color="loading.spinnerColor" 
+			:size="loading.spinnerSize"
+		>
+		</clip-loader>
+		<p class="loadingMsg">{{loading.msg}}</p>
+	</div>
+
+	<div class="wrapper" v-else>
+		<div class="row filterOptions">
+			<h3>Previous Orders <img src="../../assets/menu-icon.png"/></h3>
+			<button v-on:click="filterOrders('all')">All</button>
+			<button v-on:click="filterOrders('today')">Today</button>
+			<button v-on:click="filterOrders('thisWeek')">This Week</button>
+			<button v-on:click="filterOrders('thisMonth')">This Month</button>
+			<input
+				v-model="orderIdSearch" 
+				v-on:keyup="filterOrders('orderId', orderIdSearch)"
+				v-on:blur="resetOrderList()"
+				placeholder="Search by orderId"
+			></input>
+			<input 
+				v-model="customerNameSearch" 
+				v-on:keyup="filterOrders('customerName', customerNameSearch)"
+				v-on:blur="resetOrderList()"
+				placeholder="Search by customer"
+			></input>
+		</div>
+		
+		<div class="container">
+			
+			<div 
+				v-for="order in orders"
+				class="panel panel-default"
+			>
+
+				<div class="panel-heading orderCardHeader container-fluid">
+					<div class="row">
+						<div class="col-xs-3">
+							<h3 class="panel-title text-center">{{order.timeAgo}}</h3>
+						<p class="panel-title text-center">£{{parseFloat(order.price).toFixed(2)}}</p>
+						</div>
+					  <div class="col-xs-6">
+						<h3 style="color: white" class="panel-title text-center orderTitle">Order
+							<span style="text-decoration: underline">{{order.orderId}}</span>
+						</h3>
+						<p class="panel-title">{{statuses[order.status]}}</p>
+						</div>
+					  <div class="col-xs-3 customerAndTable">
+						<h3 class="panel-title text-center">{{order.customerFName}} {{order.customerLName}}</h3>
+						<h3 class="panel-title text-center">Table {{order.tableNo}}</h3>
+						</div>
+					</div>
+		  		</div>
+
+	  			<div class="panel-body text-left">
+					<div class="row">
+						<div class="col-xs-10">
+			 				<div class="item-container">
+								<div class="pairWrapper" v-for="pair in order.itemPairs">
+				  					<ul class="items">
+										<li class="item-name" v-for="item in pair">{{item.name}}</li>
+				  					</ul>
+								</div>
+			  				</div>
+						</div>
+						<div class="col-xs-2">
+							<button
+								class="refundBtn"
+								v-if="order.status == 500 || order.status == 1000"
+								v-on:click="emitRefundRequestToServer(order)">Refund
+							</button>
+						</div>
+					</div>
+	  			</div>
+
+			</div>
+
+		</div>
+	</div>
+	
+</div>

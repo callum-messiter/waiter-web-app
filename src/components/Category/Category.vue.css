@@ -1,0 +1,84 @@
+@font-face {
+	font-family: 'grotesque';
+	src: url("../../fonts/grotesque.otf");
+}
+
+.accordion {
+	border: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+.panel {
+	border: none !important;
+}
+
+.panel-body {
+	padding: 0 !important;
+	margin: 0 !important;
+	border: 0 !important;
+	border-bottom: 0 !important;
+}
+
+.categoryPanelHeader {
+	background-color: #151515 !important;
+	color: #469ada !important;
+	padding-right: 3px;
+}
+
+.panel-title {
+	height: 17.6px;
+}
+
+table {
+	border: none !important;
+	margin-bottom: 0 !important;
+	font-family: 'grotesque';
+	color: #fff;
+}
+
+thead {
+	background-color: #262626;
+}
+
+.table>thead>tr>th {
+	border: none;
+}
+
+.table>thead>tr {
+	border-top: 1px solid #151515;
+	border-bottom: 1px solid #151515;
+}
+
+.name, .price {
+	border-right: 1px solid #151515 !important;
+}
+
+.glyphicon {
+	padding-right: 10px;
+	cursor: pointer;
+	font-size: 10px;
+}
+
+.categoryName {
+	background: none;
+	border: none;
+	text-align: center;
+}
+
+.categoryName:focus {
+	outline: none;
+	-webkit-box-shadow: none !important;
+	-moz-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+.editMode {
+	border-bottom: solid 2px white !important;
+	display: inline;
+	padding-bottom: 4px;
+}
+
+a {
+	margin-left: 15px;
+}

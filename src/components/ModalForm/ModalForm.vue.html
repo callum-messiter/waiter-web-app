@@ -1,0 +1,255 @@
+<transition name="modalForm" v-if="modal.isVisible">
+	<div class="modal" style="display: block" v-on:keydown.esc="closeModal(modal.name)">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<div class="row">
+						<span
+							class="glyphicon glyphicon-remove pull-right"
+							v-on:click="closeModal(modal.name)"
+						></span>
+					</div>
+					<!-- E.g. "Add a new item to {categoryName}" -->
+					<div class="row">
+						<h4 class="modal-title">{{modal.title}}</h4>
+					</div>
+				</div>
+
+				<!--
+					**The contents of the modal body vary depending on the particular action being performed by the user.**
+				-->
+
+				<div class="modal-body">
+					<!--
+						Add-Item form
+					-->
+					<form id="addItem" v-if="modal.name == 'item_add'">
+						<div class="row">
+							<div class="col-xs-6">
+								<!-- Item name -->
+								<input
+									:class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
+									name="itemName"
+									type="text"
+									placeholder="Item name"
+									v-model="form.item.name"
+									v-validate="{required: true, max: 100}"
+									data-vv-as="item name"
+								/>
+								<span
+									class="help is-danger"
+									v-show="errors.has('itemName')">
+									<br>
+									{{ errors.first('itemName') }}
+								</span>
+							</div>
+							<div class="col-xs-6">
+								<!-- Item price -->
+								<money
+									:class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
+									name="itemPrice"
+									v-model ="form.item.price"
+									v-bind="money"
+									v-validate="{required: true}"
+									data-vv-as="item price">
+								</money>
+								<span
+									class="help is-danger"
+									v-show="errors.has('itemPrice')">
+									{{ errors.first('itemPrice') }}
+								</span>
+							</div>
+							<div class="col-xs-12">
+								<!-- Item Description -->
+								<input
+									:class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
+									name="itemDescription"
+									type="text"
+									placeholder="Item description"
+									v-model="form.item.description"
+									v-validate="{required: true, max: 200}"
+									data-vv-as="item description"
+								/>
+								<br>
+								<span
+									class="help is-danger"
+									v-show="errors.has('itemDescription')">
+									{{ errors.first('itemDescription') }}
+								</span>
+							</div>
+						</div>
+						<div class="row">
+							<!-- Save Item Button -->
+							<button
+								type="button"
+								class="btn btn-primary"
+								v-on:click="sendAddNewEvent()">
+								{{modal.buttons.primary}}
+							</button>
+						</div>
+					</form>
+
+					<!--
+						Edit-Item form
+					-->
+					<form id="editItem" v-if="modal.name == 'item_edit'">
+						<div class="row">
+							<div class="col-xs-6">
+								<!-- Item name -->
+								<input
+									:class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemName') }"
+									name="itemName"
+									type="text"
+									placeholder="Item name"
+									v-model="form.item.name"
+									v-validate="{required: true, max: 100}"
+									data-vv-as="item name"
+								/>
+								<span
+									class="help is-danger"
+									v-show="errors.has('itemName')">
+									{{ errors.first('itemName') }}
+								</span>
+							</div>
+							<div class="col-xs-6">
+								<!-- Item price -->
+								<money
+									:class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemPrice') }"
+									name="itemPrice"
+									placeholder="Item price"
+									v-model="form.item.price"
+									v-bind="money"
+									v-validate="{required: true, max: 4}"
+									data-vv-as="item price">
+								</money>
+								<span
+									class="help is-danger"
+									v-show="errors.has('itemPrice')">
+									{{ errors.first('itemPrice') }}
+								</span>
+							</div>
+							<div class="col-xs-12">
+								<!-- Item Description -->
+								<input
+									:class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('itemDescription') }"
+									name="itemDescription"
+									type="text"
+									placeholder="Item description"
+									v-model="form.item.description"
+									v-validate="{required: true, max: 500}"
+									data-vv-as="item description"
+								/>
+								<span
+									class="help is-danger"
+									v-show="errors.has('itemDescription')">
+									{{ errors.first('itemDescription') }}
+								</span>
+							</div>
+						</div>
+						<!-- Save Item Button -->
+						<div class="row">
+							<button
+								type="button"
+								class="btn btn-primary"
+								v-on:click="sendUpdateEvent()">
+								{{modal.buttons.primary}}
+							</button>
+							<button
+								type="button"
+								class="btn btn-primary delete-button"
+								v-on:click="sendDeleteEvent()">
+								{{modal.buttons.warning}}
+							</button>
+						</div>
+					</form>
+
+					<!--
+						Add-Category form
+					-->
+					<form 
+						id="addCategory" 
+						v-if="modal.name == 'category_add'" 
+						v-on:keyup.enter="sendAddNewEvent()"
+					>
+					<!-- Category name -->
+						<div class="row">
+							<div class="col-xs-9">
+								<input
+									:class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
+									name="categoryName"
+									type="text"
+									placeholder="Category name"
+									v-model="form.category.name"
+									v-validate="{required: true, max: 30}"
+									data-vv-as="category name"
+								/>
+							</div>
+							<div class="col-xs-3">
+								<!-- Save Category Button -->
+								<button
+									type="button"
+									class="btn btn-primary"
+									v-on:click="sendAddNewEvent()">
+									{{modal.buttons.primary}}
+								</button>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-9">
+								<span
+									class="help is-danger"
+									v-show="errors.has('categoryName')">
+									{{ errors.first('categoryName') }}
+								</span>
+							</div>
+						</div>
+					</form>
+
+					<!--
+						Edit-Category form
+					-->
+					<form id="editCategory" v-if="modal.name == 'category_edit'">
+					<!-- Category name -->
+						<div class="row">
+							<div class="col-xs-8 col-xs-offset-2">
+								<input
+									:class="{'input': true, 'pass' : true, 'is-danger-input': errors.has('categoryName') }"
+									name="categoryName"
+									type="text"
+									placeholder="Category name"
+									v-model="form.category.name"
+									v-validate="{required: true, max: 30}"
+									data-vv-as="category name"
+								/>
+								<span
+									class="help is-danger"
+									v-show="errors.has('categoryName')">
+									{{ errors.first('categoryName') }}
+								</span>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-10 col-xs-offset-1">
+								<!-- Save Category Button -->
+								<button
+									type="button"
+									class="btn btn-primary"
+									v-on:click="sendUpdateEvent()">
+									{{modal.buttons.primary}}
+								</button>
+								<button
+									type="button"
+									class="btn btn-primary delete-button"
+									v-on:click="sendDeleteEvent()">
+									{{modal.buttons.warning}}
+								</button>
+							</div>
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</transition>

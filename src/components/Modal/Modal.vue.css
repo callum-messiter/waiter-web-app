@@ -1,0 +1,47 @@
+@font-face {
+	font-family: 'grotesque';
+	src: url("../../fonts/grotesque.otf");
+}
+
+.modal-dialog {
+	padding-top: 10%;
+	width: 400px !important;
+}
+
+.modal-content {
+	background-color: #151515;
+	font-family: 'grotesque';
+	color: #fff;
+	border: 3px solid #469ada;
+	border-radius: 3px;
+	padding: 10px;
+}
+
+.modal-header {
+	border: none;
+}
+
+.modal-body {
+	font-size: 16px;
+}
+
+.modal-footer {
+	border: none;
+	text-align: center;
+	padding: 15px;
+}
+
+.btn {
+	font-size: 14px;
+	padding: 5px 10px;
+	background-color: #469ada;
+	border: 1px solid #469ada;
+	border-radius: 3px;
+	font-weight: bold;
+}
+
+@media (min-width: 768px) {
+	.modal-dialog {
+		width: 400px !important;
+	}
+}

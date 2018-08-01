@@ -1,0 +1,11 @@
+<div class="container">
+	<div class="loading" v-if="loading.still">
+		<clip-loader  
+			:color="loading.spinnerColor" 
+			:size="loading.spinnerSize"
+		>
+		</clip-loader>
+		<p class="loadingMsg">{{loading.msg}}</p>
+	</div>
+	<restaurant-menu v-else></restaurant-menu>
+</div>

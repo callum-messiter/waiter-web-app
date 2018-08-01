@@ -18,10 +18,7 @@ const statuses = {
 	paymentFailed: 998,
 	paymentSuccessful: 500,
 	refunded: 600,
-	enRouteToCustomer: 1000,
-	// receivedByCustomer: 2000 // would be set by deliverer of food
-	// returnedByCustomer: 666,
-	// eaten: 500 // May be set once the user has sent feedback
+	enRouteToCustomer: 1000
 };
 
 // We must define the default state, reflecting the entire object, in order for computed properties to be reactive

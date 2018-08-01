@@ -1,0 +1,52 @@
+<div class="panel-group" id="accordion">
+	<div v-for="category in categories" class="panel panel-default">
+		<div class="panel-heading categoryPanelHeader">
+			<h4 class="panel-title">
+				<!-- Category name -->
+				<a
+					data-toggle="collapse"
+					data-parent="#accordion"
+					v-bind:href="'#' + category.categoryId"
+					>{{category.name}} ({{category.items.length}})
+				</a>
+				<!-- Edit Icon (visible by default) -->
+				<span
+					class="glyphicon glyphicon-pencil pull-right align-middle"
+					v-on:click="showEditCategoryModal(
+						category.categoryId,
+						categories.indexOf(category)
+					)">
+				</span>
+				<!-- Add Item Icon (visible by default) -->
+				<span
+					class="glyphicon glyphicon-plus pull-right"
+					v-on:click="showAddItemModal(
+						category.categoryId,
+						categories.indexOf(category),
+						category.name
+					)">
+				</span>
+			</h4>
+		</div>
+		<div
+			class="panel-collapse collapse"
+			v-bind:class="{'in': categories.indexOf(category) == 0}"
+			v-bind:id="category.categoryId"
+		>
+			<!-- Each category is a collapsable panel, containing a table of the category's items -->
+			<div class="panel-body">
+				<table class="table">
+					<thead class="thead-default">
+						<tr>
+							<th class="text-center name">Name</th>
+							<th class="text-center price">Price</th>
+							<th class="text-center description">Description</th>
+						</tr>
+					</thead>
+					<!-- Each item is a row (<tr>) in the table body (<tbody>). We have to pass the categories object in too, because we need the category index, which we get by using "categories.indexOf(category)" in the item component" -->
+					<item :categoriesObj="categories" :categoryItems="category"></item>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

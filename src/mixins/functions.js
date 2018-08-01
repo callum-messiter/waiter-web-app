@@ -1,4 +1,3 @@
-// Events bus
 import { bus } from '../main';
 
 export default {

@@ -1,0 +1,36 @@
+<tbody>
+	<tr 
+		class="item-row" 
+		v-for="item in category.items" 
+		v-on:dblclick="showEditItemModal(
+			category.items.indexOf(item),
+			categories.indexOf(category)
+		)"
+	>
+		<td class="item-name text-left col-md-3">
+			<input
+				type="text"
+				readonly
+				class="form-control"
+				v-model="item.name"
+			>
+		</td>
+		<td class="item-price text-left col-md-1">
+			<money 
+				type="text"
+				readonly
+				class="form-control" 
+				v-model="item.price" 
+				v-bind="money"
+			></money>
+		</td>
+		<td class="item-description text-left col-md-8">
+			<input
+				type="text"
+				readonly
+				class="form-control"
+				v-model="item.description"
+			>
+		</td>
+	</tr>
+</tbody>

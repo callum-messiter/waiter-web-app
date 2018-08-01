@@ -1,4 +1,4 @@
-	// The Vue build version to load with the `import` command
+// The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import App from './App';
@@ -20,7 +20,7 @@ Raven
 .addPlugin(RavenVue, Vue)
 .install();
 
-// TODO: set this also upon successful login
+/* TODO: set this also upon successful login */
 if(localStorage.getItem('user') !== null) {
 	Raven.setUserContext({
 		userId: JSON.parse(localStorage.user).userId || null,
@@ -54,16 +54,13 @@ Vue.use(VueFlashMessage, {
 });
 require('vue-flash-message/dist/vue-flash-message.min.css');
 
-// Use Bootstrap across the application
+
 import jQuery from 'jquery';
 global.jQuery = jQuery;
 let Bootstrap = require('bootstrap');
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 let cloneDeep = require('clone-deep');
-
 Vue.config.productionTip = false;
-
 export const bus = new Vue();
 
 /* eslint-disable no-new */

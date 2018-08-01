@@ -1,0 +1,149 @@
+<div class="container-fluid">
+	<audio id="newOrderNotification" src="./static/audio/quite-impressed.mp3"></audio>
+	
+	<div class="loading" v-if="loading.still">
+		<clip-loader  
+			:color="loading.spinnerColor" 
+			:size="loading.spinnerSize"
+		>
+		</clip-loader>
+		<p class="loadingMsg">{{loading.msg}}</p>
+	</div>
+	
+	<div class="inner" v-else>
+		<!-- If there are no live orders, inform the user -->
+		<div 
+			class="row zeroOrders" 
+			v-if="Object.keys(orders.received).length < 1 && Object.keys(orders.accepted).length < 1"
+		>
+			<img class="zeroOrdersIcon" src="../../assets/safebox.png"/>
+			<h4 class="zeroOrdersMsg">{{restaurantName}} has no live orders right now...</h4>
+		</div>
+	
+		<!-- Orders received by the kitchen, yet to be accpeted. Ordered by recency (most recent at top)-->
+		<div class="row" v-else>
+			<div class="received-container col-sm-6">
+				<h3>New Orders <img src="../../assets/waiter-icon.png"/></h3>
+				<div v-for="table in orders.received" class="table">
+					<h4 style="color: white">Table {{table.tableNo}} <icon name="users"></icon></h4>
+
+					<div 
+						class="orderIncoming row"
+						v-if="tableBreakdown.hasOwnProperty(table.tableNo) && tableBreakdown[table.tableNo].length > 0"
+					>
+						<pacman-loader :color="orderIncoming.color" :size="orderIncoming.size"></pacman-loader>
+						<p class="orderIncomingMsg">Hold on - someone else from table {{table.tableNo}} is currently placing an order</p>
+					</div>
+
+					<div 
+						v-for="order in table.orders"
+						class="panel panel-default"
+						:class="{ 'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) }" 
+						v-if="order.status == statuses.receivedByKitchen"
+					>
+						<!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
+						<clip-loader
+							v-if="ordersAwaitingStatusUpdate.includes(order.orderId)"
+							class="orderLoadingSpinner"
+							:color="loading.spinnerColor"
+						>
+						</clip-loader>
+
+						<!-- Main order-card content -->
+						<div class="panel-heading orderCardHeader container-fluid">
+							<div class="row">
+								<h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
+								<h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
+								<!-- Reject-Order Icon -->
+								<span
+									class="glyphicon glyphicon-remove pull-right"
+									v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
+									v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.rejectedByKitchen)">
+								</span>
+								<!-- Accept-Order Icon -->
+								<span
+									class="glyphicon glyphicon-ok pull-right"
+									v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
+									v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.acceptedByKitchen)">
+								</span>
+							</div>
+						</div>
+
+						<div class="panel-body text-left">
+							<div class="row">
+								<div class="col-md-2">
+									<img src="../../assets/menu-icon.png"/>
+								</div>
+								<div class="item-container">
+									<div class="pairWrapper" v-for="pair in order.itemPairs">
+										<ul class="items">
+											<li class="item-name" v-for="item in pair">{{item.name}}</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			
+			<!-- Orders accepted by the kitchen, and thus in progress. Ordered by recency (oldest at top)-->
+			<div class="accepted-container col-sm-6">
+				<h3>Orders We've Accepted<img src="../../assets/cutlery-icon.png"></h3>
+
+				<div v-for="table in orders.accepted" class="table">
+					<h4 style="color: white">Table {{table.tableNo}} <icon name="users"></icon></h4>
+					<!-- If the order card is awaiting a status update confirmation from the server, we reduce the opacity
+						and display the loading spinner -->
+					<div
+						v-for="order in table.orders" 
+						class="panel panel-default"
+						:class="{ 
+							'orderCard_loading': ordersAwaitingStatusUpdate.includes(order.orderId) 
+							|| order.status == statuses.acceptedByKitchen
+						}" 
+						v-if="order.status == statuses.acceptedByKitchen || order.status == statuses.paymentSuccessful"
+					>
+						<!-- This is displayed when an order status update is sent to the server, and we are awaiting confirmation of receipt -->
+						<clip-loader
+							v-if="ordersAwaitingStatusUpdate.includes(order.orderId) || order.status == statuses.acceptedByKitchen"
+							class="orderLoadingSpinner"
+							:color="loading.spinnerColor"
+						>
+						</clip-loader>
+
+						<!-- Main order-card content -->
+						<div class="panel-heading orderCardHeader container-fluid">
+							<div class="row">
+								<h3 class="panel-title text-left col-xs-4 timeAgo">{{order.timeAgo}}</h3>
+								<h3 class="panel-title text-center col-xs-4">Table {{order.tableNo}}</h3>
+								<!-- Send-Order-to-Custom Icon -->
+								<span
+									class="glyphicon glyphicon-send pull-right"
+									v-if="!ordersAwaitingStatusUpdate.includes(order.orderId)"
+									v-on:click="sendUpdatedOrderStatusToBackend(order, statuses.enRouteToCustomer)">
+								</span>
+							</div>
+						</div>
+
+						<div class="panel-body text-left">
+							<div class="row">
+								<div class="col-md-2">
+									<img src="../../assets/menu-icon.png"/>
+								</div>
+								<div class="item-container">
+									<div class="pairWrapper" v-for="pair in order.itemPairs">
+										<ul class="items">
+											<li class="item-name" v-for="item in pair">{{item.name}}</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

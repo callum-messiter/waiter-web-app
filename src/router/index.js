@@ -2,10 +2,10 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import routes from './routes';
 import Home from '@/components/Home/Home'
-import LiveOrders from '@/components/LiveOrders'
-import Dashboard from '@/components/Dashboard'
-import ResolvedOrders from '@/components/ResolvedOrders'
-import Account from '@/components/Account'
+import LiveOrders from '@/components/LiveOrders/LiveOrders'
+import Dashboard from '@/components/Dashboard/Dashboard'
+import ResolvedOrders from '@/components/ResolvedOrders/ResolvedOrders'
+import Account from '@/components/Account/Account'
 
 Vue.use(Router)
 

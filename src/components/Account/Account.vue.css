@@ -1,0 +1,211 @@
+@font-face {
+	font-family: 'grotesque';
+	src: url("../../fonts/grotesque.otf");
+}
+
+.container {
+	/**background-image: url('../../assets/restaurant.jpg');**/
+	background-color: #1b1c23;
+	display: -webkit-flex;
+	display: flex;
+	height: 100vh;
+	width: 100vw;
+	background-size: cover;
+	padding: 0 10px;
+	margin: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.header-img {
+	height: 50px;
+	width: auto;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
+.switchImg {
+	height: 100px;
+	width: auto;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 30px;
+}
+	
+#signinForm {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	max-width: 300px;
+}
+
+.input-group {
+	width: 100%;
+	border-radius: 3px !important;
+	padding-top: 10px;
+}
+
+.input-row {
+	display: flex;
+	align-items: center;
+	background-color: white !important;
+	padding-left: 8px;
+	padding-right: 8px;
+	border-bottom: 1px solid #eee;
+}
+
+input {
+	width: 100%;
+	height: 45px;
+	padding-left: 8px;
+	border: none;
+	font-size: 16px;
+	outline: none;
+	background-color: white !important;
+}
+	
+button {
+	width: 100%;
+	height: 45px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	background-color: #343959;
+	border: 1px solid #343959;
+	border-radius: 3px;
+	color: #ffffff;
+	font-size: 16px;
+	font-weight: 500;
+}
+
+span {
+	cursor: pointer;
+}
+
+.link-view {
+	color: #ffffff;
+	font-size: 13px;
+}
+
+.link-text {
+	text-decoration: underline;
+	color: #8bd9ed;
+}
+
+.loading {
+	position: fixed;
+	top: 50% !important;
+	left: 50% !important;
+	transform: translate(-50%, -50%);
+}
+
+.loadingStripe {
+	position: absolute;
+	top: 50% !important;
+	left: 50% !important;
+	transform: translate(-50%, -50%);
+}
+
+.loadingMsg {
+	font-size: 16px;
+	color: #469ada;
+}
+
+.detailsLoadingMsg {
+	font-size: 14px;
+	color: white;
+}
+
+h4 {
+	color: white;
+	text-align: center
+}
+
+.row {
+	width: 80%;
+}
+
+.formTitle {
+	float: left;
+}
+
+.header-icon {
+	color: #8bd9ed;
+}
+
+.requiredMarker {
+	font-size: 25px;
+	color: red;
+}
+
+input[type=date]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	display: none;
+}
+
+::-webkit-clear-button
+{
+	display: none; /* Hide the button */
+	-webkit-appearance: none; /* turn off default browser styling */
+}
+
+input:-webkit-autofill {
+	-webkit-box-shadow: 0 0 0 30px white inset;
+}
+
+.tos {
+	color: white;
+	padding-bottom: 25px;
+}
+
+#tosLink {
+	color: #8bd9ed;
+}
+
+.forms {
+	margin-top: 30px;
+}
+
+.faded {
+	opacity: 0.2;
+}
+
+.row.editModeBtns {
+	width: 100%;
+	margin: 0 !important;
+}
+
+.editModeBtn {
+	width: 100%;
+}
+
+.col-xs-6.btnCol {
+	padding:  !important;
+}
+
+.col-xs-6.btnColLeft {
+	padding-left: 0;
+	padding-right: 5px;
+}
+
+.col-xs-6.btnColRight {
+	padding-right: 0;
+	padding-left: 5px;
+}
+
+.cancelBtn {
+	background-color: red;
+	border: 1px solid red;
+}
+
+.btn:focus,.btn:active:focus,.btn.active:focus,
+.btn.focus,.btn:active.focus,.btn.active.focus {
+	outline: none;
+}

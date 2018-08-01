@@ -1,0 +1,238 @@
+<div class="container">
+
+	<div class="loading" v-if="loading.main.still">
+		<clip-loader :color="loading.main.spinnerColor" :size="loading.main.spinnerSize">
+		</clip-loader>
+		<p class="loadingMsg">{{loading.main.msg}}</p>
+	</div>
+
+	<div class="container" v-else>
+		<div class="row">
+
+			<div class="col-xs-6 text-left">
+				<h3 style="color: white; padding-top: 1 0px">
+					<img src="../../assets/shield.png" class="header-img"> 
+					Account Details
+					<!-- Show if account is verified already
+					<img src="../../assets/shield.png" class="header-img"> 
+					Account Details
+					-->
+				</h3>
+				<!-- Only show the TOS prompt if the user has not already accepted the TOS -->
+				<div class="tos" v-if="restaurantStripeAccount.tos_acceptance.date == '' ">
+					<p>Please fill in the details below so we can verify your restaurant and allow you to accept payments from your customers.</p>
+					<p>By saving your account details, you agree to the
+						<a href="https://stripe.com/gb/connect-account/legal" id="tosLink">
+							Stripe Connected Account Agreement.
+						</a>
+					</p>
+				</div>
+			</div>
+
+			<div class="col-xs-3 col-xs-offset-3 text-right">
+				<!-- TODO: check if account is verified -->
+				<figure v-if="restaurantStripeAccount.charges_enabled && restaurantStripeAccount.payouts_enabled">
+					<img class="switchImg" src="../../assets/switch-on.png">
+					<figcaption style="color: #46ba4e">
+						{{forms.companyDetails.legal_entity_business_name}} is verified! You are ready to start accepting payments.
+					</figcaption>
+				</figure>
+				<figure v-else>
+					<img class="switchImg" src="../../assets/switch-off.png">
+					<figcaption style="color: red">
+						{{forms.companyDetails.legal_entity_business_name}} is not verified and cannot accept payments.
+						Please fill in the details below to continue using Waitr.
+					</figcaption>
+				</figure>
+			</div>
+		</div>
+
+		<!-- Show TOS, v-if="restaurantStripeAccount.id !== undefined" -->
+
+		<div class="row forms">
+
+			<div class="col-sm-4">
+
+				<div class="loadingStripe" v-if="loading.stripe['companyDetails']">
+					<clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
+					<p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
+				</div>
+
+				<form id="companyDetails" v-on:keyup.enter="updateStripeAccount('companyDetails')" data-vv-scope="companyDetails">
+					<h4 class="formTitle">Company Details <icon class="header-icon " name="info"></icon></h4>
+					<div class="input-group" v-on:dblclick="activateEditMode('companyDetails')" :class="{ faded: !editMode['companyDetails'] }">
+						<fieldset :disabled="!editMode['companyDetails']">
+							<div class="input-row">
+								<icon name="building"></icon>
+								<input name="legal_entity_business_name" v-model="forms.companyDetails.legal_entity_business_name" placeholder="Company Name" v-validate="{ max: 200, required: true }" data-vv-as="Company Name" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="map-marker-alt"></icon>
+								<input name="legal_entity_address_line1" v-model="forms['companyDetails'].legal_entity_address_line1" placeholder="Address Line 1" v-validate="{ required: true }" data-vv-as="Address Line 1" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="map-marker-alt"></icon>
+								<input name="legal_entity_address_city" v-model="forms['companyDetails'].legal_entity_address_city" placeholder="City" v-validate="{ required: true }" data-vv-as="City" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="map-marker-alt"></icon>
+								<!-- Dropdown list with country codes -->
+								<input name="legal_entity_address_postal_code" v-model="forms['companyDetails'].legal_entity_address_postal_code" placeholder="Postcode" v-validate="{ required: true }" data-vv-as="Postcode" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="money-bill-alt"></icon>
+								<input name="legal_entity_business_tax_id" type="password" v-model="forms['companyDetails'].legal_entity_business_tax_id" placeholder="Companies House Reg Number" v-validate="{ max: 200, required: true }" data-vv-as="Companies House Reg Number" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+						</fieldset>
+					</div>
+
+					<button type="button" v-on:click="activateEditMode('companyDetails')" v-if="!editMode['companyDetails']">
+						Edit
+					</button>
+					<div class="row editModeBtns" v-else>
+						<div class="col-xs-6 btnColLeft">
+							<button class="editModeBtn saveBtn" type="button" v-on:click="updateStripeAccount('companyDetails')">
+								Save
+							</button>
+						</div>
+						<div class="col-xs-6 btnColRight">
+							<button class="editModeBtn cancelBtn" type="button" v-on:click="discardEdits('companyDetails')">
+								Cancel
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="col-sm-4">
+
+				<div class="loadingStripe" v-if="loading.stripe['companyRep']">
+					<clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
+					<p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
+				</div>
+
+				<form id="companyRep" v-on:keyup.enter="updateStripeAccount('companyRep')" data-vv-scope="companyRep">
+					<h4 class="formTitle">Company Representative <icon class="header-icon" name="user"></icon></h4>
+					<div class="input-group" v-on:dblclick="activateEditMode('companyRep')" :class="{ faded: !editMode['companyRep'] }">
+						<fieldset :disabled="!editMode['companyRep']">
+							<div class="input-row">
+								<icon name="user"></icon>
+								<input name="legal_entity_first_name" v-model="forms.companyRep.legal_entity_first_name" placeholder="First Name" v-validate="{ max: 100, required: true }" data-vv-as="First Name" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="user"></icon>
+								<input name="legal_entity_last_name" v-model="forms.companyRep.legal_entity_last_name" placeholder="Last Name" v-validate="{ max: 100, required: true }" data-vv-as="Last Name" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<!-- v-model="forms['companyRep'].legal_entity_dob_month" -->
+							<div class="input-row">
+								<icon name="calendar"></icon>
+								<input type="text" name="dob" placeholder="Date of Birth" onfocus="(this.type='date')" onblur="(this.type='text')" v-model="dateString" v-validate="{ required: true, date_format: 'YYYY-MM-DD', before: today }" data-vv-as="Date of Birth" />
+							</div>
+							<!-- <span class="requiredMarker">*</span> -->
+							<div class="input-row">
+								<icon name="address-book"></icon>
+								<input name="legal_entity_personal_address_line1" v-model="forms['companyRep'].legal_entity_personal_address_line1" placeholder="Line 1" v-validate="{ required: true }" data-vv-as="Personal Address (Line 1)" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="address-book"></icon>
+								<input name="legal_entity_personal_address_city" v-model="forms['companyRep'].legal_entity_personal_address_city" placeholder="City" v-validate="{ required: true }" data-vv-as="Personal Address (City)" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="address-book"></icon>
+								<!-- Dropdown list with country codes -->
+								<input name="legal_entity_personal_address_postal_code" v-model="forms['companyRep'].legal_entity_personal_address_postal_code" placeholder="Postcode" v-validate="{ required: true }" data-vv-as="Personal Address (Postcode)" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+						</fieldset>
+					</div>
+
+					<button type="button" v-on:click="activateEditMode('companyRep')" v-if="!editMode['companyRep']">
+						Edit
+					</button>
+					<div class="row editModeBtns" v-else>
+						<div class="col-xs-6 btnColLeft">
+							<button class="editModeBtn saveBtn" type="button" v-on:click="updateStripeAccount('companyRep')">
+								Save
+							</button>
+						</div>
+						<div class="col-xs-6 btnColRight">
+							<button class="editModeBtn cancelBtn" type="button" v-on:click="discardEdits('companyRep')">
+								Cancel
+							</button>
+						</div>
+					</div>
+
+				</form>
+			</div>
+
+			<div class="col-sm-4">
+
+				<div class="loadingStripe" v-if="loading.stripe['companyBankAccount']">
+					<clip-loader :color="loading.stripe.color" :size="loading.stripe.size"></clip-loader>
+					<p class="detailsLoadingMsg">{{loading.stripe.msg}}</p>
+				</div>
+
+				<form id="companyBankAccount" v-on:keyup.enter="updateStripeAccount('companyBankAccount')" data-vv-scope="companyBankAccount">
+					<h4 class="formTitle">Company Bank Account <icon class="header-icon" name="credit-card"></icon></h4>
+					<div class="input-group" v-on:dblclick="activateEditMode('companyBankAccount')" :class="{ faded: !editMode['companyBankAccount'] }">
+						<fieldset :disabled="!editMode['companyBankAccount']">
+							<div class="input-row">
+								<icon name="user"></icon>
+								<input name="account_holder_name" v-model="forms.companyBankAccount.account_holder_name" placeholder="Account Holder Name" v-validate="{ max: 205, required: true }" data-vv-as="Account Holder Name" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="credit-card"></icon>
+								<input name="account_number" type="password" v-model="forms['companyBankAccount'].account_number" placeholder="Account Number" v-validate="{ numeric: true, required: true }" data-vv-as="Account Number" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="credit-card"></icon>
+								<input name="routing_number" type="password" v-model="forms['companyBankAccount'].routing_number" placeholder="Sort Code" v-validate="{ numeric: true, required: true }" data-vv-as="Sort Code" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="globe"></icon>
+								<!-- Dropdown list with country codes -->
+								<input readonly name="country" v-model="forms['companyBankAccount'].country" placeholder="Country" v-validate="{ required: true }" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+							<div class="input-row">
+								<icon name="pound-sign"></icon>
+								<!-- Dropdown list with country codes -->
+								<input readonly name="currency" v-model="forms['companyBankAccount'].currency" placeholder="Currency" v-validate="{ required: true }" />
+								<!-- <span class="requiredMarker">*</span> -->
+							</div>
+						</fieldset>
+					</div>
+
+					<button type="button" v-on:click="activateEditMode('companyBankAccount')" v-if="!editMode['companyBankAccount']">
+						Edit
+					</button>
+					<div class="row editModeBtns" v-else>
+						<div class="col-xs-6 btnColLeft">
+							<button class="editModeBtn saveBtn" type="button" v-on:click="updateStripeAccount('companyBankAccount')">
+								Save
+							</button>
+						</div>
+						<div class="col-xs-6 btnColRight">
+							<button class="editModeBtn cancelBtn" type="button" v-on:click="discardEdits('companyBankAccount')">
+								Cancel
+							</button>
+						</div>
+					</div>
+
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
